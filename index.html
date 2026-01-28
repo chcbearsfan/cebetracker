@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEBE Tracker | Bitcoin Treasury Company Analysis</title>
+    <meta name="description" content="Track Common Equity Bitcoin Exposure (CEBE) across Bitcoin Treasury Companies. Rigorous analysis of drag, capital structure, and actual BTC ownership for common shareholders.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Arial', sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+        
+        .logo {
+            font-size: 64px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            background: linear-gradient(135deg, #FF8C00 0%, #FFA500 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+        
+        .tagline {
+            font-size: 24px;
+            color: #888;
+            margin-bottom: 40px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            background: rgba(255, 140, 0, 0.1);
+            border: 2px solid #FF8C00;
+            color: #FF8C00;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            max-width: 800px;
+            margin: 0 auto 60px;
+            text-align: center;
+        }
+        
+        .main-title {
+            font-size: 48px;
+            margin-bottom: 30px;
+            line-height: 1.2;
+        }
+        
+        .description {
+            font-size: 20px;
+            color: #ccc;
+            margin-bottom: 50px;
+            line-height: 1.8;
+        }
+        
+        /* Feature Grid */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 80px;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 140, 0, 0.3);
+            border-radius: 15px;
+            padding: 40px 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            background: rgba(255, 140, 0, 0.05);
+            border-color: #FF8C00;
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .feature-title {
+            font-size: 24px;
+            color: #FF8C00;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .feature-text {
+            font-size: 16px;
+            color: #999;
+            line-height: 1.6;
+        }
+        
+        /* What is CEBE */
+        .explainer {
+            background: rgba(255, 140, 0, 0.05);
+            border: 1px solid rgba(255, 140, 0, 0.3);
+            border-radius: 20px;
+            padding: 50px;
+            margin-bottom: 80px;
+        }
+        
+        .explainer-title {
+            font-size: 36px;
+            color: #FF8C00;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .explainer-content {
+            font-size: 18px;
+            color: #ccc;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+        
+        .explainer-formula {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 4px solid #FF8C00;
+            padding: 20px 30px;
+            margin: 30px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            color: #FFA500;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .cta-title {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+        
+        .cta-text {
+            font-size: 18px;
+            color: #888;
+            margin-bottom: 40px;
+        }
+        
+        .framework-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #FF8C00 0%, #FFA500 100%);
+            color: #000;
+            padding: 18px 40px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+        
+        .framework-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 140, 0, 0.3);
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255, 140, 0, 0.2);
+            color: #666;
+        }
+        
+        .footer-text {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .footer-link {
+            color: #FF8C00;
+            text-decoration: none;
+        }
+        
+        .footer-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 48px;
+            }
+            
+            .main-title {
+                font-size: 36px;
+            }
+            
+            .tagline {
+                font-size: 20px;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">CEBE TRACKER</div>
+            <div class="tagline">Bitcoin Treasury Company Analysis</div>
+            <div class="status-badge">COMING SOON</div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <h1 class="main-title">Track Actual Bitcoin Exposure for Common Equity Holders</h1>
+            <p class="description">
+                Most BTCTC analysis focuses on Bitcoin Per Share (BPS). But BPS doesn't tell you what percentage 
+                of Bitcoin common equity holders actually own after accounting for senior claims like debt and 
+                preferred stock. CEBE does.
+            </p>
+        </div>
+        
+        <!-- Features -->
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title">Live CEBE Data</div>
+                <div class="feature-text">
+                    Real-time tracking of Common Equity Bitcoin Exposure across major Bitcoin Treasury Companies
+                </div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">⚖️</div>
+                <div class="feature-title">Drag Analysis</div>
+                <div class="feature-text">
+                    Understand how senior claims impact your actual Bitcoin ownership as a common shareholder
+                </div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📈</div>
+                <div class="feature-title">Compression Dynamics</div>
+                <div class="feature-text">
+                    See how drag compresses as Bitcoin appreciates, increasing common equity's ownership percentage
+                </div>
+            </div>
+        </div>
+        
+        <!-- Explainer -->
+        <div class="explainer">
+            <h2 class="explainer-title">What is CEBE?</h2>
+            <p class="explainer-content">
+                <strong>CEBE (Common Equity Bitcoin Exposure)</strong> is a framework for analyzing Bitcoin Treasury 
+                Companies that reveals what percentage of Bitcoin on the balance sheet is actually owned by common 
+                equity holders after accounting for senior claims.
+            </p>
+            <div class="explainer-formula">
+                CEBE = (Total BTC - Senior Claims in BTC) ÷ Shares Outstanding
+                <br><br>
+                Drag = Senior Claims ÷ Total BTC
+            </div>
+            <p class="explainer-content">
+                <strong>Why it matters:</strong> A company with 10,000 BTC and 22% drag means common equity holders 
+                own 78% of that Bitcoin. As BTC price rises, senior claims (denominated in fiat) compress in BTC terms, 
+                increasing common equity's ownership percentage over time.
+            </p>
+            <p class="explainer-content">
+                This dynamic explains why Bitcoin Treasury Companies can outperform direct Bitcoin ownership—the 
+                compression of senior claims creates amplification beyond simple leverage.
+            </p>
+        </div>
+        
+        <!-- CTA -->
+        <div class="cta-section">
+            <h2 class="cta-title">Read the Full Framework</h2>
+            <p class="cta-text">
+                Understand the complete CEBE methodology and how it applies to Bitcoin Treasury Company analysis
+            </p>
+            <a href="https://x.com/chcbearsfan" class="framework-link" target="_blank">
+                View Framework on X →
+            </a>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p class="footer-text">
+                Created by <a href="https://x.com/chcbearsfan" class="footer-link" target="_blank">@chcbearsfan</a>
+            </p>
+            <p class="footer-text">
+                Validated by <a href="https://x.com/Adam_Livingston" class="footer-link" target="_blank">Adam Livingston</a> 
+                in his 24-minute analysis
+            </p>
+        </div>
+    </div>
+</body>
+</html>
