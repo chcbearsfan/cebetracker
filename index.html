@@ -7,21 +7,27 @@
     <meta name="description" content="Track Common Equity Bitcoin Exposure (CEBE) across Bitcoin Treasury Companies. Rigorous analysis of drag, capital structure, and actual BTC ownership for common shareholders.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #0a0a0a;
-            --bg-secondary: #111111;
-            --bg-card: #161616;
-            --orange-primary: #FF8C00;
-            --orange-glow: rgba(255, 140, 0, 0.15);
-            --orange-border: rgba(255, 140, 0, 0.3);
-            --text-primary: #ffffff;
-            --text-secondary: #888888;
-            --text-muted: #666666;
-            --green: #00C853;
-            --red: #FF5252;
-            --yellow: #FFD600;
+            --bg-primary: #09090b;
+            --bg-secondary: #0f0f11;
+            --bg-card: #141416;
+            --bg-elevated: #1a1a1d;
+            --orange-primary: #f97316;
+            --orange-light: #fb923c;
+            --orange-glow: rgba(249, 115, 22, 0.12);
+            --orange-border: rgba(249, 115, 22, 0.25);
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #52525b;
+            --green: #22c55e;
+            --green-muted: rgba(34, 197, 94, 0.15);
+            --red: #ef4444;
+            --red-muted: rgba(239, 68, 68, 0.15);
+            --yellow: #eab308;
+            --yellow-muted: rgba(234, 179, 8, 0.15);
+            --border-subtle: rgba(255, 255, 255, 0.06);
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -36,29 +42,74 @@
         
         .container { max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
         
-        .header { text-align: center; margin-bottom: 50px; }
+        /* Modern Logo with Glow */
+        .header { text-align: center; margin-bottom: 60px; }
+        
+        .logo-container { position: relative; display: inline-block; }
         
         .logo {
-            font-size: 48px;
-            font-weight: 700;
-            letter-spacing: 3px;
-            background: linear-gradient(135deg, #FF8C00 0%, #FFA500 50%, #FF8C00 100%);
+            font-size: 42px;
+            font-weight: 300;
+            letter-spacing: 12px;
+            color: var(--text-primary);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .logo span {
+            background: linear-gradient(135deg, var(--orange-primary) 0%, var(--orange-light) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 8px;
+            font-weight: 600;
         }
         
-        .tagline { font-size: 16px; color: var(--text-secondary); }
-        .last-updated { font-size: 12px; color: var(--text-muted); margin-top: 8px; font-family: 'JetBrains Mono', monospace; }
+        .logo-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 60px;
+            background: radial-gradient(ellipse, rgba(249, 115, 22, 0.3) 0%, transparent 70%);
+            filter: blur(20px);
+            z-index: 0;
+        }
         
-        .loading { text-align: center; padding: 60px; color: var(--text-secondary); }
-        .loading-spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid var(--orange-border); border-top-color: var(--orange-primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
+        .tagline { 
+            font-size: 14px; 
+            color: var(--text-muted); 
+            margin-top: 12px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+        
+        .last-updated { 
+            font-size: 11px; 
+            color: var(--text-muted); 
+            margin-top: 16px; 
+            font-family: 'JetBrains Mono', monospace;
+            opacity: 0.7;
+        }
+        
+        /* Loading State */
+        .loading { text-align: center; padding: 80px; color: var(--text-secondary); }
+        .loading-spinner { 
+            display: inline-block; 
+            width: 32px; 
+            height: 32px; 
+            border: 2px solid var(--border-subtle); 
+            border-top-color: var(--orange-primary); 
+            border-radius: 50%; 
+            animation: spin 0.8s linear infinite; 
+            margin-bottom: 16px; 
+        }
         @keyframes spin { to { transform: rotate(360deg); } }
         
+        /* Table Container */
         .table-container {
             background: var(--bg-card);
-            border: 1px solid var(--orange-border);
+            border: 1px solid var(--border-subtle);
             border-radius: 16px;
             overflow: hidden;
             margin-bottom: 40px;
@@ -68,154 +119,396 @@
         
         .data-table th {
             background: var(--bg-secondary);
-            padding: 16px 20px;
+            padding: 14px 24px;
             text-align: left;
-            font-weight: 600;
-            font-size: 12px;
+            font-weight: 500;
+            font-size: 11px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-secondary);
-            border-bottom: 1px solid var(--orange-border);
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-subtle);
         }
         
         .data-table td {
-            padding: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-subtle);
             vertical-align: middle;
         }
         
-        .data-table tr:last-child td { border-bottom: none; }
-        .data-table tr:hover { background: var(--orange-glow); cursor: pointer; }
+        .data-table tbody tr {
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
         
-        .company-cell { display: flex; align-items: center; gap: 12px; }
-        .company-ticker { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 16px; color: var(--orange-primary); }
-        .company-name { font-size: 14px; color: var(--text-secondary); }
+        .data-table tbody tr:last-child td { border-bottom: none; }
         
-        .metric-value { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 18px; }
-        .metric-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+        .data-table tbody tr:hover { 
+            background: var(--orange-glow);
+        }
         
+        .data-table tbody tr:active {
+            background: rgba(249, 115, 22, 0.18);
+        }
+        
+        /* Company Cell */
+        .company-cell { display: flex; align-items: center; gap: 16px; }
+        
+        .company-info { display: flex; flex-direction: column; gap: 2px; }
+        
+        .company-ticker { 
+            font-family: 'JetBrains Mono', monospace; 
+            font-weight: 600; 
+            font-size: 15px; 
+            color: var(--orange-primary);
+            letter-spacing: 0.5px;
+        }
+        
+        .company-name { 
+            font-size: 13px; 
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+        
+        /* Metrics */
+        .metric-value { 
+            font-family: 'JetBrains Mono', monospace; 
+            font-weight: 500; 
+            font-size: 16px;
+            letter-spacing: -0.3px;
+        }
+        
+        .metric-label { 
+            font-size: 10px; 
+            color: var(--text-muted); 
+            margin-top: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Drag Badge */
         .drag-badge {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
+            min-width: 64px;
             padding: 6px 12px;
-            border-radius: 20px;
+            border-radius: 8px;
             font-family: 'JetBrains Mono', monospace;
-            font-weight: 600;
-            font-size: 14px;
+            font-weight: 500;
+            font-size: 13px;
         }
         
-        .drag-low { background: rgba(0, 200, 83, 0.15); color: var(--green); border: 1px solid rgba(0, 200, 83, 0.3); }
-        .drag-medium { background: rgba(255, 214, 0, 0.15); color: var(--yellow); border: 1px solid rgba(255, 214, 0, 0.3); }
-        .drag-high { background: rgba(255, 82, 82, 0.15); color: var(--red); border: 1px solid rgba(255, 82, 82, 0.3); }
-        .drag-zero { background: rgba(0, 200, 83, 0.2); color: var(--green); border: 1px solid rgba(0, 200, 83, 0.4); }
+        .drag-low { background: var(--green-muted); color: var(--green); }
+        .drag-medium { background: var(--yellow-muted); color: var(--yellow); }
+        .drag-high { background: var(--red-muted); color: var(--red); }
+        .drag-zero { background: var(--green-muted); color: var(--green); }
         
+        /* Trend Indicator */
+        .trend-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .mini-chart {
+            width: 60px;
+            height: 24px;
+        }
+        
+        .mini-chart svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Modal */
         .modal-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
             z-index: 1000;
             justify-content: center;
             align-items: center;
             padding: 20px;
         }
+        
         .modal-overlay.active { display: flex; }
         
         .modal {
             background: var(--bg-card);
-            border: 1px solid var(--orange-border);
+            border: 1px solid var(--border-subtle);
             border-radius: 20px;
-            max-width: 600px;
+            max-width: 560px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
         
         .modal-header {
-            padding: 24px;
-            border-bottom: 1px solid var(--orange-border);
+            padding: 24px 28px;
+            border-bottom: 1px solid var(--border-subtle);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         
-        .modal-title { font-size: 24px; font-weight: 700; }
-        .modal-ticker { color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; margin-left: 8px; }
+        .modal-title-group { display: flex; align-items: baseline; gap: 10px; }
+        
+        .modal-title { 
+            font-size: 20px; 
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .modal-ticker { 
+            color: var(--orange-primary); 
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 500;
+        }
         
         .modal-close {
-            background: none;
-            border: none;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
             color: var(--text-secondary);
-            font-size: 28px;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
             cursor: pointer;
-            padding: 4px;
-            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.15s ease;
         }
-        .modal-close:hover { color: var(--text-primary); }
         
-        .modal-body { padding: 24px; }
-        .modal-section { margin-bottom: 24px; }
+        .modal-close:hover { 
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        
+        .modal-body { padding: 24px 28px; }
+        
+        .modal-section { margin-bottom: 28px; }
         .modal-section:last-child { margin-bottom: 0; }
         
         .section-title {
-            font-size: 12px;
+            font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: var(--orange-primary);
-            margin-bottom: 12px;
-            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
-        .metric-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .section-title::before {
+            content: '';
+            width: 3px;
+            height: 12px;
+            background: var(--orange-primary);
+            border-radius: 2px;
+        }
+        
+        /* Metric Grid */
+        .metric-grid { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 12px; 
+        }
         
         .metric-card {
             background: var(--bg-secondary);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
             border-radius: 12px;
             padding: 16px;
         }
         
-        .metric-card-value { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 600; margin-bottom: 4px; }
-        .metric-card-label { font-size: 12px; color: var(--text-secondary); }
+        .metric-card-value { 
+            font-family: 'JetBrains Mono', monospace; 
+            font-size: 22px; 
+            font-weight: 600; 
+            margin-bottom: 4px;
+            letter-spacing: -0.5px;
+        }
         
-        .capital-structure { background: var(--bg-secondary); border-radius: 12px; padding: 16px; }
-        .capital-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .metric-card-label { 
+            font-size: 11px; 
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Capital Structure */
+        .capital-structure { 
+            background: var(--bg-secondary); 
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px; 
+            overflow: hidden;
+        }
+        
+        .capital-item { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 12px 16px; 
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        
         .capital-item:last-child { border-bottom: none; }
-        .capital-label { color: var(--text-secondary); }
-        .capital-value { font-family: 'JetBrains Mono', monospace; font-weight: 500; }
         
-        .insight-box {
-            background: var(--orange-glow);
+        .capital-label { color: var(--text-secondary); font-size: 13px; }
+        
+        .capital-value { 
+            font-family: 'JetBrains Mono', monospace; 
+            font-weight: 500;
+            font-size: 13px;
+        }
+        
+        .capital-item.total {
+            background: var(--bg-elevated);
+        }
+        
+        .capital-item.total .capital-label,
+        .capital-item.total .capital-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        /* Formula Box */
+        .formula-box {
+            background: var(--bg-secondary);
             border: 1px solid var(--orange-border);
             border-radius: 12px;
             padding: 16px;
         }
-        .insight-text { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
         
-        .footer { text-align: center; padding: 40px 20px; border-top: 1px solid var(--orange-border); margin-top: 40px; }
-        .footer-text { color: var(--text-muted); font-size: 14px; }
-        .footer-link { color: var(--orange-primary); text-decoration: none; }
-        .footer-link:hover { text-decoration: underline; }
+        .formula-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--orange-primary);
+            margin-bottom: 12px;
+        }
         
+        .formula-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+        
+        .formula-text .highlight {
+            color: var(--text-primary);
+            background: var(--bg-elevated);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        /* History Section */
+        .history-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-subtle);
+        }
+        
+        .history-chart {
+            height: 120px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+        }
+        
+        .history-bar {
+            flex: 1;
+            background: var(--orange-primary);
+            border-radius: 4px 4px 0 0;
+            min-height: 8px;
+            opacity: 0.6;
+            transition: opacity 0.15s ease;
+        }
+        
+        .history-bar:hover {
+            opacity: 1;
+        }
+        
+        .history-bar.current {
+            background: var(--orange-light);
+            opacity: 1;
+        }
+        
+        /* Footer */
+        .footer { 
+            text-align: center; 
+            padding: 40px 20px; 
+            border-top: 1px solid var(--border-subtle); 
+            margin-top: 40px; 
+        }
+        
+        .footer-text { 
+            color: var(--text-muted); 
+            font-size: 13px; 
+        }
+        
+        .footer-link { 
+            color: var(--orange-primary); 
+            text-decoration: none;
+            transition: color 0.15s ease;
+        }
+        
+        .footer-link:hover { 
+            color: var(--orange-light);
+        }
+        
+        .footer-formula {
+            margin-top: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+        
+        /* Meta info */
+        .modal-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-muted);
+            padding-top: 16px;
+            border-top: 1px solid var(--border-subtle);
+            margin-top: 20px;
+        }
+        
+        /* Responsive */
         @media (max-width: 900px) {
             .data-table { display: block; overflow-x: auto; }
-            .logo { font-size: 36px; }
+            .logo { font-size: 32px; letter-spacing: 8px; }
             .metric-grid { grid-template-columns: 1fr; }
         }
         
         @media (max-width: 600px) {
             .container { padding: 20px 12px; }
-            .data-table th, .data-table td { padding: 12px; }
-            .metric-value { font-size: 16px; }
+            .data-table th, .data-table td { padding: 14px 16px; }
+            .metric-value { font-size: 14px; }
+            .modal { border-radius: 16px; }
+            .modal-body { padding: 20px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1 class="logo">CEBE TRACKER</h1>
-            <p class="tagline">Common Equity Bitcoin Exposure Analysis</p>
-            <p class="last-updated" id="lastUpdated">Loading...</p>
+            <div class="logo-container">
+                <div class="logo-glow"></div>
+                <h1 class="logo"><span>CEBE</span></h1>
+            </div>
+            <p class="tagline">Common Equity Bitcoin Exposure</p>
+            <p class="last-updated" id="lastUpdated">Loading data...</p>
         </header>
         
         <div class="table-container">
@@ -228,9 +521,9 @@
                     <tr>
                         <th>Company</th>
                         <th>BTC Holdings</th>
-                        <th>CEBE (sats/share)</th>
+                        <th>CEBE</th>
                         <th>Drag</th>
-                        <th>Common Equity %</th>
+                        <th>Common Equity</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
@@ -240,19 +533,20 @@
         <footer class="footer">
             <p class="footer-text">
                 Created by <a href="https://x.com/chcbearsfan" class="footer-link" target="_blank">@chcbearsfan</a> · 
-                <a href="https://x.com/chcbearsfan" class="footer-link" target="_blank">Read the CEBE Framework</a>
+                <a href="https://x.com/chcbearsfan/status/2047673648810063297" class="footer-link" target="_blank">Read the CEBE Framework</a>
             </p>
-            <p class="footer-text" style="margin-top: 8px; font-size: 12px;">
-                CEBE = (Total BTC - Senior Claims in BTC) ÷ Shares Outstanding
-            </p>
+            <p class="footer-formula">CEBE = (Total BTC − Senior Claims in BTC) ÷ Shares</p>
         </footer>
     </div>
     
-    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
-        <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="modal">
             <div class="modal-header">
-                <h2 class="modal-title" id="modalTitle">Company</h2>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
+                <div class="modal-title-group">
+                    <h2 class="modal-title" id="modalTitle">Company</h2>
+                    <span class="modal-ticker" id="modalTicker">TICKER</span>
+                </div>
+                <button class="modal-close" id="modalClose">×</button>
             </div>
             <div class="modal-body" id="modalBody"></div>
         </div>
@@ -262,16 +556,16 @@
         // Google Sheets Configuration
         const SHEET_ID = '1BNsCWGVU08PDinDcfzJccqcuj9_KrK1VZGETErzBZvg';
         const SNAPSHOTS_GID = '771405586';
-        const COMPANIES_GID = '0';
         
-        // Company metadata (static - could also come from Companies tab)
+        // Company metadata
         const companyMeta = {
-            MSTR: { name: 'Strategy', exchange: 'Nasdaq' },
-            MTPLF: { name: 'Metaplanet', exchange: 'OTC (TYO: 3350)' },
-            ASST: { name: 'Strive', exchange: 'Nasdaq' },
-            TSWCF: { name: 'Smarter Web Co', exchange: 'Aquis (SWC)' }
+            MSTR: { name: 'Strategy', exchange: 'Nasdaq: MSTR' },
+            MTPLF: { name: 'Metaplanet', exchange: 'TYO: 3350 / OTC: MTPLF' },
+            ASST: { name: 'Strive', exchange: 'Nasdaq: ASST' },
+            TSWCF: { name: 'Smarter Web Co', exchange: 'Aquis: SWC / OTC: TSWCF' }
         };
         
+        let allSnapshots = [];
         let companiesData = {};
         
         // Fetch and parse Google Sheets CSV
@@ -328,14 +622,17 @@
             const btcPrice = parseFloat(snapshot.btc_price) || 100000;
             
             const netClaimsUsd = debt + preferred - cash;
-            const netClaimsBtc = netClaimsUsd / btcPrice;
+            const netClaimsBtc = Math.max(0, netClaimsUsd / btcPrice);
             const drag = btcHoldings > 0 ? Math.max(0, netClaimsBtc / btcHoldings) : 0;
-            const commonEquityBtc = btcHoldings - netClaimsBtc;
+            const commonEquityBtc = Math.max(0, btcHoldings - netClaimsBtc);
             const bps = (btcHoldings / shares) * 100000000;
             const cebe = (commonEquityBtc / shares) * 100000000;
             const commonEquityPct = Math.max(0, 1 - drag);
             
-            return { netClaimsUsd, netClaimsBtc, drag, commonEquityBtc, bps, cebe, commonEquityPct };
+            return { 
+                netClaimsUsd, netClaimsBtc, drag, commonEquityBtc, 
+                bps, cebe, commonEquityPct, debt, preferred, cash, btcPrice 
+            };
         }
         
         function formatNumber(num) {
@@ -355,6 +652,12 @@
             return 'drag-high';
         }
         
+        function getCompanyHistory(ticker) {
+            return allSnapshots
+                .filter(s => s.ticker === ticker)
+                .sort((a, b) => a.snapshot_date.localeCompare(b.snapshot_date));
+        }
+        
         function getLatestSnapshots(snapshots) {
             const latest = {};
             const order = ['MSTR', 'MTPLF', 'ASST', 'TSWCF'];
@@ -366,7 +669,6 @@
                 }
             });
             
-            // Return in preferred order
             return order.filter(t => latest[t]).map(t => latest[t]);
         }
         
@@ -387,11 +689,11 @@
                 companiesData[ticker] = { ...snapshot, ...meta, metrics };
                 
                 const row = document.createElement('tr');
-                row.onclick = () => openModal(ticker);
+                row.setAttribute('data-ticker', ticker);
                 row.innerHTML = `
                     <td>
                         <div class="company-cell">
-                            <div>
+                            <div class="company-info">
                                 <div class="company-ticker">${ticker}</div>
                                 <div class="company-name">${meta.name}</div>
                             </div>
@@ -416,9 +718,17 @@
                 tbody.appendChild(row);
             });
             
-            document.getElementById('lastUpdated').textContent = `Data as of: ${latestDate}`;
+            document.getElementById('lastUpdated').textContent = `Last updated: ${latestDate}`;
             document.getElementById('loadingState').style.display = 'none';
             document.getElementById('dataTable').style.display = 'table';
+            
+            // Add click handlers
+            document.querySelectorAll('#tableBody tr').forEach(row => {
+                row.addEventListener('click', () => {
+                    const ticker = row.getAttribute('data-ticker');
+                    openModal(ticker);
+                });
+            });
         }
         
         function openModal(ticker) {
@@ -426,16 +736,35 @@
             if (!data) return;
             
             const m = data.metrics;
+            const history = getCompanyHistory(ticker);
             
-            document.getElementById('modalTitle').innerHTML = `${data.name} <span class="modal-ticker">| ${ticker}</span>`;
+            document.getElementById('modalTitle').textContent = data.name;
+            document.getElementById('modalTicker').textContent = ticker;
             
-            const debt = parseFloat(data.debt_usd) || 0;
-            const preferred = parseFloat(data.preferred_usd) || 0;
-            const cash = parseFloat(data.cash_usd) || 0;
+            // Build history chart
+            let historyHTML = '';
+            if (history.length > 1) {
+                const cebeValues = history.map(h => calculateMetrics(h).cebe);
+                const maxCebe = Math.max(...cebeValues);
+                
+                const bars = history.map((h, i) => {
+                    const cebe = calculateMetrics(h).cebe;
+                    const height = maxCebe > 0 ? (cebe / maxCebe) * 100 : 10;
+                    const isCurrent = i === history.length - 1;
+                    return `<div class="history-bar ${isCurrent ? 'current' : ''}" style="height: ${Math.max(8, height)}%" title="${h.period}: ${formatNumber(Math.round(cebe))} sats"></div>`;
+                }).join('');
+                
+                historyHTML = `
+                    <div class="history-section">
+                        <div class="section-title">CEBE History</div>
+                        <div class="history-chart">${bars}</div>
+                    </div>
+                `;
+            }
             
             document.getElementById('modalBody').innerHTML = `
                 <div class="modal-section">
-                    <div class="section-title">📊 CEBE Metrics</div>
+                    <div class="section-title">CEBE Metrics</div>
                     <div class="metric-grid">
                         <div class="metric-card">
                             <div class="metric-card-value">${formatNumber(parseFloat(data.btc_holdings))}</div>
@@ -457,53 +786,44 @@
                 </div>
                 
                 <div class="modal-section">
-                    <div class="section-title">🏗️ Capital Structure</div>
+                    <div class="section-title">Capital Structure</div>
                     <div class="capital-structure">
                         <div class="capital-item">
                             <span class="capital-label">Debt</span>
-                            <span class="capital-value">${formatCurrency(debt)}</span>
+                            <span class="capital-value">${formatCurrency(m.debt)}</span>
                         </div>
                         <div class="capital-item">
                             <span class="capital-label">Preferred Stock</span>
-                            <span class="capital-value">${formatCurrency(preferred)}</span>
+                            <span class="capital-value">${formatCurrency(m.preferred)}</span>
                         </div>
                         <div class="capital-item">
                             <span class="capital-label">Cash Offset</span>
-                            <span class="capital-value">-${formatCurrency(cash)}</span>
+                            <span class="capital-value">−${formatCurrency(m.cash)}</span>
                         </div>
-                        <div class="capital-item">
-                            <span class="capital-label"><strong>Net Senior Claims</strong></span>
-                            <span class="capital-value"><strong>${formatCurrency(m.netClaimsUsd)}</strong></span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="modal-section">
-                    <div class="section-title">📈 Additional Metrics</div>
-                    <div class="capital-structure">
-                        <div class="capital-item">
-                            <span class="capital-label">BPS (sats/share)</span>
-                            <span class="capital-value">${formatNumber(Math.round(m.bps))}</span>
-                        </div>
-                        <div class="capital-item">
-                            <span class="capital-label">Claims in BTC</span>
-                            <span class="capital-value">${formatNumber(Math.round(m.netClaimsBtc))} BTC</span>
-                        </div>
-                        <div class="capital-item">
-                            <span class="capital-label">BTC Price (snapshot)</span>
-                            <span class="capital-value">$${formatNumber(parseFloat(data.btc_price))}</span>
+                        <div class="capital-item total">
+                            <span class="capital-label">Net Senior Claims</span>
+                            <span class="capital-value">${formatCurrency(m.netClaimsUsd)}</span>
                         </div>
                     </div>
                 </div>
                 
                 <div class="modal-section">
-                    <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);">
-                        <span>Exchange: ${data.exchange}</span>
-                        <span>Period: ${data.period}</span>
+                    <div class="section-title">Calculation</div>
+                    <div class="formula-box">
+                        <div class="formula-title">How CEBE is calculated</div>
+                        <div class="formula-text">
+                            Net Claims: ${formatCurrency(m.netClaimsUsd)} ÷ <span class="highlight">$${formatNumber(m.btcPrice)}</span> = <span class="highlight">${formatNumber(Math.round(m.netClaimsBtc))} BTC</span><br><br>
+                            Common Equity: ${formatNumber(parseFloat(data.btc_holdings))} − ${formatNumber(Math.round(m.netClaimsBtc))} = <span class="highlight">${formatNumber(Math.round(m.commonEquityBtc))} BTC</span><br><br>
+                            CEBE: ${formatNumber(Math.round(m.commonEquityBtc))} BTC ÷ ${formatNumber(parseFloat(data.shares_outstanding))} shares × 100M = <span class="highlight">${formatNumber(Math.round(m.cebe))} sats</span>
+                        </div>
                     </div>
-                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">
-                        Source: ${data.source || 'N/A'}
-                    </div>
+                </div>
+                
+                ${historyHTML}
+                
+                <div class="modal-meta">
+                    <span>${data.exchange}</span>
+                    <span>Source: ${data.source || 'N/A'}</span>
                 </div>
             `;
             
@@ -511,25 +831,34 @@
             document.body.style.overflow = 'hidden';
         }
         
-        function closeModal(event) {
-            if (event && event.target !== document.getElementById('modalOverlay')) return;
+        function closeModal() {
             document.getElementById('modalOverlay').classList.remove('active');
             document.body.style.overflow = '';
         }
         
+        // Event Listeners
+        document.getElementById('modalOverlay').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('modalOverlay')) {
+                closeModal();
+            }
+        });
+        
+        document.getElementById('modalClose').addEventListener('click', closeModal);
+        document.getElementById('modal').addEventListener('click', (e) => e.stopPropagation());
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
         
         // Initialize
         async function init() {
             try {
-                const snapshots = await fetchSheetData(SNAPSHOTS_GID);
-                const latest = getLatestSnapshots(snapshots);
+                allSnapshots = await fetchSheetData(SNAPSHOTS_GID);
+                const latest = getLatestSnapshots(allSnapshots);
                 renderTable(latest);
             } catch (error) {
                 console.error('Failed to load data:', error);
                 document.getElementById('loadingState').innerHTML = `
-                    <p style="color: var(--red);">Failed to load data. Please refresh.</p>
-                    <p style="font-size: 12px; margin-top: 8px;">${error.message}</p>
+                    <p style="color: var(--red);">Failed to load data</p>
+                    <p style="font-size: 12px; margin-top: 8px; color: var(--text-muted);">${error.message}</p>
+                    <p style="font-size: 11px; margin-top: 16px; color: var(--text-muted);">Make sure the Google Sheet is published to web</p>
                 `;
             }
         }
