@@ -24,11 +24,7 @@
             --yellow: #FFD600;
         }
         
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -38,17 +34,9 @@
             min-height: 100vh;
         }
         
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
         
-        /* Header */
-        .header {
-            text-align: center;
-            margin-bottom: 50px;
-        }
+        .header { text-align: center; margin-bottom: 50px; }
         
         .logo {
             font-size: 48px;
@@ -59,23 +47,15 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin-bottom: 8px;
-            text-shadow: 0 0 40px rgba(255, 140, 0, 0.3);
         }
         
-        .tagline {
-            font-size: 16px;
-            color: var(--text-secondary);
-            font-weight: 400;
-        }
+        .tagline { font-size: 16px; color: var(--text-secondary); }
+        .last-updated { font-size: 12px; color: var(--text-muted); margin-top: 8px; font-family: 'JetBrains Mono', monospace; }
         
-        .last-updated {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 8px;
-            font-family: 'JetBrains Mono', monospace;
-        }
+        .loading { text-align: center; padding: 60px; color: var(--text-secondary); }
+        .loading-spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid var(--orange-border); border-top-color: var(--orange-primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
         
-        /* Main Table */
         .table-container {
             background: var(--bg-card);
             border: 1px solid var(--orange-border);
@@ -84,10 +64,7 @@
             margin-bottom: 40px;
         }
         
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+        .data-table { width: 100%; border-collapse: collapse; }
         
         .data-table th {
             background: var(--bg-secondary);
@@ -107,49 +84,19 @@
             vertical-align: middle;
         }
         
-        .data-table tr:last-child td {
-            border-bottom: none;
-        }
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table tr:hover { background: var(--orange-glow); cursor: pointer; }
         
-        .data-table tr:hover {
-            background: var(--orange-glow);
-            cursor: pointer;
-        }
+        .company-cell { display: flex; align-items: center; gap: 12px; }
+        .company-ticker { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 16px; color: var(--orange-primary); }
+        .company-name { font-size: 14px; color: var(--text-secondary); }
         
-        .company-cell {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .company-ticker {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 600;
-            font-size: 16px;
-            color: var(--orange-primary);
-        }
-        
-        .company-name {
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-        
-        .metric-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 600;
-            font-size: 18px;
-        }
-        
-        .metric-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 2px;
-        }
+        .metric-value { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 18px; }
+        .metric-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
         
         .drag-badge {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
             padding: 6px 12px;
             border-radius: 20px;
             font-family: 'JetBrains Mono', monospace;
@@ -157,58 +104,22 @@
             font-size: 14px;
         }
         
-        .drag-low {
-            background: rgba(0, 200, 83, 0.15);
-            color: var(--green);
-            border: 1px solid rgba(0, 200, 83, 0.3);
-        }
+        .drag-low { background: rgba(0, 200, 83, 0.15); color: var(--green); border: 1px solid rgba(0, 200, 83, 0.3); }
+        .drag-medium { background: rgba(255, 214, 0, 0.15); color: var(--yellow); border: 1px solid rgba(255, 214, 0, 0.3); }
+        .drag-high { background: rgba(255, 82, 82, 0.15); color: var(--red); border: 1px solid rgba(255, 82, 82, 0.3); }
+        .drag-zero { background: rgba(0, 200, 83, 0.2); color: var(--green); border: 1px solid rgba(0, 200, 83, 0.4); }
         
-        .drag-medium {
-            background: rgba(255, 214, 0, 0.15);
-            color: var(--yellow);
-            border: 1px solid rgba(255, 214, 0, 0.3);
-        }
-        
-        .drag-high {
-            background: rgba(255, 82, 82, 0.15);
-            color: var(--red);
-            border: 1px solid rgba(255, 82, 82, 0.3);
-        }
-        
-        .drag-zero {
-            background: rgba(0, 200, 83, 0.2);
-            color: var(--green);
-            border: 1px solid rgba(0, 200, 83, 0.4);
-        }
-        
-        .change-positive {
-            color: var(--green);
-            font-size: 12px;
-        }
-        
-        .change-negative {
-            color: var(--red);
-            font-size: 12px;
-        }
-        
-        /* Modal */
         .modal-overlay {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0, 0, 0, 0.85);
             z-index: 1000;
             justify-content: center;
             align-items: center;
             padding: 20px;
         }
-        
-        .modal-overlay.active {
-            display: flex;
-        }
+        .modal-overlay.active { display: flex; }
         
         .modal {
             background: var(--bg-card);
@@ -218,7 +129,6 @@
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
-            position: relative;
         }
         
         .modal-header {
@@ -229,16 +139,8 @@
             align-items: center;
         }
         
-        .modal-title {
-            font-size: 24px;
-            font-weight: 700;
-        }
-        
-        .modal-ticker {
-            color: var(--text-secondary);
-            font-family: 'JetBrains Mono', monospace;
-            margin-left: 8px;
-        }
+        .modal-title { font-size: 24px; font-weight: 700; }
+        .modal-ticker { color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; margin-left: 8px; }
         
         .modal-close {
             background: none;
@@ -249,22 +151,11 @@
             padding: 4px;
             line-height: 1;
         }
+        .modal-close:hover { color: var(--text-primary); }
         
-        .modal-close:hover {
-            color: var(--text-primary);
-        }
-        
-        .modal-body {
-            padding: 24px;
-        }
-        
-        .modal-section {
-            margin-bottom: 24px;
-        }
-        
-        .modal-section:last-child {
-            margin-bottom: 0;
-        }
+        .modal-body { padding: 24px; }
+        .modal-section { margin-bottom: 24px; }
+        .modal-section:last-child { margin-bottom: 0; }
         
         .section-title {
             font-size: 12px;
@@ -275,11 +166,7 @@
             font-weight: 600;
         }
         
-        .metric-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-        }
+        .metric-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
         
         .metric-card {
             background: var(--bg-secondary);
@@ -288,43 +175,14 @@
             padding: 16px;
         }
         
-        .metric-card-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
+        .metric-card-value { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 600; margin-bottom: 4px; }
+        .metric-card-label { font-size: 12px; color: var(--text-secondary); }
         
-        .metric-card-label {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-        
-        .capital-structure {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            padding: 16px;
-        }
-        
-        .capital-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
-        .capital-item:last-child {
-            border-bottom: none;
-        }
-        
-        .capital-label {
-            color: var(--text-secondary);
-        }
-        
-        .capital-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 500;
-        }
+        .capital-structure { background: var(--bg-secondary); border-radius: 12px; padding: 16px; }
+        .capital-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .capital-item:last-child { border-bottom: none; }
+        .capital-label { color: var(--text-secondary); }
+        .capital-value { font-family: 'JetBrains Mono', monospace; font-weight: 500; }
         
         .insight-box {
             background: var(--orange-glow);
@@ -332,84 +190,40 @@
             border-radius: 12px;
             padding: 16px;
         }
+        .insight-text { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
         
-        .insight-icon {
-            color: var(--orange-primary);
-            margin-right: 8px;
-        }
+        .footer { text-align: center; padding: 40px 20px; border-top: 1px solid var(--orange-border); margin-top: 40px; }
+        .footer-text { color: var(--text-muted); font-size: 14px; }
+        .footer-link { color: var(--orange-primary); text-decoration: none; }
+        .footer-link:hover { text-decoration: underline; }
         
-        .insight-text {
-            font-size: 14px;
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-        
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 40px 20px;
-            border-top: 1px solid var(--orange-border);
-            margin-top: 40px;
-        }
-        
-        .footer-text {
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-        
-        .footer-link {
-            color: var(--orange-primary);
-            text-decoration: none;
-        }
-        
-        .footer-link:hover {
-            text-decoration: underline;
-        }
-        
-        /* Responsive */
         @media (max-width: 900px) {
-            .data-table {
-                display: block;
-                overflow-x: auto;
-            }
-            
-            .logo {
-                font-size: 36px;
-            }
-            
-            .metric-grid {
-                grid-template-columns: 1fr;
-            }
+            .data-table { display: block; overflow-x: auto; }
+            .logo { font-size: 36px; }
+            .metric-grid { grid-template-columns: 1fr; }
         }
         
         @media (max-width: 600px) {
-            .container {
-                padding: 20px 12px;
-            }
-            
-            .data-table th,
-            .data-table td {
-                padding: 12px;
-            }
-            
-            .metric-value {
-                font-size: 16px;
-            }
+            .container { padding: 20px 12px; }
+            .data-table th, .data-table td { padding: 12px; }
+            .metric-value { font-size: 16px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <header class="header">
             <h1 class="logo">CEBE TRACKER</h1>
             <p class="tagline">Common Equity Bitcoin Exposure Analysis</p>
-            <p class="last-updated">Last updated: January 29, 2026</p>
+            <p class="last-updated" id="lastUpdated">Loading...</p>
         </header>
         
-        <!-- Main Data Table -->
         <div class="table-container">
-            <table class="data-table">
+            <div class="loading" id="loadingState">
+                <div class="loading-spinner"></div>
+                <p>Loading CEBE data...</p>
+            </div>
+            <table class="data-table" id="dataTable" style="display: none;">
                 <thead>
                     <tr>
                         <th>Company</th>
@@ -419,123 +233,14 @@
                         <th>Common Equity %</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- MSTR -->
-                    <tr onclick="openModal('mstr')">
-                        <td>
-                            <div class="company-cell">
-                                <div>
-                                    <div class="company-ticker">MSTR</div>
-                                    <div class="company-name">Strategy</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="metric-value">471,107</div>
-                            <div class="metric-label">BTC</div>
-                        </td>
-                        <td>
-                            <div class="metric-value">121,013</div>
-                            <div class="metric-label">sats/share</div>
-                        </td>
-                        <td>
-                            <span class="drag-badge drag-medium">22.8%</span>
-                        </td>
-                        <td>
-                            <div class="metric-value">77.2%</div>
-                            <div class="metric-label">of BTC</div>
-                        </td>
-                    </tr>
-                    
-                    <!-- MTPLF -->
-                    <tr onclick="openModal('mtplf')">
-                        <td>
-                            <div class="company-cell">
-                                <div>
-                                    <div class="company-ticker">MTPLF</div>
-                                    <div class="company-name">Metaplanet</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="metric-value">35,102</div>
-                            <div class="metric-label">BTC</div>
-                        </td>
-                        <td>
-                            <div class="metric-value">2,642</div>
-                            <div class="metric-label">sats/share</div>
-                        </td>
-                        <td>
-                            <span class="drag-badge drag-low">14.0%</span>
-                        </td>
-                        <td>
-                            <div class="metric-value">86.0%</div>
-                            <div class="metric-label">of BTC</div>
-                        </td>
-                    </tr>
-                    
-                    <!-- ASST -->
-                    <tr onclick="openModal('asst')">
-                        <td>
-                            <div class="company-cell">
-                                <div>
-                                    <div class="company-ticker">ASST</div>
-                                    <div class="company-name">Strive</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="metric-value">13,132</div>
-                            <div class="metric-label">BTC</div>
-                        </td>
-                        <td>
-                            <div class="metric-value">659</div>
-                            <div class="metric-label">sats/share</div>
-                        </td>
-                        <td>
-                            <span class="drag-badge drag-high">37.3%</span>
-                        </td>
-                        <td>
-                            <div class="metric-value">62.7%</div>
-                            <div class="metric-label">of BTC</div>
-                        </td>
-                    </tr>
-                    
-                    <!-- TSWCF -->
-                    <tr onclick="openModal('tswcf')">
-                        <td>
-                            <div class="company-cell">
-                                <div>
-                                    <div class="company-ticker">TSWCF</div>
-                                    <div class="company-name">Smarter Web Co</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="metric-value">2,674</div>
-                            <div class="metric-label">BTC</div>
-                        </td>
-                        <td>
-                            <div class="metric-value">763</div>
-                            <div class="metric-label">sats/share</div>
-                        </td>
-                        <td>
-                            <span class="drag-badge drag-zero">0.0%</span>
-                        </td>
-                        <td>
-                            <div class="metric-value">100.0%</div>
-                            <div class="metric-label">of BTC</div>
-                        </td>
-                    </tr>
-                </tbody>
+                <tbody id="tableBody"></tbody>
             </table>
         </div>
         
-        <!-- Footer -->
         <footer class="footer">
             <p class="footer-text">
                 Created by <a href="https://x.com/chcbearsfan" class="footer-link" target="_blank">@chcbearsfan</a> · 
-                <a href="https://x.com/chcbearsfan/status/..." class="footer-link" target="_blank">Read the CEBE Framework</a>
+                <a href="https://x.com/chcbearsfan" class="footer-link" target="_blank">Read the CEBE Framework</a>
             </p>
             <p class="footer-text" style="margin-top: 8px; font-size: 12px;">
                 CEBE = (Total BTC - Senior Claims in BTC) ÷ Shares Outstanding
@@ -543,171 +248,209 @@
         </footer>
     </div>
     
-    <!-- Modal Overlay -->
     <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
         <div class="modal" onclick="event.stopPropagation()">
             <div class="modal-header">
-                <h2 class="modal-title" id="modalTitle">Company <span class="modal-ticker" id="modalTicker"></span></h2>
+                <h2 class="modal-title" id="modalTitle">Company</h2>
                 <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
-            <div class="modal-body" id="modalBody">
-                <!-- Content injected by JavaScript -->
-            </div>
+            <div class="modal-body" id="modalBody"></div>
         </div>
     </div>
     
     <script>
-        // Company Data
-        const companies = {
-            mstr: {
-                name: "Strategy",
-                ticker: "MSTR",
-                exchange: "Nasdaq",
-                btcHoldings: 471107,
-                sharesOutstanding: 362606000,
-                debtUsd: 8214000000,
-                preferredUsd: 8360000000,
-                cashUsd: 2250000000,
-                btcPrice: 105000,
-                snapshotDate: "Q4 2025",
-                insight: "Strategy has the largest BTC treasury but also significant senior claims. At 22.8% drag, common shareholders own 77.2% of the Bitcoin exposure. Drag compresses as BTC price rises.",
-                capitalNotes: [
-                    { label: "Convertible Debt", value: "$8.21B" },
-                    { label: "Preferred Stock", value: "$8.36B", sub: "STRK, STRF, STRC @ 9.73% avg" },
-                    { label: "Cash Offset", value: "-$2.25B" },
-                    { label: "Net Senior Claims", value: "$14.32B" }
-                ]
-            },
-            mtplf: {
-                name: "Metaplanet",
-                ticker: "MTPLF",
-                exchange: "OTC (TYO: 3350)",
-                btcHoldings: 35102,
-                sharesOutstanding: 1141000000,
-                debtUsd: 280000000,
-                preferredUsd: 152000000,
-                cashUsd: 25000000,
-                btcPrice: 105000,
-                snapshotDate: "Q4 2025",
-                insight: "35% of claims are JPY-denominated. When BTC rises AND JPY weakens, drag compresses faster than pure USD structures. BTC Yield 2025: 568%.",
-                capitalNotes: [
-                    { label: "USD Credit Facility", value: "$280M", sub: "65% of claims" },
-                    { label: "JPY Preferreds", value: "¥23.61B (~$152M)", sub: "35% of claims" },
-                    { label: "Cash Offset", value: "-$25M" },
-                    { label: "Net Senior Claims", value: "~$407M" }
-                ]
-            },
-            asst: {
-                name: "Strive",
-                ticker: "ASST",
-                exchange: "Nasdaq",
-                btcHoldings: 13132,
-                sharesOutstanding: 1250000000,
-                debtUsd: 10000000,
-                preferredUsd: 426550000,
-                cashUsd: 0,
-                btcPrice: 89386,
-                snapshotDate: "Jan 28, 2026",
-                insight: "First Bitcoin treasury company amplified exclusively with perpetual preferred equity. 97.7% of leverage is SATA preferred, only 2.3% debt. 100% of BTC now unencumbered after retiring Coinbase loan. Q1 2026 BTC Yield: 21.39%.",
-                capitalNotes: [
-                    { label: "SATA Preferred", value: "$426.55M", sub: "12.25% dividend rate" },
-                    { label: "Remaining Debt", value: "$10M", sub: "Retires by Apr 2026" },
-                    { label: "Cash Offset", value: "$0" },
-                    { label: "Net Senior Claims", value: "$436.55M" }
-                ]
-            },
-            tswcf: {
-                name: "The Smarter Web Company",
-                ticker: "TSWCF",
-                exchange: "Aquis (SWC)",
-                btcHoldings: 2674,
-                sharesOutstanding: 350237093,
-                debtUsd: 0,
-                preferredUsd: 0,
-                cashUsd: 800000,
-                btcPrice: 105000,
-                snapshotDate: "Jan 22, 2026",
-                insight: "Zero debt, equity-funded only. UK's largest publicly traded Bitcoin holder. 'The 10 Year Plan' strategy announced April 2025. Common shareholders own 100% of BTC exposure.",
-                capitalNotes: [
-                    { label: "Debt", value: "$0" },
-                    { label: "Preferred Stock", value: "$0" },
-                    { label: "Cash", value: "~$800K" },
-                    { label: "Net Senior Claims", value: "$0" }
-                ]
-            }
+        // Google Sheets Configuration
+        const SHEET_ID = '1BNsCWGVU08PDinDcfzJccqcuj9_KrK1VZGETErzBZvg';
+        const SNAPSHOTS_GID = '771405586';
+        const COMPANIES_GID = '0';
+        
+        // Company metadata (static - could also come from Companies tab)
+        const companyMeta = {
+            MSTR: { name: 'Strategy', exchange: 'Nasdaq' },
+            MTPLF: { name: 'Metaplanet', exchange: 'OTC (TYO: 3350)' },
+            ASST: { name: 'Strive', exchange: 'Nasdaq' },
+            TSWCF: { name: 'Smarter Web Co', exchange: 'Aquis (SWC)' }
         };
         
-        function calculateMetrics(company) {
-            const netClaimsUsd = company.debtUsd + company.preferredUsd - company.cashUsd;
-            const netClaimsBtc = netClaimsUsd / company.btcPrice;
-            const drag = company.btcHoldings > 0 ? netClaimsBtc / company.btcHoldings : 0;
-            const commonEquityBtc = company.btcHoldings - netClaimsBtc;
-            const bps = (company.btcHoldings / company.sharesOutstanding) * 100000000;
-            const cebe = (commonEquityBtc / company.sharesOutstanding) * 100000000;
-            const commonEquityPct = 1 - drag;
-            
-            return {
-                netClaimsUsd,
-                netClaimsBtc,
-                drag,
-                commonEquityBtc,
-                bps,
-                cebe,
-                commonEquityPct
-            };
+        let companiesData = {};
+        
+        // Fetch and parse Google Sheets CSV
+        async function fetchSheetData(gid) {
+            const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}`;
+            const response = await fetch(url);
+            const text = await response.text();
+            return parseCSV(text);
         }
         
-        function formatNumber(num, decimals = 0) {
-            return num.toLocaleString('en-US', { 
-                minimumFractionDigits: decimals,
-                maximumFractionDigits: decimals 
-            });
+        function parseCSV(text) {
+            const lines = text.split('\n');
+            const headers = parseCSVLine(lines[0]);
+            const data = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim()) {
+                    const values = parseCSVLine(lines[i]);
+                    const row = {};
+                    headers.forEach((h, idx) => {
+                        row[h.replace(/"/g, '').trim()] = values[idx]?.replace(/"/g, '').trim() || '';
+                    });
+                    data.push(row);
+                }
+            }
+            return data;
+        }
+        
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let char of line) {
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current);
+            return result;
+        }
+        
+        function calculateMetrics(snapshot) {
+            const btcHoldings = parseFloat(snapshot.btc_holdings) || 0;
+            const shares = parseFloat(snapshot.shares_outstanding) || 1;
+            const debt = parseFloat(snapshot.debt_usd) || 0;
+            const preferred = parseFloat(snapshot.preferred_usd) || 0;
+            const cash = parseFloat(snapshot.cash_usd) || 0;
+            const btcPrice = parseFloat(snapshot.btc_price) || 100000;
+            
+            const netClaimsUsd = debt + preferred - cash;
+            const netClaimsBtc = netClaimsUsd / btcPrice;
+            const drag = btcHoldings > 0 ? Math.max(0, netClaimsBtc / btcHoldings) : 0;
+            const commonEquityBtc = btcHoldings - netClaimsBtc;
+            const bps = (btcHoldings / shares) * 100000000;
+            const cebe = (commonEquityBtc / shares) * 100000000;
+            const commonEquityPct = Math.max(0, 1 - drag);
+            
+            return { netClaimsUsd, netClaimsBtc, drag, commonEquityBtc, bps, cebe, commonEquityPct };
+        }
+        
+        function formatNumber(num) {
+            return num.toLocaleString('en-US', { maximumFractionDigits: 0 });
         }
         
         function formatCurrency(num) {
-            if (num >= 1000000000) {
-                return '$' + (num / 1000000000).toFixed(2) + 'B';
-            } else if (num >= 1000000) {
-                return '$' + (num / 1000000).toFixed(1) + 'M';
-            } else {
-                return '$' + formatNumber(num);
-            }
+            if (Math.abs(num) >= 1e9) return '$' + (num / 1e9).toFixed(2) + 'B';
+            if (Math.abs(num) >= 1e6) return '$' + (num / 1e6).toFixed(1) + 'M';
+            return '$' + formatNumber(num);
         }
         
-        function openModal(companyKey) {
-            const company = companies[companyKey];
-            const metrics = calculateMetrics(company);
+        function getDragClass(drag) {
+            if (drag <= 0.001) return 'drag-zero';
+            if (drag < 0.15) return 'drag-low';
+            if (drag < 0.30) return 'drag-medium';
+            return 'drag-high';
+        }
+        
+        function getLatestSnapshots(snapshots) {
+            const latest = {};
+            const order = ['MSTR', 'MTPLF', 'ASST', 'TSWCF'];
             
-            document.getElementById('modalTitle').innerHTML = `${company.name} <span class="modal-ticker">| ${company.ticker}</span>`;
-            
-            let capitalHtml = '';
-            company.capitalNotes.forEach(item => {
-                capitalHtml += `
-                    <div class="capital-item">
-                        <span class="capital-label">${item.label}${item.sub ? `<br><small style="color: var(--text-muted)">${item.sub}</small>` : ''}</span>
-                        <span class="capital-value">${item.value}</span>
-                    </div>
-                `;
+            snapshots.forEach(s => {
+                const ticker = s.ticker;
+                if (!latest[ticker] || s.snapshot_date > latest[ticker].snapshot_date) {
+                    latest[ticker] = s;
+                }
             });
             
-            const modalContent = `
+            // Return in preferred order
+            return order.filter(t => latest[t]).map(t => latest[t]);
+        }
+        
+        function renderTable(snapshots) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            let latestDate = '';
+            
+            snapshots.forEach(snapshot => {
+                const ticker = snapshot.ticker;
+                const meta = companyMeta[ticker] || { name: ticker, exchange: '' };
+                const metrics = calculateMetrics(snapshot);
+                
+                if (snapshot.snapshot_date > latestDate) latestDate = snapshot.snapshot_date;
+                
+                // Store for modal
+                companiesData[ticker] = { ...snapshot, ...meta, metrics };
+                
+                const row = document.createElement('tr');
+                row.onclick = () => openModal(ticker);
+                row.innerHTML = `
+                    <td>
+                        <div class="company-cell">
+                            <div>
+                                <div class="company-ticker">${ticker}</div>
+                                <div class="company-name">${meta.name}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="metric-value">${formatNumber(parseFloat(snapshot.btc_holdings))}</div>
+                        <div class="metric-label">BTC</div>
+                    </td>
+                    <td>
+                        <div class="metric-value">${formatNumber(Math.round(metrics.cebe))}</div>
+                        <div class="metric-label">sats/share</div>
+                    </td>
+                    <td>
+                        <span class="drag-badge ${getDragClass(metrics.drag)}">${(metrics.drag * 100).toFixed(1)}%</span>
+                    </td>
+                    <td>
+                        <div class="metric-value">${(metrics.commonEquityPct * 100).toFixed(1)}%</div>
+                        <div class="metric-label">of BTC</div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            document.getElementById('lastUpdated').textContent = `Data as of: ${latestDate}`;
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('dataTable').style.display = 'table';
+        }
+        
+        function openModal(ticker) {
+            const data = companiesData[ticker];
+            if (!data) return;
+            
+            const m = data.metrics;
+            
+            document.getElementById('modalTitle').innerHTML = `${data.name} <span class="modal-ticker">| ${ticker}</span>`;
+            
+            const debt = parseFloat(data.debt_usd) || 0;
+            const preferred = parseFloat(data.preferred_usd) || 0;
+            const cash = parseFloat(data.cash_usd) || 0;
+            
+            document.getElementById('modalBody').innerHTML = `
                 <div class="modal-section">
                     <div class="section-title">📊 CEBE Metrics</div>
                     <div class="metric-grid">
                         <div class="metric-card">
-                            <div class="metric-card-value">${formatNumber(company.btcHoldings)}</div>
+                            <div class="metric-card-value">${formatNumber(parseFloat(data.btc_holdings))}</div>
                             <div class="metric-card-label">BTC Holdings</div>
                         </div>
                         <div class="metric-card">
-                            <div class="metric-card-value">${formatNumber(Math.round(metrics.cebe))}</div>
+                            <div class="metric-card-value">${formatNumber(Math.round(m.cebe))}</div>
                             <div class="metric-card-label">CEBE (sats/share)</div>
                         </div>
                         <div class="metric-card">
-                            <div class="metric-card-value" style="color: ${metrics.drag < 0.15 ? 'var(--green)' : metrics.drag < 0.30 ? 'var(--yellow)' : 'var(--red)'}">${(metrics.drag * 100).toFixed(1)}%</div>
+                            <div class="metric-card-value" style="color: ${m.drag < 0.15 ? 'var(--green)' : m.drag < 0.30 ? 'var(--yellow)' : 'var(--red)'}">${(m.drag * 100).toFixed(1)}%</div>
                             <div class="metric-card-label">Drag</div>
                         </div>
                         <div class="metric-card">
-                            <div class="metric-card-value" style="color: var(--green)">${(metrics.commonEquityPct * 100).toFixed(1)}%</div>
+                            <div class="metric-card-value" style="color: var(--green)">${(m.commonEquityPct * 100).toFixed(1)}%</div>
                             <div class="metric-card-label">Common Equity Owns</div>
                         </div>
                     </div>
@@ -716,26 +459,54 @@
                 <div class="modal-section">
                     <div class="section-title">🏗️ Capital Structure</div>
                     <div class="capital-structure">
-                        ${capitalHtml}
+                        <div class="capital-item">
+                            <span class="capital-label">Debt</span>
+                            <span class="capital-value">${formatCurrency(debt)}</span>
+                        </div>
+                        <div class="capital-item">
+                            <span class="capital-label">Preferred Stock</span>
+                            <span class="capital-value">${formatCurrency(preferred)}</span>
+                        </div>
+                        <div class="capital-item">
+                            <span class="capital-label">Cash Offset</span>
+                            <span class="capital-value">-${formatCurrency(cash)}</span>
+                        </div>
+                        <div class="capital-item">
+                            <span class="capital-label"><strong>Net Senior Claims</strong></span>
+                            <span class="capital-value"><strong>${formatCurrency(m.netClaimsUsd)}</strong></span>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="modal-section">
-                    <div class="section-title">🔑 Key Insight</div>
-                    <div class="insight-box">
-                        <p class="insight-text">${company.insight}</p>
+                    <div class="section-title">📈 Additional Metrics</div>
+                    <div class="capital-structure">
+                        <div class="capital-item">
+                            <span class="capital-label">BPS (sats/share)</span>
+                            <span class="capital-value">${formatNumber(Math.round(m.bps))}</span>
+                        </div>
+                        <div class="capital-item">
+                            <span class="capital-label">Claims in BTC</span>
+                            <span class="capital-value">${formatNumber(Math.round(m.netClaimsBtc))} BTC</span>
+                        </div>
+                        <div class="capital-item">
+                            <span class="capital-label">BTC Price (snapshot)</span>
+                            <span class="capital-value">$${formatNumber(parseFloat(data.btc_price))}</span>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="modal-section">
                     <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);">
-                        <span>Exchange: ${company.exchange}</span>
-                        <span>Snapshot: ${company.snapshotDate}</span>
+                        <span>Exchange: ${data.exchange}</span>
+                        <span>Period: ${data.period}</span>
+                    </div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">
+                        Source: ${data.source || 'N/A'}
                     </div>
                 </div>
             `;
             
-            document.getElementById('modalBody').innerHTML = modalContent;
             document.getElementById('modalOverlay').classList.add('active');
             document.body.style.overflow = 'hidden';
         }
@@ -746,10 +517,24 @@
             document.body.style.overflow = '';
         }
         
-        // Close modal on Escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeModal();
-        });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+        
+        // Initialize
+        async function init() {
+            try {
+                const snapshots = await fetchSheetData(SNAPSHOTS_GID);
+                const latest = getLatestSnapshots(snapshots);
+                renderTable(latest);
+            } catch (error) {
+                console.error('Failed to load data:', error);
+                document.getElementById('loadingState').innerHTML = `
+                    <p style="color: var(--red);">Failed to load data. Please refresh.</p>
+                    <p style="font-size: 12px; margin-top: 8px;">${error.message}</p>
+                `;
+            }
+        }
+        
+        init();
     </script>
 </body>
 </html>
