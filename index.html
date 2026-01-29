@@ -5,7 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEBE Tracker | Bitcoin Treasury Company Analysis</title>
     <meta name="description" content="Track Common Equity Bitcoin Exposure (CEBE) across Bitcoin Treasury Companies. Rigorous analysis of drag, capital structure, and actual BTC ownership for common shareholders.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-card: #161616;
+            --orange-primary: #FF8C00;
+            --orange-glow: rgba(255, 140, 0, 0.15);
+            --orange-border: rgba(255, 140, 0, 0.3);
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --text-muted: #666666;
+            --green: #00C853;
+            --red: #FF5252;
+            --yellow: #FFD600;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -13,197 +31,334 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Arial', sans-serif;
-            background: #0a0a0a;
-            color: #fff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             line-height: 1.6;
+            min-height: 100vh;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 60px 20px;
+            padding: 40px 20px;
         }
         
         /* Header */
         .header {
             text-align: center;
-            margin-bottom: 80px;
+            margin-bottom: 50px;
         }
         
         .logo {
-            font-size: 64px;
+            font-size: 48px;
             font-weight: 700;
-            letter-spacing: 4px;
-            background: linear-gradient(135deg, #FF8C00 0%, #FFA500 100%);
+            letter-spacing: 3px;
+            background: linear-gradient(135deg, #FF8C00 0%, #FFA500 50%, #FF8C00 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 20px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 40px rgba(255, 140, 0, 0.3);
         }
         
         .tagline {
-            font-size: 24px;
-            color: #888;
-            margin-bottom: 40px;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            background: rgba(255, 140, 0, 0.1);
-            border: 2px solid #FF8C00;
-            color: #FF8C00;
-            padding: 12px 30px;
-            border-radius: 30px;
-            font-size: 18px;
-            font-weight: 600;
-            letter-spacing: 2px;
-        }
-        
-        /* Main Content */
-        .main-content {
-            max-width: 800px;
-            margin: 0 auto 60px;
-            text-align: center;
-        }
-        
-        .main-title {
-            font-size: 48px;
-            margin-bottom: 30px;
-            line-height: 1.2;
-        }
-        
-        .description {
-            font-size: 20px;
-            color: #ccc;
-            margin-bottom: 50px;
-            line-height: 1.8;
-        }
-        
-        /* Feature Grid */
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-bottom: 80px;
-        }
-        
-        .feature-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 140, 0, 0.3);
-            border-radius: 15px;
-            padding: 40px 30px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        
-        .feature-card:hover {
-            background: rgba(255, 140, 0, 0.05);
-            border-color: #FF8C00;
-            transform: translateY(-5px);
-        }
-        
-        .feature-icon {
-            font-size: 48px;
-            margin-bottom: 20px;
-        }
-        
-        .feature-title {
-            font-size: 24px;
-            color: #FF8C00;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-        
-        .feature-text {
             font-size: 16px;
-            color: #999;
-            line-height: 1.6;
+            color: var(--text-secondary);
+            font-weight: 400;
         }
         
-        /* What is CEBE */
-        .explainer {
-            background: rgba(255, 140, 0, 0.05);
-            border: 1px solid rgba(255, 140, 0, 0.3);
-            border-radius: 20px;
-            padding: 50px;
-            margin-bottom: 80px;
+        .last-updated {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            font-family: 'JetBrains Mono', monospace;
         }
         
-        .explainer-title {
-            font-size: 36px;
-            color: #FF8C00;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        
-        .explainer-content {
-            font-size: 18px;
-            color: #ccc;
-            line-height: 1.8;
-            margin-bottom: 20px;
-        }
-        
-        .explainer-formula {
-            background: rgba(0, 0, 0, 0.3);
-            border-left: 4px solid #FF8C00;
-            padding: 20px 30px;
-            margin: 30px 0;
-            font-family: 'Courier New', monospace;
-            font-size: 18px;
-            color: #FFA500;
-        }
-        
-        /* CTA Section */
-        .cta-section {
-            text-align: center;
-            margin-bottom: 60px;
-        }
-        
-        .cta-title {
-            font-size: 32px;
-            margin-bottom: 20px;
-        }
-        
-        .cta-text {
-            font-size: 18px;
-            color: #888;
+        /* Main Table */
+        .table-container {
+            background: var(--bg-card);
+            border: 1px solid var(--orange-border);
+            border-radius: 16px;
+            overflow: hidden;
             margin-bottom: 40px;
         }
         
-        .framework-link {
-            display: inline-block;
-            background: linear-gradient(135deg, #FF8C00 0%, #FFA500 100%);
-            color: #000;
-            padding: 18px 40px;
-            border-radius: 10px;
-            text-decoration: none;
-            font-size: 18px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
         }
         
-        .framework-link:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(255, 140, 0, 0.3);
+        .data-table th {
+            background: var(--bg-secondary);
+            padding: 16px 20px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--orange-border);
+        }
+        
+        .data-table td {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            vertical-align: middle;
+        }
+        
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .data-table tr:hover {
+            background: var(--orange-glow);
+            cursor: pointer;
+        }
+        
+        .company-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .company-ticker {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--orange-primary);
+        }
+        
+        .company-name {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .metric-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .metric-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        
+        .drag-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .drag-low {
+            background: rgba(0, 200, 83, 0.15);
+            color: var(--green);
+            border: 1px solid rgba(0, 200, 83, 0.3);
+        }
+        
+        .drag-medium {
+            background: rgba(255, 214, 0, 0.15);
+            color: var(--yellow);
+            border: 1px solid rgba(255, 214, 0, 0.3);
+        }
+        
+        .drag-high {
+            background: rgba(255, 82, 82, 0.15);
+            color: var(--red);
+            border: 1px solid rgba(255, 82, 82, 0.3);
+        }
+        
+        .drag-zero {
+            background: rgba(0, 200, 83, 0.2);
+            color: var(--green);
+            border: 1px solid rgba(0, 200, 83, 0.4);
+        }
+        
+        .change-positive {
+            color: var(--green);
+            font-size: 12px;
+        }
+        
+        .change-negative {
+            color: var(--red);
+            font-size: 12px;
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--orange-border);
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--orange-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .modal-ticker {
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            margin-left: 8px;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 28px;
+            cursor: pointer;
+            padding: 4px;
+            line-height: 1;
+        }
+        
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+        
+        .modal-body {
+            padding: 24px;
+        }
+        
+        .modal-section {
+            margin-bottom: 24px;
+        }
+        
+        .modal-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .section-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--orange-primary);
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        
+        .metric-card {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+        }
+        
+        .metric-card-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .metric-card-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .capital-structure {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 16px;
+        }
+        
+        .capital-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .capital-item:last-child {
+            border-bottom: none;
+        }
+        
+        .capital-label {
+            color: var(--text-secondary);
+        }
+        
+        .capital-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+        }
+        
+        .insight-box {
+            background: var(--orange-glow);
+            border: 1px solid var(--orange-border);
+            border-radius: 12px;
+            padding: 16px;
+        }
+        
+        .insight-icon {
+            color: var(--orange-primary);
+            margin-right: 8px;
+        }
+        
+        .insight-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
         }
         
         /* Footer */
         .footer {
             text-align: center;
-            padding-top: 40px;
-            border-top: 1px solid rgba(255, 140, 0, 0.2);
-            color: #666;
+            padding: 40px 20px;
+            border-top: 1px solid var(--orange-border);
+            margin-top: 40px;
         }
         
         .footer-text {
-            font-size: 16px;
-            margin-bottom: 10px;
+            color: var(--text-muted);
+            font-size: 14px;
         }
         
         .footer-link {
-            color: #FF8C00;
+            color: var(--orange-primary);
             text-decoration: none;
         }
         
@@ -212,21 +367,33 @@
         }
         
         /* Responsive */
-        @media (max-width: 768px) {
-            .logo {
-                font-size: 48px;
+        @media (max-width: 900px) {
+            .data-table {
+                display: block;
+                overflow-x: auto;
             }
             
-            .main-title {
+            .logo {
                 font-size: 36px;
             }
             
-            .tagline {
-                font-size: 20px;
+            .metric-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 12px;
             }
             
-            .features {
-                grid-template-columns: 1fr;
+            .data-table th,
+            .data-table td {
+                padding: 12px;
+            }
+            
+            .metric-value {
+                font-size: 16px;
             }
         }
     </style>
@@ -234,94 +401,355 @@
 <body>
     <div class="container">
         <!-- Header -->
-        <div class="header">
-            <div class="logo">CEBE TRACKER</div>
-            <div class="tagline">Bitcoin Treasury Company Analysis</div>
-            <div class="status-badge">COMING SOON</div>
-        </div>
+        <header class="header">
+            <h1 class="logo">CEBE TRACKER</h1>
+            <p class="tagline">Common Equity Bitcoin Exposure Analysis</p>
+            <p class="last-updated">Last updated: January 29, 2026</p>
+        </header>
         
-        <!-- Main Content -->
-        <div class="main-content">
-            <h1 class="main-title">Track Actual Bitcoin Exposure for Common Equity Holders</h1>
-            <p class="description">
-                Most BTCTC analysis focuses on Bitcoin Per Share (BPS). But BPS doesn't tell you what percentage 
-                of Bitcoin common equity holders actually own after accounting for senior claims like debt and 
-                preferred stock. CEBE does.
-            </p>
-        </div>
-        
-        <!-- Features -->
-        <div class="features">
-            <div class="feature-card">
-                <div class="feature-icon">📊</div>
-                <div class="feature-title">Live CEBE Data</div>
-                <div class="feature-text">
-                    Real-time tracking of Common Equity Bitcoin Exposure across major Bitcoin Treasury Companies
-                </div>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">⚖️</div>
-                <div class="feature-title">Drag Analysis</div>
-                <div class="feature-text">
-                    Understand how senior claims impact your actual Bitcoin ownership as a common shareholder
-                </div>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">📈</div>
-                <div class="feature-title">Compression Dynamics</div>
-                <div class="feature-text">
-                    See how drag compresses as Bitcoin appreciates, increasing common equity's ownership percentage
-                </div>
-            </div>
-        </div>
-        
-        <!-- Explainer -->
-        <div class="explainer">
-            <h2 class="explainer-title">What is CEBE?</h2>
-            <p class="explainer-content">
-                <strong>CEBE (Common Equity Bitcoin Exposure)</strong> is a framework for analyzing Bitcoin Treasury 
-                Companies that reveals what percentage of Bitcoin on the balance sheet is actually owned by common 
-                equity holders after accounting for senior claims.
-            </p>
-            <div class="explainer-formula">
-                CEBE = (Total BTC - Senior Claims in BTC) ÷ Shares Outstanding
-                <br><br>
-                Drag = Senior Claims ÷ Total BTC
-            </div>
-            <p class="explainer-content">
-                <strong>Why it matters:</strong> A company with 10,000 BTC and 22% drag means common equity holders 
-                own 78% of that Bitcoin. As BTC price rises, senior claims (denominated in fiat) compress in BTC terms, 
-                increasing common equity's ownership percentage over time.
-            </p>
-            <p class="explainer-content">
-                This dynamic explains why Bitcoin Treasury Companies can outperform direct Bitcoin ownership—the 
-                compression of senior claims creates amplification beyond simple leverage.
-            </p>
-        </div>
-        
-        <!-- CTA -->
-        <div class="cta-section">
-            <h2 class="cta-title">Read the Full Framework</h2>
-            <p class="cta-text">
-                Understand the complete CEBE methodology and how it applies to Bitcoin Treasury Company analysis
-            </p>
-            <a href="https://x.com/chcbearsfan" class="framework-link" target="_blank">
-                View Framework on X →
-            </a>
+        <!-- Main Data Table -->
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>BTC Holdings</th>
+                        <th>CEBE (sats/share)</th>
+                        <th>Drag</th>
+                        <th>Common Equity %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- MSTR -->
+                    <tr onclick="openModal('mstr')">
+                        <td>
+                            <div class="company-cell">
+                                <div>
+                                    <div class="company-ticker">MSTR</div>
+                                    <div class="company-name">Strategy</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="metric-value">471,107</div>
+                            <div class="metric-label">BTC</div>
+                        </td>
+                        <td>
+                            <div class="metric-value">121,013</div>
+                            <div class="metric-label">sats/share</div>
+                        </td>
+                        <td>
+                            <span class="drag-badge drag-medium">22.8%</span>
+                        </td>
+                        <td>
+                            <div class="metric-value">77.2%</div>
+                            <div class="metric-label">of BTC</div>
+                        </td>
+                    </tr>
+                    
+                    <!-- MTPLF -->
+                    <tr onclick="openModal('mtplf')">
+                        <td>
+                            <div class="company-cell">
+                                <div>
+                                    <div class="company-ticker">MTPLF</div>
+                                    <div class="company-name">Metaplanet</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="metric-value">35,102</div>
+                            <div class="metric-label">BTC</div>
+                        </td>
+                        <td>
+                            <div class="metric-value">2,642</div>
+                            <div class="metric-label">sats/share</div>
+                        </td>
+                        <td>
+                            <span class="drag-badge drag-low">14.0%</span>
+                        </td>
+                        <td>
+                            <div class="metric-value">86.0%</div>
+                            <div class="metric-label">of BTC</div>
+                        </td>
+                    </tr>
+                    
+                    <!-- ASST -->
+                    <tr onclick="openModal('asst')">
+                        <td>
+                            <div class="company-cell">
+                                <div>
+                                    <div class="company-ticker">ASST</div>
+                                    <div class="company-name">Strive</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="metric-value">13,132</div>
+                            <div class="metric-label">BTC</div>
+                        </td>
+                        <td>
+                            <div class="metric-value">659</div>
+                            <div class="metric-label">sats/share</div>
+                        </td>
+                        <td>
+                            <span class="drag-badge drag-high">37.3%</span>
+                        </td>
+                        <td>
+                            <div class="metric-value">62.7%</div>
+                            <div class="metric-label">of BTC</div>
+                        </td>
+                    </tr>
+                    
+                    <!-- TSWCF -->
+                    <tr onclick="openModal('tswcf')">
+                        <td>
+                            <div class="company-cell">
+                                <div>
+                                    <div class="company-ticker">TSWCF</div>
+                                    <div class="company-name">Smarter Web Co</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="metric-value">2,674</div>
+                            <div class="metric-label">BTC</div>
+                        </td>
+                        <td>
+                            <div class="metric-value">763</div>
+                            <div class="metric-label">sats/share</div>
+                        </td>
+                        <td>
+                            <span class="drag-badge drag-zero">0.0%</span>
+                        </td>
+                        <td>
+                            <div class="metric-value">100.0%</div>
+                            <div class="metric-label">of BTC</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
         
         <!-- Footer -->
-        <div class="footer">
+        <footer class="footer">
             <p class="footer-text">
-                Created by <a href="https://x.com/chcbearsfan" class="footer-link" target="_blank">@chcbearsfan</a>
+                Created by <a href="https://x.com/chcbearsfan" class="footer-link" target="_blank">@chcbearsfan</a> · 
+                <a href="https://x.com/chcbearsfan/status/..." class="footer-link" target="_blank">Read the CEBE Framework</a>
             </p>
-            <p class="footer-text">
-                Validated by <a href="https://x.com/AdamBLiv" class="footer-link" target="_blank">Adam Livingston</a> 
-                in his 24-minute analysis
+            <p class="footer-text" style="margin-top: 8px; font-size: 12px;">
+                CEBE = (Total BTC - Senior Claims in BTC) ÷ Shares Outstanding
             </p>
+        </footer>
+    </div>
+    
+    <!-- Modal Overlay -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Company <span class="modal-ticker" id="modalTicker"></span></h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Content injected by JavaScript -->
+            </div>
         </div>
     </div>
+    
+    <script>
+        // Company Data
+        const companies = {
+            mstr: {
+                name: "Strategy",
+                ticker: "MSTR",
+                exchange: "Nasdaq",
+                btcHoldings: 471107,
+                sharesOutstanding: 362606000,
+                debtUsd: 8214000000,
+                preferredUsd: 8360000000,
+                cashUsd: 2250000000,
+                btcPrice: 105000,
+                snapshotDate: "Q4 2025",
+                insight: "Strategy has the largest BTC treasury but also significant senior claims. At 22.8% drag, common shareholders own 77.2% of the Bitcoin exposure. Drag compresses as BTC price rises.",
+                capitalNotes: [
+                    { label: "Convertible Debt", value: "$8.21B" },
+                    { label: "Preferred Stock", value: "$8.36B", sub: "STRK, STRF, STRC @ 9.73% avg" },
+                    { label: "Cash Offset", value: "-$2.25B" },
+                    { label: "Net Senior Claims", value: "$14.32B" }
+                ]
+            },
+            mtplf: {
+                name: "Metaplanet",
+                ticker: "MTPLF",
+                exchange: "OTC (TYO: 3350)",
+                btcHoldings: 35102,
+                sharesOutstanding: 1141000000,
+                debtUsd: 280000000,
+                preferredUsd: 152000000,
+                cashUsd: 25000000,
+                btcPrice: 105000,
+                snapshotDate: "Q4 2025",
+                insight: "35% of claims are JPY-denominated. When BTC rises AND JPY weakens, drag compresses faster than pure USD structures. BTC Yield 2025: 568%.",
+                capitalNotes: [
+                    { label: "USD Credit Facility", value: "$280M", sub: "65% of claims" },
+                    { label: "JPY Preferreds", value: "¥23.61B (~$152M)", sub: "35% of claims" },
+                    { label: "Cash Offset", value: "-$25M" },
+                    { label: "Net Senior Claims", value: "~$407M" }
+                ]
+            },
+            asst: {
+                name: "Strive",
+                ticker: "ASST",
+                exchange: "Nasdaq",
+                btcHoldings: 13132,
+                sharesOutstanding: 1250000000,
+                debtUsd: 10000000,
+                preferredUsd: 426550000,
+                cashUsd: 0,
+                btcPrice: 89386,
+                snapshotDate: "Jan 28, 2026",
+                insight: "First Bitcoin treasury company amplified exclusively with perpetual preferred equity. 97.7% of leverage is SATA preferred, only 2.3% debt. 100% of BTC now unencumbered after retiring Coinbase loan. Q1 2026 BTC Yield: 21.39%.",
+                capitalNotes: [
+                    { label: "SATA Preferred", value: "$426.55M", sub: "12.25% dividend rate" },
+                    { label: "Remaining Debt", value: "$10M", sub: "Retires by Apr 2026" },
+                    { label: "Cash Offset", value: "$0" },
+                    { label: "Net Senior Claims", value: "$436.55M" }
+                ]
+            },
+            tswcf: {
+                name: "The Smarter Web Company",
+                ticker: "TSWCF",
+                exchange: "Aquis (SWC)",
+                btcHoldings: 2674,
+                sharesOutstanding: 350237093,
+                debtUsd: 0,
+                preferredUsd: 0,
+                cashUsd: 800000,
+                btcPrice: 105000,
+                snapshotDate: "Jan 22, 2026",
+                insight: "Zero debt, equity-funded only. UK's largest publicly traded Bitcoin holder. 'The 10 Year Plan' strategy announced April 2025. Common shareholders own 100% of BTC exposure.",
+                capitalNotes: [
+                    { label: "Debt", value: "$0" },
+                    { label: "Preferred Stock", value: "$0" },
+                    { label: "Cash", value: "~$800K" },
+                    { label: "Net Senior Claims", value: "$0" }
+                ]
+            }
+        };
+        
+        function calculateMetrics(company) {
+            const netClaimsUsd = company.debtUsd + company.preferredUsd - company.cashUsd;
+            const netClaimsBtc = netClaimsUsd / company.btcPrice;
+            const drag = company.btcHoldings > 0 ? netClaimsBtc / company.btcHoldings : 0;
+            const commonEquityBtc = company.btcHoldings - netClaimsBtc;
+            const bps = (company.btcHoldings / company.sharesOutstanding) * 100000000;
+            const cebe = (commonEquityBtc / company.sharesOutstanding) * 100000000;
+            const commonEquityPct = 1 - drag;
+            
+            return {
+                netClaimsUsd,
+                netClaimsBtc,
+                drag,
+                commonEquityBtc,
+                bps,
+                cebe,
+                commonEquityPct
+            };
+        }
+        
+        function formatNumber(num, decimals = 0) {
+            return num.toLocaleString('en-US', { 
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals 
+            });
+        }
+        
+        function formatCurrency(num) {
+            if (num >= 1000000000) {
+                return '$' + (num / 1000000000).toFixed(2) + 'B';
+            } else if (num >= 1000000) {
+                return '$' + (num / 1000000).toFixed(1) + 'M';
+            } else {
+                return '$' + formatNumber(num);
+            }
+        }
+        
+        function openModal(companyKey) {
+            const company = companies[companyKey];
+            const metrics = calculateMetrics(company);
+            
+            document.getElementById('modalTitle').innerHTML = `${company.name} <span class="modal-ticker">| ${company.ticker}</span>`;
+            
+            let capitalHtml = '';
+            company.capitalNotes.forEach(item => {
+                capitalHtml += `
+                    <div class="capital-item">
+                        <span class="capital-label">${item.label}${item.sub ? `<br><small style="color: var(--text-muted)">${item.sub}</small>` : ''}</span>
+                        <span class="capital-value">${item.value}</span>
+                    </div>
+                `;
+            });
+            
+            const modalContent = `
+                <div class="modal-section">
+                    <div class="section-title">📊 CEBE Metrics</div>
+                    <div class="metric-grid">
+                        <div class="metric-card">
+                            <div class="metric-card-value">${formatNumber(company.btcHoldings)}</div>
+                            <div class="metric-card-label">BTC Holdings</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-card-value">${formatNumber(Math.round(metrics.cebe))}</div>
+                            <div class="metric-card-label">CEBE (sats/share)</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-card-value" style="color: ${metrics.drag < 0.15 ? 'var(--green)' : metrics.drag < 0.30 ? 'var(--yellow)' : 'var(--red)'}">${(metrics.drag * 100).toFixed(1)}%</div>
+                            <div class="metric-card-label">Drag</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-card-value" style="color: var(--green)">${(metrics.commonEquityPct * 100).toFixed(1)}%</div>
+                            <div class="metric-card-label">Common Equity Owns</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-section">
+                    <div class="section-title">🏗️ Capital Structure</div>
+                    <div class="capital-structure">
+                        ${capitalHtml}
+                    </div>
+                </div>
+                
+                <div class="modal-section">
+                    <div class="section-title">🔑 Key Insight</div>
+                    <div class="insight-box">
+                        <p class="insight-text">${company.insight}</p>
+                    </div>
+                </div>
+                
+                <div class="modal-section">
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);">
+                        <span>Exchange: ${company.exchange}</span>
+                        <span>Snapshot: ${company.snapshotDate}</span>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('modalBody').innerHTML = modalContent;
+            document.getElementById('modalOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal(event) {
+            if (event && event.target !== document.getElementById('modalOverlay')) return;
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
 </body>
 </html>
