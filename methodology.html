@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEBE Methodology | Common Equity Bitcoin Exposure</title>
+    <meta name="description" content="The CEBE methodology for measuring true shareholder exposure in Bitcoin Treasury Companies. Developed January 2025.">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="CEBE Methodology | Common Equity Bitcoin Exposure">
+    <meta property="og:description" content="A better metric for Bitcoin Treasury Companies. What shareholders actually own after senior claims.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://cebetracker.io/methodology">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:creator" content="@chcbearsfan">
+    
+    <link rel="canonical" href="https://cebetracker.io/methodology">
+    <link rel="icon" type="image/png" href="favicon.png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #09090b;
+            --bg-secondary: #18181b;
+            --bg-elevated: #27272a;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --orange-primary: #f97316;
+            --orange-light: #fb923c;
+            --orange-muted: rgba(249, 115, 22, 0.1);
+            --border-subtle: #27272a;
+            --green: #22c55e;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 60px 24px;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 40px;
+            transition: color 0.15s ease;
+        }
+        
+        .back-link:hover {
+            color: var(--orange-primary);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+        
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 48px;
+        }
+        
+        .author-block {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 24px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            margin-bottom: 48px;
+        }
+        
+        .author-avatar {
+            width: 48px;
+            height: 48px;
+            background: var(--orange-muted);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--orange-primary);
+        }
+        
+        .author-info {
+            flex: 1;
+        }
+        
+        .author-name {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .author-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        
+        .author-meta a {
+            color: var(--orange-primary);
+            text-decoration: none;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 48px;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+        
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+        
+        .highlight {
+            color: var(--text-primary);
+        }
+        
+        .formula-block {
+            background: var(--bg-secondary);
+            border-left: 3px solid var(--orange-primary);
+            padding: 24px;
+            border-radius: 0 12px 12px 0;
+            margin: 32px 0;
+        }
+        
+        .formula-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--orange-primary);
+            margin-bottom: 16px;
+        }
+        
+        .formula {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 15px;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        
+        .formula:last-child {
+            margin-bottom: 0;
+        }
+        
+        .step-list {
+            list-style: none;
+            counter-reset: steps;
+            margin: 32px 0;
+        }
+        
+        .step-list li {
+            counter-increment: steps;
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        
+        .step-list li:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .step-list li::before {
+            content: counter(steps);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 32px;
+            background: var(--orange-muted);
+            color: var(--orange-primary);
+            font-weight: 600;
+            font-size: 14px;
+            border-radius: 50%;
+        }
+        
+        .step-content h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .step-content p {
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+        
+        .step-content code {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-elevated);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: var(--orange-light);
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 32px 0;
+        }
+        
+        .comparison-table th,
+        .comparison-table td {
+            text-align: left;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        
+        .comparison-table th {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+        
+        .comparison-table td {
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+        
+        .comparison-table td:first-child {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .insight-box {
+            background: var(--orange-muted);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 32px 0;
+        }
+        
+        .insight-box p {
+            color: var(--text-primary);
+            margin-bottom: 0;
+        }
+        
+        .insight-box strong {
+            color: var(--orange-primary);
+        }
+        
+        .footer {
+            margin-top: 64px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border-subtle);
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        
+        .footer a {
+            color: var(--orange-primary);
+            text-decoration: none;
+        }
+        
+        .timestamp {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to CEBE Tracker</a>
+        
+        <h1>The CEBE Methodology</h1>
+        <p class="subtitle">A framework for measuring true shareholder exposure in Bitcoin Treasury Companies</p>
+        
+        <div class="author-block">
+            <div class="author-avatar">B</div>
+            <div class="author-info">
+                <div class="author-name">Bobby</div>
+                <div class="author-meta">
+                    <a href="https://x.com/chcbearsfan" target="_blank">@chcbearsfan</a> · January 2026
+                </div>
+            </div>
+        </div>
+        
+        <h2>The Problem with BTC-Per-Share</h2>
+        
+        <p>Bitcoin Treasury Companies (BTCTCs) are often evaluated using <span class="highlight">BTC-per-share (BPS)</span> — total Bitcoin holdings divided by shares outstanding. This metric is dangerously incomplete.</p>
+        
+        <p>BPS ignores the capital structure. Before common shareholders see a single satoshi, the company must satisfy:</p>
+        
+        <p>• <span class="highlight">Convertible debt</span> — bonds that can convert to shares or must be repaid<br>
+        • <span class="highlight">Preferred stock</span> — senior equity with liquidation preferences<br>
+        • <span class="highlight">Other liabilities</span> — claims that rank above common equity</p>
+        
+        <p>These "senior claims" eat into the Bitcoin stack before common shareholders get anything. BPS pretends they don't exist.</p>
+        
+        <h2>What is CEBE?</h2>
+        
+        <p><span class="highlight">Common Equity Bitcoin Exposure (CEBE)</span> answers a simple question:</p>
+        
+        <div class="insight-box">
+            <p><strong>If this company liquidated all its Bitcoin today, how many satoshis would each common share actually receive?</strong></p>
+        </div>
+        
+        <p>CEBE subtracts senior claims from the Bitcoin holdings, then divides by shares outstanding. It shows what common shareholders <em>actually</em> own — not the gross number, the net number.</p>
+        
+        <h2>The 5-Step Calculation</h2>
+        
+        <ol class="step-list">
+            <li>
+                <div class="step-content">
+                    <h3>Calculate Net Senior Claims (USD)</h3>
+                    <p>Add up all claims that rank senior to common equity, then subtract cash (which offsets liabilities).</p>
+                    <p><code>Net Claims = Debt + Preferred − Cash</code></p>
+                </div>
+            </li>
+            <li>
+                <div class="step-content">
+                    <h3>Convert Claims to BTC</h3>
+                    <p>Express senior claims in Bitcoin terms using the current (or snapshot) BTC price.</p>
+                    <p><code>Claims (BTC) = Net Claims ÷ BTC Price</code></p>
+                </div>
+            </li>
+            <li>
+                <div class="step-content">
+                    <h3>Calculate Common Equity BTC</h3>
+                    <p>Subtract the BTC-denominated claims from total holdings. This is what's left for common shareholders.</p>
+                    <p><code>Common Equity BTC = Total BTC − Claims BTC</code></p>
+                </div>
+            </li>
+            <li>
+                <div class="step-content">
+                    <h3>Divide by Shares Outstanding</h3>
+                    <p>Distribute the remaining Bitcoin across all common shares and convert to satoshis.</p>
+                    <p><code>CEBE = (Common Equity BTC ÷ Shares) × 100,000,000</code></p>
+                </div>
+            </li>
+            <li>
+                <div class="step-content">
+                    <h3>Calculate Drag</h3>
+                    <p>Measure what percentage of the Bitcoin stack is consumed by senior claims.</p>
+                    <p><code>Drag = Claims BTC ÷ Total BTC</code></p>
+                </div>
+            </li>
+        </ol>
+        
+        <h2>CEBE vs BPS</h2>
+        
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>What It Measures</th>
+                    <th>Limitation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>BPS</td>
+                    <td>Gross BTC per share</td>
+                    <td>Ignores capital structure entirely</td>
+                </tr>
+                <tr>
+                    <td>CEBE</td>
+                    <td>Net BTC per share (after claims)</td>
+                    <td>Assumes instant liquidation</td>
+                </tr>
+                <tr>
+                    <td>Drag</td>
+                    <td>% of BTC eaten by senior claims</td>
+                    <td>Point-in-time snapshot</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h2>Why Drag Compression Matters</h2>
+        
+        <p>Here's where it gets interesting. Senior claims are <span class="highlight">denominated in USD</span>, but the Bitcoin stack is <span class="highlight">denominated in BTC</span>.</p>
+        
+        <p>As BTC price rises:</p>
+        <p>• The USD value of claims stays constant (or grows slowly)<br>
+        • The BTC value of claims <em>shrinks</em> relative to holdings<br>
+        • Drag compresses<br>
+        • CEBE grows faster than BPS</p>
+        
+        <div class="insight-box">
+            <p><strong>Drag compression is the mechanism by which Bitcoin appreciation flows disproportionately to common shareholders.</strong> The more leverage, the more dramatic the effect.</p>
+        </div>
+        
+        <p>This is why a company with 25% drag at $100K BTC might have only 10% drag at $250K BTC — the claims haven't changed, but their Bitcoin-denominated weight has collapsed.</p>
+        
+        <h2>Data Sources</h2>
+        
+        <p>CEBE Tracker pulls data from official company filings:</p>
+        
+        <p>• <span class="highlight">8-K filings</span> — Material events, Bitcoin purchase announcements<br>
+        • <span class="highlight">10-Q filings</span> — Quarterly financial statements<br>
+        • <span class="highlight">10-K filings</span> — Annual reports<br>
+        • <span class="highlight">Earnings releases</span> — Quarterly updates with current figures</p>
+        
+        <p>We use the BTC price from the filing date (snapshot price) rather than live price to maintain consistency with reported figures.</p>
+        
+        <h2>Limitations</h2>
+        
+        <p>CEBE is a useful heuristic, not a precise valuation:</p>
+        
+        <p>• Assumes hypothetical liquidation (companies don't actually liquidate)<br>
+        • Doesn't account for ongoing operations, revenue, or expenses<br>
+        • Convertible terms vary — some debt converts at different prices<br>
+        • Preferred stock may have complex redemption features<br>
+        • Doesn't capture operational value or strategic premium</p>
+        
+        <p>Use CEBE alongside other analysis. It's one lens, not the only lens.</p>
+        
+        <div class="footer">
+            <p>The CEBE methodology was developed and first published by <a href="https://x.com/chcbearsfan">@chcbearsfan</a> in January 2026.</p>
+            <p>© 2026 CEBE Tracker. All rights reserved.</p>
+            <p class="timestamp">Document version: 1.0 · Last updated: January 29, 2026</p>
+        </div>
+    </div>
+</body>
+</html>
