@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CEBE Tracker | Bitcoin Treasury Company Analysis</title>
+    <title>CEBE | Bitcoin Treasury Company Analysis</title>
     <meta name="description" content="Track Common Equity Bitcoin Exposure (CEBE) across Bitcoin Treasury Companies. Rigorous analysis of drag, capital structure, and actual BTC ownership for common shareholders.">
+    <!-- Favicon: Stacked CE/BE in orange -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%2309090b' width='32' height='32' rx='4'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f97316'/%3E%3Cstop offset='100%25' stop-color='%23fb923c'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='16' y='15' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='url(%23g)' text-anchor='middle'%3ECE%3C/text%3E%3Ctext x='16' y='28' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='url(%23g)' text-anchor='middle'%3EBE%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect fill='%2309090b' width='180' height='180' rx='40'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f97316'/%3E%3Cstop offset='100%25' stop-color='%23fb923c'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='90' y='75' font-family='Arial,sans-serif' font-size='50' font-weight='700' fill='url(%23g)' text-anchor='middle'%3ECE%3C/text%3E%3Ctext x='90' y='130' font-family='Arial,sans-serif' font-size='50' font-weight='700' fill='url(%23g)' text-anchor='middle'%3EBE%3C/text%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -62,6 +65,21 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             font-weight: 600;
+        }
+        
+        .logo-whisper {
+            font-size: 13px;
+            font-weight: 400;
+            letter-spacing: 6px;
+            margin-top: 4px;
+            text-transform: lowercase;
+            background: linear-gradient(180deg, 
+                rgba(161, 161, 170, 0.6) 0%, 
+                rgba(82, 82, 91, 0.2) 100%
+            );
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
         .logo-glow {
@@ -202,6 +220,30 @@
         .drag-medium { background: var(--yellow-muted); color: var(--yellow); }
         .drag-high { background: var(--red-muted); color: var(--red); }
         .drag-zero { background: var(--green-muted); color: var(--green); }
+        
+        /* Source Column */
+        .source-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .source-text {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .click-hint {
+            font-size: 10px;
+            color: var(--orange-primary);
+            opacity: 0;
+            transition: opacity 0.15s ease;
+        }
+        
+        .data-table tbody tr:hover .click-hint {
+            opacity: 1;
+        }
         
         /* Trend Indicator */
         .trend-cell {
@@ -407,6 +449,15 @@
             border-radius: 4px;
         }
         
+        .formula-note {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-subtle);
+            font-size: 10px;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        
         /* History Section */
         .history-section {
             margin-top: 20px;
@@ -473,6 +524,13 @@
             opacity: 0.6;
         }
         
+        .footer-roadmap {
+            margin-top: 16px;
+            font-size: 11px;
+            color: var(--orange-primary);
+            opacity: 0.7;
+        }
+        
         /* Meta info */
         .modal-meta {
             display: flex;
@@ -506,6 +564,7 @@
             <div class="logo-container">
                 <div class="logo-glow"></div>
                 <h1 class="logo"><span>CEBE</span></h1>
+                <p class="logo-whisper">tracker</p>
             </div>
             <p class="tagline">Common Equity Bitcoin Exposure</p>
             <p class="last-updated" id="lastUpdated">Loading data...</p>
@@ -524,6 +583,7 @@
                         <th>CEBE</th>
                         <th>Drag</th>
                         <th>Common Equity</th>
+                        <th style="width: 100px;">Source</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
@@ -533,9 +593,10 @@
         <footer class="footer">
             <p class="footer-text">
                 Created by <a href="https://x.com/chcbearsfan" class="footer-link" target="_blank">@chcbearsfan</a> · 
-                <a href="https://x.com/chcbearsfan/status/2014767364819063207" class="footer-link" target="_blank">Read the CEBE Framework</a>
+                <a href="https://x.com/chcbearsfan/status/2047673648810063297" class="footer-link" target="_blank">Read the CEBE Framework</a>
             </p>
             <p class="footer-formula">CEBE = (Total BTC − Senior Claims in BTC) ÷ Shares</p>
+            <p class="footer-roadmap">Coming soon: More tickers · Historical charts · Drag compression calculator</p>
         </footer>
     </div>
     
@@ -690,6 +751,12 @@
                 
                 const row = document.createElement('tr');
                 row.setAttribute('data-ticker', ticker);
+                
+                // Truncate source for display
+                const sourceShort = (snapshot.source || 'N/A').length > 20 
+                    ? (snapshot.source || 'N/A').substring(0, 18) + '...' 
+                    : (snapshot.source || 'N/A');
+                
                 row.innerHTML = `
                     <td>
                         <div class="company-cell">
@@ -713,6 +780,12 @@
                     <td>
                         <div class="metric-value">${(metrics.commonEquityPct * 100).toFixed(1)}%</div>
                         <div class="metric-label">of BTC</div>
+                    </td>
+                    <td>
+                        <div class="source-cell">
+                            <span class="source-text" title="${snapshot.source || 'N/A'}">${sourceShort}</span>
+                            <span class="click-hint">Click for details →</span>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -816,6 +889,7 @@
                             Common Equity: ${formatNumber(parseFloat(data.btc_holdings))} − ${formatNumber(Math.round(m.netClaimsBtc))} = <span class="highlight">${formatNumber(Math.round(m.commonEquityBtc))} BTC</span><br><br>
                             CEBE: ${formatNumber(Math.round(m.commonEquityBtc))} BTC ÷ ${formatNumber(parseFloat(data.shares_outstanding))} shares × 100M = <span class="highlight">${formatNumber(Math.round(m.cebe))} sats</span>
                         </div>
+                        <div class="formula-note">BTC price from snapshot date (${data.snapshot_date}), not live spot</div>
                     </div>
                 </div>
                 
