@@ -846,6 +846,42 @@
             margin-top: 40px; 
         }
         
+        /* BTC Price Display */
+        .btc-price-display {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 8px 16px;
+            margin: 16px 0;
+        }
+        
+        .btc-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--orange-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btc-price {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .btc-price.updating {
+            animation: pulse 1s ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
         .footer-text { 
             color: var(--text-muted); 
             font-size: 13px; 
@@ -912,6 +948,10 @@
                 <p class="logo-whisper">tracker</p>
             </div>
             <p class="tagline">Common Equity Bitcoin Exposure</p>
+            <div class="btc-price-display" id="btcPriceDisplay">
+                <span class="btc-label">BTC</span>
+                <span class="btc-price" id="headerBtcPrice">—</span>
+            </div>
             <p class="last-updated" id="lastUpdated">Loading data...</p>
         </header>
         
@@ -924,6 +964,7 @@
                 <thead>
                     <tr>
                         <th>Company</th>
+                        <th>Stock Price</th>
                         <th>BTC Holdings</th>
                         <th>CEBE</th>
                         <th>Drag</th>
@@ -1157,6 +1198,10 @@
                                 <div class="company-name">${meta.name}</div>
                             </div>
                         </div>
+                    </td>
+                    <td>
+                        <div class="metric-value stock-price" data-symbol="${tickerToStock[ticker] || ticker}">—</div>
+                        <div class="metric-label">USD</div>
                     </td>
                     <td>
                         <div class="metric-value">${formatNumber(parseFloat(snapshot.btc_holdings))}</div>
@@ -1600,6 +1645,28 @@
                 allSnapshots = await fetchSheetData(SNAPSHOTS_GID);
                 const latest = getLatestSnapshots(allSnapshots);
                 renderTable(latest);
+                
+                // Fetch live BTC price for header
+                fetchBtcPrice().then(price => {
+                    if (price) {
+                        const el = document.getElementById('headerBtcPrice');
+                        el.textContent = '$' + formatNumber(Math.round(price));
+                        el.classList.add('updating');
+                        setTimeout(() => el.classList.remove('updating'), 1000);
+                    }
+                });
+                
+                // Fetch live stock prices for table
+                document.querySelectorAll('.stock-price').forEach(async (el) => {
+                    const symbol = el.dataset.symbol;
+                    const price = await fetchStockPrice(symbol);
+                    if (price) {
+                        el.textContent = '$' + price.toFixed(2);
+                    } else {
+                        el.textContent = '—';
+                    }
+                });
+                
             } catch (error) {
                 console.error('Failed to load data:', error);
                 document.getElementById('loadingState').innerHTML = `
