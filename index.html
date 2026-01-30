@@ -1187,7 +1187,7 @@
         
         function getCompanyHistory(ticker) {
             return allSnapshots
-                .filter(s => s.ticker === ticker)
+                .filter(s => s.ticker === ticker && (!s.status || s.status.toLowerCase() === 'live'))
                 .sort((a, b) => a.snapshot_date.localeCompare(b.snapshot_date));
         }
         
@@ -1694,7 +1694,11 @@
         async function init() {
             try {
                 allSnapshots = await fetchSheetData(SNAPSHOTS_GID);
-                const latest = getLatestSnapshots(allSnapshots);
+                
+                // Filter to only show 'live' status rows (or rows without status column for backwards compatibility)
+                const liveSnapshots = allSnapshots.filter(s => !s.status || s.status.toLowerCase() === 'live');
+                
+                const latest = getLatestSnapshots(liveSnapshots);
                 renderTable(latest);
                 
                 // Fetch live BTC price for header
