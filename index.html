@@ -810,6 +810,45 @@
             color: var(--red);
         }
         
+        .sim-stock-row.mnav-input-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .mnav-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .mnav-input {
+            width: 70px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            padding: 6px 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--text-primary);
+            text-align: right;
+            outline: none;
+        }
+        
+        .mnav-input:focus {
+            border-color: var(--orange-primary);
+        }
+        
+        .mnav-input::placeholder {
+            color: var(--text-muted);
+            font-size: 11px;
+        }
+        
+        .mnav-x {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+        
         .sim-disclaimer {
             margin-top: 20px;
             padding: 12px 16px;
@@ -1414,8 +1453,15 @@
                                         <span id="simCurrentStock">$—</span>
                                     </div>
                                     <div class="sim-stock-row">
-                                        <span>Implied mNAV</span>
+                                        <span>Current mNAV</span>
                                         <span id="simMnav">—</span>
+                                    </div>
+                                    <div class="sim-stock-row mnav-input-row">
+                                        <span>Projected mNAV</span>
+                                        <div class="mnav-input-wrapper">
+                                            <input type="number" id="simProjMnav" class="mnav-input" value="" placeholder="same" min="0.1" max="10" step="0.1">
+                                            <span class="mnav-x">x</span>
+                                        </div>
                                     </div>
                                     <div class="sim-stock-row highlight-row">
                                         <span>Projected Price</span>
@@ -1430,7 +1476,7 @@
                         </div>
                         
                         <div class="sim-disclaimer">
-                            ⚠️ For educational purposes only. Assumes constant mNAV multiple and no changes to capital structure. Not financial advice. Actual results will vary.
+                            ⚠️ For educational purposes only. Assumes no changes to capital structure. Not financial advice. Actual results will vary.
                         </div>
                     </div>
                 </div>
@@ -1547,15 +1593,19 @@
                     document.getElementById('simStockSection').style.display = 'block';
                     document.getElementById('simCurrentStock').textContent = '$' + stockPrice.toFixed(2);
                     
-                    // Calculate mNAV: Market Cap / BTC NAV
+                    // Calculate current mNAV: Market Cap / BTC NAV
                     const currentMarketCap = stockPrice * simData.shares;
                     const currentBtcNav = simData.btcHoldings * simData.originalBtcPrice;
-                    const mNav = currentBtcNav > 0 ? currentMarketCap / currentBtcNav : 0;
-                    document.getElementById('simMnav').textContent = mNav.toFixed(2) + 'x';
+                    const currentMnav = currentBtcNav > 0 ? currentMarketCap / currentBtcNav : 0;
+                    document.getElementById('simMnav').textContent = currentMnav.toFixed(2) + 'x';
                     
-                    // Project new stock price assuming constant mNAV
+                    // Use projected mNAV if entered, otherwise use current
+                    const projMnavInput = parseFloat(document.getElementById('simProjMnav').value);
+                    const projMnav = projMnavInput > 0 ? projMnavInput : currentMnav;
+                    
+                    // Project new stock price
                     const newBtcNav = simData.btcHoldings * newBtcPrice;
-                    const projectedMarketCap = newBtcNav * mNav;
+                    const projectedMarketCap = newBtcNav * projMnav;
                     const projectedStockPrice = projectedMarketCap / simData.shares;
                     document.getElementById('simProjStock').textContent = '$' + projectedStockPrice.toFixed(2);
                     
@@ -1581,6 +1631,7 @@
             });
             
             document.getElementById('simStockPrice').addEventListener('input', updateSimulation);
+            document.getElementById('simProjMnav').addEventListener('input', updateSimulation);
             
             // Live BTC price button
             document.getElementById('fetchBtcBtn').addEventListener('click', async (e) => {
