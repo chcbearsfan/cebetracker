@@ -135,6 +135,18 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         
+        /* Table Hint */
+        .table-hint {
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+        
+        .table-hint:hover {
+            color: var(--orange-primary);
+        }
+        
         /* Table Container */
         .table-container {
             background: var(--bg-card);
@@ -477,6 +489,16 @@
             color: var(--text-primary);
         }
         
+        .capital-note {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 10px 16px;
+            background: var(--bg-elevated);
+            border-radius: 0 0 12px 12px;
+            border-top: 1px solid var(--border-subtle);
+        }
+        
         /* Formula Box */
         .formula-box {
             background: var(--bg-secondary);
@@ -654,6 +676,42 @@
         .sim-live-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+        
+        .sim-duration-btns {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .sim-duration-btn {
+            flex: 1;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        
+        .sim-duration-btn:hover {
+            border-color: var(--orange-border);
+            color: var(--text-primary);
+        }
+        
+        .sim-duration-btn.active {
+            background: var(--orange-muted);
+            border-color: var(--orange-primary);
+            color: var(--orange-primary);
+        }
+        
+        .sim-duration-note {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            font-style: italic;
         }
         
         .sim-slider {
@@ -994,6 +1052,8 @@
             <p class="last-updated" id="lastUpdated">Loading data...</p>
         </header>
         
+        <p class="table-hint">Click any company to view full CEBE breakdown, simulations, and historical tracking →</p>
+        
         <div class="table-container">
             <div class="loading" id="loadingState">
                 <div class="loading-spinner"></div>
@@ -1021,7 +1081,7 @@
                 <a href="https://x.com/chcbearsfan/status/2047673648810063297" class="footer-link" target="_blank">Read the CEBE Framework</a>
             </p>
             <p class="footer-formula">CEBE = (Total BTC − Senior Claims in BTC) ÷ Shares</p>
-            <p class="footer-roadmap">Coming soon: More tickers · Historical charts · Drag compression calculator</p>
+            <p class="footer-roadmap">More tickers coming · Request via <a href="https://x.com/chcbearsfan" class="footer-link" target="_blank">@chcbearsfan</a></p>
         </footer>
     </div>
     
@@ -1093,9 +1153,9 @@
         // Company metadata
         const companyMeta = {
             MSTR: { name: 'Strategy', exchange: 'Nasdaq: MSTR' },
-            MTPLF: { name: 'Metaplanet', exchange: 'TYO: 3350 / OTC: MTPLF' },
+            MTPLF: { name: 'Metaplanet', exchange: 'TYO: 3350 / OTC: MTPLF', fx_note: 'JPY claims at snapshot FX' },
             ASST: { name: 'Strive', exchange: 'Nasdaq: ASST' },
-            TSWCF: { name: 'Smarter Web Co', exchange: 'Aquis: SWC / OTC: TSWCF' }
+            TSWCF: { name: 'Smarter Web Co', exchange: 'Aquis: SWC / OTC: TSWCF', fx_note: 'GBP claims at snapshot FX' }
         };
         
         let allSnapshots = [];
@@ -1364,6 +1424,7 @@
                                 <span class="capital-value">${formatCurrency(m.netClaimsUsd)}</span>
                             </div>
                         </div>
+                        <div class="capital-note">Senior claims include convertibles and preferred equity senior to common${data.fx_note ? '. ' + data.fx_note : ''}.</div>
                     </div>
                     
                     <div class="modal-meta">
@@ -1400,6 +1461,17 @@
                                     <button class="sim-live-btn" id="fetchStockBtn" title="Fetch live price" data-symbol="${tickerToStock[ticker] || ticker}">⟳ Live</button>
                                 </div>
                             </div>
+                            
+                            <div class="sim-input-group">
+                                <label class="sim-label">Time Horizon</label>
+                                <div class="sim-duration-btns">
+                                    <button class="sim-duration-btn active" data-years="0">Now</button>
+                                    <button class="sim-duration-btn" data-years="1">1Y</button>
+                                    <button class="sim-duration-btn" data-years="3">3Y</button>
+                                    <button class="sim-duration-btn" data-years="5">5Y</button>
+                                </div>
+                                <div class="sim-duration-note" id="simDurationNote"></div>
+                            </div>
                         </div>
                         
                         <div class="sim-results" id="simResults">
@@ -1425,7 +1497,7 @@
                                 </div>
                                 <div class="sim-arrow">→</div>
                                 <div class="sim-col projected">
-                                    <div class="sim-col-header">Projected</div>
+                                    <div class="sim-col-header" id="simProjHeader">Projected</div>
                                     <div class="sim-metric">
                                         <span class="sim-metric-label">BTC Price</span>
                                         <span class="sim-metric-value" id="simProjBtc">$${formatNumber(Math.round(m.btcPrice))}</span>
@@ -1632,6 +1704,34 @@
             
             document.getElementById('simStockPrice').addEventListener('input', updateSimulation);
             document.getElementById('simProjMnav').addEventListener('input', updateSimulation);
+            
+            // Duration button handlers
+            let selectedYears = 0;
+            document.querySelectorAll('.sim-duration-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.sim-duration-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    selectedYears = parseInt(btn.dataset.years);
+                    
+                    const noteEl = document.getElementById('simDurationNote');
+                    const headerEl = document.getElementById('simProjHeader');
+                    
+                    if (selectedYears > 0) {
+                        // Assume 15% annual BTC CAGR for projection
+                        const projectedBtc = Math.round(simData.originalBtcPrice * Math.pow(1.15, selectedYears));
+                        document.getElementById('simBtcPrice').value = projectedBtc;
+                        document.getElementById('simBtcSlider').value = Math.min(projectedBtc, 500000);
+                        noteEl.textContent = 'Assuming 15% annual BTC appreciation. Adjust slider to explore scenarios.';
+                        headerEl.textContent = 'In ' + selectedYears + ' Year' + (selectedYears > 1 ? 's' : '');
+                    } else {
+                        document.getElementById('simBtcPrice').value = Math.round(simData.originalBtcPrice);
+                        document.getElementById('simBtcSlider').value = Math.round(simData.originalBtcPrice);
+                        noteEl.textContent = '';
+                        headerEl.textContent = 'Projected';
+                    }
+                    updateSimulation();
+                });
+            });
             
             // Live BTC price button
             document.getElementById('fetchBtcBtn').addEventListener('click', async (e) => {
