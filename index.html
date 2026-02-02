@@ -1148,13 +1148,13 @@
         }
         
         // Ticker symbol mapping for Finnhub
-        // Note: ALCPB is on Euronext Growth Paris - Finnhub free tier doesn't support it
+        // Note: ALCPB is on Euronext Growth Paris - trying .PA suffix
         const tickerToStock = {
             MSTR: 'MSTR',
             MTPLF: 'MTPLF',
             ASST: 'ASST',
             TSWCF: 'TSWCF',
-            ALCPB: null  // Finnhub doesn't support Euronext Growth stocks
+            ALCPB: 'ALCPB.PA'  // Euronext Paris suffix for Finnhub
         };
         
         // Company metadata
