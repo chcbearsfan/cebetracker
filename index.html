@@ -1149,11 +1149,13 @@
             // Fallback to Yahoo Finance for European stocks (via CORS proxy)
             try {
                 const yahooSymbol = symbol;
-                console.log(`[Yahoo] Fetching price for ${yahooSymbol}...`);
                 const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSymbol}?interval=1d&range=1d`;
-                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`;
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`;
+                console.log(`[Yahoo] Fetching price for ${yahooSymbol} via proxy...`);
+                console.log(`[Yahoo] Proxy URL: ${proxyUrl}`);
                 const response = await fetch(proxyUrl);
                 const data = await response.json();
+                console.log(`[Yahoo] Response:`, data);
                 const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
                 if (price && price > 0) {
                     liveStockPrices[symbol] = price;
