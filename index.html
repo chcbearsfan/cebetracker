@@ -1216,7 +1216,8 @@
             const debt = parseFloat(snapshot.debt_usd) || 0;
             const preferred = parseFloat(snapshot.preferred_usd) || 0;
             const cash = parseFloat(snapshot.cash_usd) || 0;
-            const btcPrice = parseFloat(snapshot.btc_price) || 100000;
+            // Use live BTC price from CoinGecko, fall back to sheet price only if API failed
+            const btcPrice = liveBtcPrice || parseFloat(snapshot.btc_price) || 100000;
             
             const netClaimsUsd = debt + preferred - cash;
             const netClaimsBtc = Math.max(0, netClaimsUsd / btcPrice);
@@ -1798,6 +1799,15 @@
         // Initialize
         async function init() {
             try {
+                // Fetch live BTC price FIRST - so calculations use live price
+                const price = await fetchBtcPrice();
+                if (price) {
+                    const el = document.getElementById('headerBtcPrice');
+                    el.textContent = '$' + formatNumber(Math.round(price));
+                    el.classList.add('updating');
+                    setTimeout(() => el.classList.remove('updating'), 1000);
+                }
+                
                 allSnapshots = await fetchSheetData(SNAPSHOTS_GID);
                 
                 // Filter to only show 'live' status rows (or rows without status column for backwards compatibility)
@@ -1805,16 +1815,6 @@
                 
                 const latest = getLatestSnapshots(liveSnapshots);
                 renderTable(latest);
-                
-                // Fetch live BTC price for header
-                fetchBtcPrice().then(price => {
-                    if (price) {
-                        const el = document.getElementById('headerBtcPrice');
-                        el.textContent = '$' + formatNumber(Math.round(price));
-                        el.classList.add('updating');
-                        setTimeout(() => el.classList.remove('updating'), 1000);
-                    }
-                });
                 
                 // Fetch live stock prices for table
                 document.querySelectorAll('.stock-price').forEach(async (el) => {
