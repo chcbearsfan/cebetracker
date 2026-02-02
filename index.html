@@ -1146,11 +1146,13 @@
                 console.error(`[Finnhub] ✗ Failed to fetch ${symbol}:`, error);
             }
             
-            // Fallback to Yahoo Finance for European stocks
+            // Fallback to Yahoo Finance for European stocks (via CORS proxy)
             try {
-                const yahooSymbol = symbol; // Already has .PA suffix if needed
+                const yahooSymbol = symbol;
                 console.log(`[Yahoo] Fetching price for ${yahooSymbol}...`);
-                const response = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${yahooSymbol}?interval=1d&range=1d`);
+                const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSymbol}?interval=1d&range=1d`;
+                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`;
+                const response = await fetch(proxyUrl);
                 const data = await response.json();
                 const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
                 if (price && price > 0) {
