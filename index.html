@@ -1143,19 +1143,23 @@
         }
         
         // Ticker symbol mapping for Finnhub
+        // UPDATED: Added ALCPB for Capital B
         const tickerToStock = {
             MSTR: 'MSTR',
-            MTPLF: 'MTPLF', // OTC might not work on Finnhub free tier
+            MTPLF: 'MTPLF',
             ASST: 'ASST',
-            TSWCF: 'TSWCF' // OTC might not work on Finnhub free tier
+            TSWCF: 'TSWCF',
+            ALCPB: 'ALCPB'
         };
         
         // Company metadata
+        // UPDATED: Added Capital B (ALCPB)
         const companyMeta = {
             MSTR: { name: 'Strategy', exchange: 'Nasdaq: MSTR' },
             MTPLF: { name: 'Metaplanet', exchange: 'TYO: 3350 / OTC: MTPLF', fx_note: 'JPY claims at snapshot FX' },
             ASST: { name: 'Strive', exchange: 'Nasdaq: ASST' },
-            TSWCF: { name: 'Smarter Web Co', exchange: 'Aquis: SWC / OTC: TSWCF', fx_note: 'GBP claims at snapshot FX' }
+            TSWCF: { name: 'Smarter Web Co', exchange: 'Aquis: SWC / OTC: TSWCF', fx_note: 'GBP claims at snapshot FX' },
+            ALCPB: { name: 'Capital B', exchange: 'Euronext: ALCPB', fx_note: 'EUR claims at snapshot FX' }
         };
         
         let allSnapshots = [];
@@ -1253,7 +1257,8 @@
         
         function getLatestSnapshots(snapshots) {
             const latest = {};
-            const order = ['MSTR', 'MTPLF', 'ASST', 'TSWCF'];
+            // UPDATED: Added ALCPB to display order
+            const order = ['MSTR', 'MTPLF', 'ASST', 'TSWCF', 'ALCPB'];
             
             snapshots.forEach(s => {
                 const ticker = s.ticker;
