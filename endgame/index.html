@@ -404,7 +404,7 @@
         /* Power Law tick marks */
         .slider-ticks {
             position: relative;
-            height: 16px;
+            height: 20px;
             margin-top: 2px;
         }
         .pl-tick {
@@ -422,12 +422,12 @@
             background: #3f3f46;
         }
         .pl-tick-label {
-            font-size: 7px;
-            color: #3f3f46;
+            font-size: 8px;
+            color: #52525b;
             letter-spacing: 0.5px;
             font-family: 'JetBrains Mono', monospace;
             white-space: nowrap;
-            margin-top: 1px;
+            margin-top: 2px;
         }
 
         /* Price input mode */
@@ -606,6 +606,7 @@
     <div class="price-section">
         <div class="price-label">BITCOIN PRICE</div>
         <div id="priceValue" class="price-value">$80K</div>
+        <div id="priceHint" style="font-size:9px; color:#27272a; letter-spacing:1px; font-family:'JetBrains Mono',monospace; margin-top:4px; transition: opacity 0.5s;">tap to type a price</div>
         <div id="breakEvenWarn" class="break-even-warn" style="display:none;"></div>
     </div>
 
@@ -773,6 +774,9 @@ function enterPriceInput() {
     const section = $('priceValue');
     const currentPrice = btcPrice;
     section.style.display = 'none';
+    // Fade out the tap hint
+    const ph = $('priceHint');
+    if (ph) ph.style.opacity = '0';
 
     // Create input
     const wrapper = section.parentElement;
