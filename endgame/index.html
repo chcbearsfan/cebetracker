@@ -401,39 +401,50 @@
             cursor: not-allowed;
         }
 
-        /* Power Law tick marks */
+        /* Power Law markers on slider track */
         .slider-ticks {
             position: relative;
-            height: 28px;
-            margin-top: 2px;
+            height: 4px;
+            margin-top: 0px;
         }
-        .pl-tick {
+        .pl-dot {
             position: absolute;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            top: 0;
+            width: 2px;
+            height: 4px;
+            background: #52525b;
             transform: translateX(-50%);
             pointer-events: none;
+            border-radius: 1px;
         }
-        .pl-tick-line {
-            width: 1px;
-            height: 6px;
-            background: #52525b;
+
+        /* Power Law pill buttons */
+        .pl-pills {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 8px;
         }
-        .pl-tick-label {
+        .pl-pill {
             font-size: 9px;
-            color: #71717a;
+            font-family: 'JetBrains Mono', monospace;
             letter-spacing: 0.5px;
-            font-family: 'JetBrains Mono', monospace;
-            white-space: nowrap;
-            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid #27272a;
+            background: transparent;
+            color: #52525b;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        .pl-tick-sublabel {
-            font-size: 7px;
-            color: #3f3f46;
-            letter-spacing: 1px;
-            font-family: 'JetBrains Mono', monospace;
-            white-space: nowrap;
+        .pl-pill:hover {
+            border-color: #3f3f46;
+            color: #71717a;
+        }
+        .pl-pill.active {
+            border-color: var(--orange-primary);
+            color: var(--orange-primary);
+            background: rgba(249, 115, 22, 0.08);
         }
 
         /* Price input mode */
@@ -639,6 +650,7 @@
         </div>
         <input type="range" id="priceSlider" min="20000" max="1000000" step="1000" value="80000">
         <div id="plTicks" class="slider-ticks"></div>
+        <div id="plPills" class="pl-pills"></div>
         <div id="sliderHint" style="text-align:center; margin-top:4px; font-size:10px; color:#3f3f46; letter-spacing:1px; font-family:'JetBrains Mono',monospace; transition: opacity 0.5s;">← drag to explore →</div>
     </div>
 
@@ -753,30 +765,64 @@ function getPowerLaw() {
 
 function renderPLTicks() {
     const pl = getPowerLaw();
-    const container = $('plTicks');
     const min = 20000, max = 1000000;
-    const ticks = [];
+
+    // Dot markers on the slider track
+    const dotsContainer = $('plTicks');
+    const dots = [];
     if (pl.support >= min && pl.support <= max) {
-        ticks.push({ price: pl.support, label: 'PL FLOOR', pos: 'top' });
+        dots.push(pl.support);
     }
     if (pl.fair >= min && pl.fair <= max) {
-        ticks.push({ price: pl.fair, label: 'PL FAIR', pos: 'bottom' });
+        dots.push(pl.fair);
     }
-    container.innerHTML = ticks.map(t => {
-        const pct = ((t.price - min) / (max - min)) * 100;
-        if (t.pos === 'bottom') {
-            return `<div class="pl-tick" style="left:${pct}%; top:0;">
-                <div class="pl-tick-line"></div>
-                <div class="pl-tick-label">${fmtPrice(t.price)}</div>
-                <div class="pl-tick-sublabel">${t.label}</div>
-            </div>`;
-        }
-        return `<div class="pl-tick" style="left:${pct}%; top:0;">
-            <div class="pl-tick-label">${fmtPrice(t.price)}</div>
-            <div class="pl-tick-sublabel">${t.label}</div>
-            <div class="pl-tick-line"></div>
-        </div>`;
+    dotsContainer.innerHTML = dots.map(p => {
+        const pct = ((p - min) / (max - min)) * 100;
+        return `<div class="pl-dot" style="left:${pct}%"></div>`;
     }).join('');
+
+    // Pill buttons
+    const pillsContainer = $('plPills');
+    const pills = [];
+    if (pl.support >= min && pl.support <= max) {
+        pills.push({ price: pl.support, label: 'PL Floor', key: 'support' });
+    }
+    pills.push({ price: startPrice, label: 'Live', key: 'live' });
+    if (pl.fair >= min && pl.fair <= max) {
+        pills.push({ price: pl.fair, label: 'PL Fair', key: 'fair' });
+    }
+    pillsContainer.innerHTML = pills.map(p => {
+        const isActive = Math.abs(btcPrice - p.price) < 2000;
+        return `<button class="pl-pill${isActive ? ' active' : ''}" data-price="${p.price}" data-key="${p.key}">${p.label} · ${fmtPrice(p.price)}</button>`;
+    }).join('');
+
+    // Click handlers
+    pillsContainer.querySelectorAll('.pl-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (isAnimating) return;
+            btcPrice = Number(btn.dataset.price);
+            $('priceSlider').value = btcPrice;
+            const sp = startPrice;
+            phase = btcPrice < sp * 0.6 ? 'crash' : btcPrice > sp * 2 ? 'moon' : btcPrice > sp * 1.2 ? 'recovery' : 'idle';
+            showEndgame = false;
+            // Fade hints
+            const sh = $('sliderHint');
+            if (sh) sh.style.opacity = '0';
+            const ph = $('priceHint');
+            if (ph) ph.style.opacity = '0';
+            render();
+            updatePillStates();
+        });
+    });
+}
+
+function updatePillStates() {
+    const pills = document.querySelectorAll('.pl-pill');
+    pills.forEach(btn => {
+        const target = Number(btn.dataset.price);
+        const isActive = Math.abs(btcPrice - target) < 2000;
+        btn.classList.toggle('active', isActive);
+    });
 }
 
 // ─── Type-in Price ───
@@ -1283,7 +1329,6 @@ function renderEndgame() {
 // ─── Event handlers ───
 $('priceSlider').addEventListener('input', e => {
     if (isAnimating) return;
-    // Fade out the hint on first interaction
     const hint = $('sliderHint');
     if (hint) hint.style.opacity = '0';
     btcPrice = Number(e.target.value);
@@ -1291,6 +1336,7 @@ $('priceSlider').addEventListener('input', e => {
     phase = btcPrice < sp * 0.6 ? 'crash' : btcPrice > sp * 2 ? 'moon' : btcPrice > sp * 1.2 ? 'recovery' : 'idle';
     showEndgame = false;
     render();
+    updatePillStates();
 });
 
 $('priceValue').addEventListener('click', enterPriceInput);
