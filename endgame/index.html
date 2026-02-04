@@ -1,1 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>CEBE Endgame | Value Flow Visualization</title>
+    <meta name="description" content="Watch drag compression in real time. See how Bitcoin price action shifts value from senior claims to common shareholders. The CEBE endgame visualized.">
 
+    <!-- PWA Meta Tags (match main site) -->
+    <meta name="application-name" content="CEBE">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CEBE">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#09090b">
+
+    <!-- Favicon (same as main site) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%2309090b' width='32' height='32' rx='4'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f97316'/%3E%3Cstop offset='100%25' stop-color='%23fb923c'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='16' y='15' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='url(%23g)' text-anchor='middle'%3ECE%3C/text%3E%3Ctext x='16' y='28' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='url(%23g)' text-anchor='middle'%3EBE%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="../icon-192.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-primary: #09090b;
+            --bg-secondary: #0f0f11;
+            --bg-card: #141416;
+            --bg-elevated: #1a1a1d;
+            --orange-primary: #f97316;
+            --orange-light: #fb923c;
+            --orange-glow: rgba(249, 115, 22, 0.12);
+            --orange-border: rgba(249, 115, 22, 0.25);
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #52525b;
+            --green: #22c55e;
+            --red: #ef4444;
+            --yellow: #eab308;
+            --border-subtle: rgba(255, 255, 255, 0.06);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(249,115,22,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(249,115,22,0.02) 1px, transparent 1px);
+            background-size: 48px 48px;
+        }
+
+        /* Phase glow */
+        #phaseGlow {
+            position: fixed;
+            top: -20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 60%;
+            border-radius: 50%;
+            pointer-events: none;
+            transition: background 1s ease;
+            background: radial-gradient(ellipse, rgba(249,115,22,0.05) 0%, transparent 70%);
+        }
+
+        .wrap {
+            width: 100%;
+            max-width: 540px;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Logo */
+        .logo-main {
+            font-size: 42px;
+            font-weight: 300;
+            letter-spacing: 12px;
+            line-height: 1;
+            background: linear-gradient(135deg, var(--orange-primary), var(--orange-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .logo-whisper {
+            font-size: 12px;
+            font-weight: 300;
+            letter-spacing: 6px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .logo-sub {
+            font-size: 9px;
+            color: #3f3f46;
+            letter-spacing: 3px;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+
+        /* Ticker selector */
+        .ticker-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        .ticker-btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1.5px solid var(--border-subtle);
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            font-family: 'JetBrains Mono', monospace;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .ticker-btn.active {
+            background: rgba(255,255,255,0.03);
+        }
+        .ticker-btn.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Company info */
+        .company-strip {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .company-name { font-size: 13px; font-weight: 600; }
+        .company-exchange {
+            font-size: 10px;
+            color: var(--text-muted);
+            background: rgba(255,255,255,0.04);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .company-detail {
+            font-size: 10px;
+            color: #3f3f46;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* BTC Price */
+        .price-section { text-align: center; margin-bottom: 24px; }
+        .price-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .price-value {
+            font-size: 56px;
+            font-weight: 700;
+            line-height: 1;
+            transition: color 0.5s ease;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .price-value.million { font-size: 48px; }
+        .break-even-warn {
+            font-size: 11px;
+            color: var(--red);
+            margin-top: 4px;
+            letter-spacing: 1px;
+            font-family: 'JetBrains Mono', monospace;
+            animation: pulse 1s ease infinite;
+        }
+
+        /* Viz container */
+        .viz-box {
+            background: linear-gradient(180deg, #0a0a0f 0%, #08080c 100%);
+            border: 1px solid rgba(249,115,22,0.15);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+        .viz-labels {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px 20px 8px;
+        }
+        .viz-labels.pure-equity {
+            justify-content: center;
+        }
+        .vlabel-title {
+            font-size: 9px;
+            color: #666;
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+        }
+        .vlabel-pct {
+            font-size: 26px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            transition: color 0.3s;
+        }
+        .vlabel-sub { font-size: 10px; color: #555; }
+        .vlabel-center {
+            text-align: center;
+            padding-top: 4px;
+        }
+        .drag-divider {
+            width: 1px;
+            height: 30px;
+            background: rgba(255,140,0,0.2);
+            margin: 0 auto;
+        }
+
+        /* Pure equity label layout */
+        .pure-label-wrap { width: 100%; text-align: center; }
+        .pure-pct {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--green);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Tank */
+        .tank {
+            position: relative;
+            height: 220px;
+            margin: 0 12px 12px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #06060a;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        .tank svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .tank-top-label {
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 8px;
+            color: #444;
+            letter-spacing: 2px;
+            white-space: nowrap;
+            font-family: 'JetBrains Mono', monospace;
+            z-index: 2;
+        }
+        .tank-label-left {
+            position: absolute;
+            bottom: 12px;
+            left: 14%;
+            transform: translateX(-50%);
+            text-align: center;
+            transition: opacity 0.5s;
+            z-index: 2;
+        }
+        .tank-label-right {
+            position: absolute;
+            bottom: 12px;
+            right: 14%;
+            transform: translateX(50%);
+            text-align: center;
+            z-index: 2;
+        }
+        .tank-text-big {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .tank-text-small {
+            font-size: 9px;
+            color: rgba(255,255,255,0.6);
+            letter-spacing: 1px;
+        }
+        .pure-equity-badge {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            padding: 4px 12px;
+            border-radius: 6px;
+            background: rgba(0,0,0,0.6);
+            z-index: 2;
+        }
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Metrics row */
+        .metrics-row {
+            display: grid;
+            gap: 8px;
+            padding: 0 12px 12px;
+        }
+        .metrics-row.cols-2 { grid-template-columns: 1fr 1fr; }
+        .metrics-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+        .metric-box {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+        }
+        .metric-box-label {
+            font-size: 8px;
+            color: #555;
+            letter-spacing: 1.5px;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+        .metric-box-value {
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .metric-box-sub { font-size: 9px; color: #444; }
+
+        /* Slider */
+        .slider-box {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(249,115,22,0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 9px;
+            color: #555;
+            letter-spacing: 1px;
+        }
+        .slider-labels span:first-child,
+        .slider-labels span:last-child {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            outline: none;
+            background: linear-gradient(90deg, #ef4444 0%, #fbbf24 20%, #FF8C00 40%, #22c55e 70%, #22c55e 100%);
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--orange-primary);
+            border: 2px solid var(--bg-primary);
+            cursor: pointer;
+            box-shadow: 0 0 12px rgba(249,115,22,0.4);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--orange-primary);
+            border: 2px solid var(--bg-primary);
+            cursor: pointer;
+        }
+        input[type="range"].locked {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Play button */
+        .play-btn {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid rgba(255,140,0,0.4);
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            font-family: 'JetBrains Mono', monospace;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .play-btn.ready {
+            background: linear-gradient(135deg, #FF8C00 0%, #cc7000 100%);
+            color: #000;
+        }
+        .play-btn.running {
+            background: rgba(255,140,0,0.1);
+            color: var(--orange-primary);
+            cursor: not-allowed;
+        }
+
+        /* Endgame card */
+        .endgame {
+            margin-top: 20px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 1s ease;
+            pointer-events: none;
+        }
+        .endgame.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        .endgame-card {
+            border-radius: 14px;
+            padding: 24px;
+        }
+        .endgame-tag {
+            font-size: 9px;
+            letter-spacing: 3px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .endgame-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.3;
+            margin-bottom: 12px;
+        }
+        .endgame-body {
+            font-size: 13px;
+            color: #999;
+            line-height: 1.7;
+            margin-bottom: 16px;
+        }
+        .endgame-punch {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .endgame-footer {
+            margin-top: 12px;
+            font-size: 10px;
+            color: #555;
+            letter-spacing: 1px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Loading / Error */
+        .state-screen {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner {
+            width: 32px; height: 32px;
+            border: 3px solid #1a1a1d;
+            border-top: 3px solid var(--orange-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Footer */
+        .page-footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 10px;
+            color: #27272a;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .page-footer a { color: var(--orange-primary); text-decoration: none; }
+        .page-footer a:hover { text-decoration: underline; }
+
+        @media (max-width: 500px) {
+            .price-value { font-size: 44px; }
+            .price-value.million { font-size: 38px; }
+            .vlabel-pct { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="phaseGlow"></div>
+
+<!-- Loading state -->
+<div id="loadingScreen" class="state-screen">
+    <div class="spinner"></div>
+    <div style="color: var(--text-muted); font-size: 13px; letter-spacing: 1px;">Loading CEBE data...</div>
+</div>
+
+<!-- Error state -->
+<div id="errorScreen" class="state-screen" style="display:none; padding: 20px;">
+    <div style="font-size: 32px; margin-bottom: 12px;">⚠️</div>
+    <div style="color: var(--red); font-size: 15px; font-weight: 600; margin-bottom: 8px;">Unable to load data</div>
+    <div id="errorMsg" style="color: var(--text-muted); font-size: 13px; text-align: center;"></div>
+</div>
+
+<!-- Main app -->
+<div id="app" class="wrap" style="display:none;">
+
+    <!-- Logo -->
+    <div style="text-align: center; margin-bottom: 20px;">
+        <div class="logo-main">CEBE</div>
+        <div class="logo-whisper">tracker</div>
+        <div class="logo-sub">VALUE FLOW VISUALIZATION</div>
+    </div>
+
+    <!-- Ticker selector -->
+    <div id="tickerBar" class="ticker-bar"></div>
+
+    <!-- Company info -->
+    <div id="companyStrip" class="company-strip"></div>
+
+    <!-- BTC Price -->
+    <div class="price-section">
+        <div class="price-label">BITCOIN PRICE</div>
+        <div id="priceValue" class="price-value">$80K</div>
+        <div id="breakEvenWarn" class="break-even-warn" style="display:none;"></div>
+    </div>
+
+    <!-- Viz container -->
+    <div class="viz-box">
+        <div id="vizLabels" class="viz-labels"></div>
+
+        <div id="tank" class="tank">
+            <svg id="tankSvg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+            <div id="tankTopLabel" class="tank-top-label"></div>
+            <div id="tankLabelsInner"></div>
+            <div id="particleLayer"></div>
+        </div>
+
+        <div id="metricsRow" class="metrics-row cols-3"></div>
+    </div>
+
+    <!-- Slider -->
+    <div class="slider-box">
+        <div class="slider-labels">
+            <span>$20K</span>
+            <span>DRAG BTC PRICE</span>
+            <span>$1M</span>
+        </div>
+        <input type="range" id="priceSlider" min="20000" max="1000000" step="1000" value="80000">
+    </div>
+
+    <!-- Play button -->
+    <button id="playBtn" class="play-btn ready">▶ PLAY: CRASH → RECOVERY → $1M</button>
+
+    <!-- Endgame -->
+    <div id="endgame" class="endgame">
+        <div id="endgameCard" class="endgame-card"></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="page-footer">
+        <a href="/">← cebetracker.io</a> · Live data from company filings · Not financial advice
+    </div>
+</div>
+
+<script>
+// ============================================================
+// CEBE Endgame — Vanilla JS
+// cebetracker.io/endgame | @chcbearsfan
+// ============================================================
+
+const SHEET_ID = '1BNsCWGVU08PDinDcfzJccqcuj9_KrK1VZGETErzBZvg';
+const SNAPSHOTS_GID = '771405586';
+
+const COMPANY_META = {
+    MSTR: { name: 'Strategy', exchange: 'Nasdaq: MSTR' },
+    MTPLF: { name: 'Metaplanet', exchange: 'TYO: 3350 / OTC: MTPLF' },
+    ASST: { name: 'Strive', exchange: 'Nasdaq: ASST' },
+    TSWCF: { name: 'Smarter Web Co', exchange: 'LSE: SWC / OTC: TSWCF' },
+    ALCPB: { name: 'Capital B', exchange: 'Euronext: ALCPB' },
+};
+const TICKER_ORDER = ['MSTR', 'MTPLF', 'ASST', 'TSWCF', 'ALCPB'];
+const TICKER_COLORS = { MSTR: '#f97316', MTPLF: '#38bdf8', ASST: '#a78bfa', TSWCF: '#4ade80', ALCPB: '#f472b6' };
+
+// ─── State ───
+let companyData = null;
+let selectedTicker = 'MSTR';
+let btcPrice = 80000;
+let startPrice = 80000;
+let isAnimating = false;
+let phase = 'idle';
+let showEndgame = false;
+let waveOffset = 0;
+let particles = [];
+let animTimeouts = [];
+
+// ─── CSV Parser (identical to live site) ───
+function parseCSVLine(line) {
+    const r = []; let c = '', q = false;
+    for (const ch of line) { if (ch === '"') q = !q; else if (ch === ',' && !q) { r.push(c); c = ''; } else c += ch; }
+    r.push(c); return r;
+}
+function parseCSV(text) {
+    const lines = text.split('\n');
+    const headers = parseCSVLine(lines[0]);
+    return lines.slice(1).filter(l => l.trim()).map(l => {
+        const vals = parseCSVLine(l);
+        const row = {};
+        headers.forEach((h, i) => { row[h.replace(/"/g, '').trim()] = vals[i]?.replace(/"/g, '').trim() || ''; });
+        return row;
+    });
+}
+function getLatestSnapshots(rows) {
+    const latest = {};
+    rows.forEach(s => {
+        if (s.status && s.status.toLowerCase() !== 'live') return;
+        const t = s.ticker;
+        if (t && (!latest[t] || s.snapshot_date > latest[t].snapshot_date)) latest[t] = s;
+    });
+    return latest;
+}
+
+// ─── CEBE Calculation (identical to live site) ───
+function calc(snapshot, price) {
+    const btc = parseFloat(snapshot.btc_holdings) || 0;
+    const shares = parseFloat(snapshot.shares_outstanding) || 1;
+    const debt = parseFloat(snapshot.debt_usd) || 0;
+    const pref = parseFloat(snapshot.preferred_usd) || 0;
+    const cash = parseFloat(snapshot.cash_usd) || 0;
+    const netClaims = debt + pref - cash;
+    const claimsBtc = price > 0 ? Math.max(0, netClaims / price) : 0;
+    const drag = btc > 0 ? Math.max(0, claimsBtc / btc) : 0;
+    const commonBtc = Math.max(0, btc - claimsBtc);
+    const cebe = (commonBtc / shares) * 1e8;
+    const bps = (btc / shares) * 1e8;
+    const commonPct = Math.max(0, 1 - drag);
+    const amp = drag < 0.999 ? 1 / (1 - drag) : Infinity;
+    const breakEven = btc > 0 ? Math.max(0, netClaims) / btc : 0;
+    const isPure = netClaims <= 0;
+    const hasDebtAndPref = debt > 0 && pref > 0;
+    return { btc, shares, netClaims, claimsBtc, drag, commonBtc, cebe, bps, commonPct, amp, breakEven, isPure, hasDebtAndPref };
+}
+
+// ─── Helpers ───
+function fmt(n) { return Math.round(n).toLocaleString('en-US'); }
+function fmtPrice(p) {
+    if (p >= 1000000) return '$' + (p / 1000000).toFixed(1) + 'M';
+    if (p >= 1000) return '$' + Math.round(p / 1000) + 'K';
+    return '$' + p;
+}
+
+// ─── DOM refs ───
+const $ = id => document.getElementById(id);
+
+// ─── Data load ───
+async function loadData() {
+    try {
+        const [btcRes, sheetText] = await Promise.all([
+            fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd')
+                .then(r => r.json()).catch(() => null),
+            fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${SNAPSHOTS_GID}`)
+                .then(r => r.text()),
+        ]);
+
+        const rows = parseCSV(sheetText);
+        const latest = getLatestSnapshots(rows);
+        if (Object.keys(latest).length === 0) throw new Error('No live data found in sheet');
+
+        companyData = latest;
+        const liveBtc = btcRes?.bitcoin?.usd || parseFloat(Object.values(latest)[0].btc_price) || 80000;
+        btcPrice = liveBtc;
+        startPrice = liveBtc;
+
+        $('loadingScreen').style.display = 'none';
+        $('app').style.display = 'block';
+        buildTickerBar();
+        render();
+        startWaveLoop();
+        startParticleLoop();
+    } catch (err) {
+        console.error('Load failed:', err);
+        $('loadingScreen').style.display = 'none';
+        $('errorScreen').style.display = 'flex';
+        $('errorMsg').innerHTML = err.message + '<br>Visit <a href="/" style="color:#f97316">cebetracker.io</a> for live data.';
+    }
+}
+
+// ─── Ticker bar ───
+function buildTickerBar() {
+    const bar = $('tickerBar');
+    bar.innerHTML = '';
+    TICKER_ORDER.forEach(ticker => {
+        if (!companyData[ticker]) return;
+        const btn = document.createElement('button');
+        btn.className = 'ticker-btn' + (ticker === selectedTicker ? ' active' : '');
+        btn.textContent = ticker;
+        btn.style.borderColor = ticker === selectedTicker ? TICKER_COLORS[ticker] : '';
+        btn.style.color = ticker === selectedTicker ? TICKER_COLORS[ticker] : '';
+        if (ticker === selectedTicker) btn.style.background = TICKER_COLORS[ticker] + '12';
+        btn.onclick = () => {
+            if (isAnimating) return;
+            selectedTicker = ticker;
+            btcPrice = startPrice;
+            phase = 'idle';
+            showEndgame = false;
+            particles = [];
+            clearAnimTimeouts();
+            buildTickerBar();
+            render();
+        };
+        bar.appendChild(btn);
+    });
+}
+
+// ─── Main render ───
+function render() {
+    const snap = companyData[selectedTicker];
+    if (!snap) return;
+    const meta = COMPANY_META[selectedTicker] || { name: selectedTicker, exchange: '' };
+    const m = calc(snap, btcPrice);
+    const col = TICKER_COLORS[selectedTicker];
+    const dragPct = m.drag * 100;
+    const commonPct = m.commonPct * 100;
+
+    // Company strip
+    $('companyStrip').innerHTML = `
+        <span class="company-name" style="color:${col}">${meta.name}</span>
+        <span class="company-exchange">${meta.exchange}</span>
+        <span class="company-detail">${fmt(m.btc)} BTC · ${snap.snapshot_date || '—'}</span>
+    `;
+
+    // Price
+    const priceColor = phase === 'crash' ? '#ef4444' : phase === 'moon' ? '#22c55e' : phase === 'recovery' ? '#eab308' : '#f97316';
+    const pv = $('priceValue');
+    pv.textContent = fmtPrice(btcPrice);
+    pv.style.color = priceColor;
+    pv.style.textShadow = `0 0 40px ${priceColor}33, 0 0 80px ${priceColor}11`;
+    pv.className = 'price-value' + (btcPrice >= 1000000 ? ' million' : '');
+
+    // Break-even warning
+    const bew = $('breakEvenWarn');
+    if (!m.isPure && m.breakEven > 0 && btcPrice <= m.breakEven * 1.07 && btcPrice > m.breakEven * 0.9) {
+        bew.textContent = '⚠ APPROACHING BREAK-EVEN: ' + fmtPrice(Math.round(m.breakEven));
+        bew.style.display = 'block';
+    } else {
+        bew.style.display = 'none';
+    }
+
+    // Phase glow
+    const glow = $('phaseGlow');
+    if (phase === 'crash') glow.style.background = 'radial-gradient(ellipse, rgba(239,68,68,0.08) 0%, transparent 70%)';
+    else if (phase === 'moon') glow.style.background = 'radial-gradient(ellipse, rgba(34,197,94,0.08) 0%, transparent 70%)';
+    else glow.style.background = 'radial-gradient(ellipse, rgba(249,115,22,0.05) 0%, transparent 70%)';
+
+    // Viz labels
+    const commonColor = commonPct > 85 ? '#22c55e' : commonPct > 60 ? '#f97316' : commonPct > 40 ? '#eab308' : '#ef4444';
+    const prefColor = dragPct > 40 ? '#ef4444' : dragPct > 20 ? '#eab308' : '#71717a';
+    const vl = $('vizLabels');
+
+    if (m.isPure) {
+        vl.className = 'viz-labels pure-equity';
+        vl.innerHTML = `<div class="pure-label-wrap">
+            <div class="vlabel-title" style="color:var(--text-muted)">COMMON SHAREHOLDERS</div>
+            <div class="pure-pct">100%</div>
+            <div class="vlabel-sub" style="color:var(--text-muted); font-family:'JetBrains Mono',monospace">${fmt(m.btc)} BTC · zero drag</div>
+        </div>`;
+    } else {
+        vl.className = 'viz-labels';
+        vl.innerHTML = `
+            <div>
+                <div class="vlabel-title">${m.hasDebtAndPref ? 'DEBT + PREFERRED' : 'SENIOR CLAIMS'}</div>
+                <div class="vlabel-pct" style="color:${prefColor}">${dragPct.toFixed(1)}%</div>
+                <div class="vlabel-sub">${fmt(Math.round(m.claimsBtc))} BTC claimed</div>
+            </div>
+            <div class="vlabel-center">
+                <div class="vlabel-title">DRAG</div>
+                <div class="drag-divider"></div>
+            </div>
+            <div style="text-align:right">
+                <div class="vlabel-title">COMMON SHAREHOLDERS</div>
+                <div class="vlabel-pct" style="color:${commonColor}">${commonPct.toFixed(1)}%</div>
+                <div class="vlabel-sub">${fmt(Math.round(m.commonBtc))} BTC owned</div>
+            </div>
+        `;
+    }
+
+    // Tank top label
+    $('tankTopLabel').textContent = fmt(m.btc) + ' BTC TOTAL';
+
+    // Tank inner labels
+    const til = $('tankLabelsInner');
+    if (m.isPure) {
+        til.innerHTML = `<div class="pure-equity-badge" style="color:${col}; border: 1px solid ${col}33;">PURE EQUITY — NO SENIOR CLAIMS</div>`;
+    } else {
+        til.innerHTML = `
+            <div class="tank-label-left" style="opacity:${dragPct > 5 ? 0.7 : 0}">
+                <div class="tank-text-big">DEBT</div>
+                ${m.hasDebtAndPref ? '<div class="tank-text-small">+ PREFS</div>' : ''}
+            </div>
+            <div class="tank-label-right">
+                <div class="tank-text-big">YOUR</div>
+                <div class="tank-text-small">EQUITY</div>
+            </div>
+        `;
+    }
+
+    // Metrics row
+    const mr = $('metricsRow');
+    mr.className = 'metrics-row ' + (m.isPure ? 'cols-2' : 'cols-3');
+    let metricsHTML = `
+        <div class="metric-box">
+            <div class="metric-box-label">CEBE</div>
+            <div class="metric-box-value" style="color:${commonColor}">${fmt(Math.max(0, Math.round(m.cebe)))}</div>
+            <div class="metric-box-sub">sats/share</div>
+        </div>`;
+    if (!m.isPure) {
+        const ampStr = m.amp === Infinity ? '∞' : m.amp.toFixed(2) + 'x';
+        const ampSub = m.amp !== Infinity ? Math.round((m.drag / (1 - m.drag)) * 100) + '% leveraged' : 'max leverage';
+        metricsHTML += `
+        <div class="metric-box">
+            <div class="metric-box-label">AMPLIFICATION</div>
+            <div class="metric-box-value" style="color:#FF8C00">${ampStr}</div>
+            <div class="metric-box-sub">${ampSub}</div>
+        </div>`;
+    }
+    metricsHTML += `
+        <div class="metric-box">
+            <div class="metric-box-label">BPS</div>
+            <div class="metric-box-value" style="color:#666">${fmt(Math.round(m.bps))}</div>
+            <div class="metric-box-sub">sats/share</div>
+        </div>`;
+    mr.innerHTML = metricsHTML;
+
+    // Slider
+    $('priceSlider').value = btcPrice;
+
+    // Play button
+    const pb = $('playBtn');
+    if (isAnimating) {
+        pb.className = 'play-btn running';
+        pb.textContent = phase === 'crash' ? '▼ CRASH IN PROGRESS...'
+            : phase === 'recovery' ? '▲ RECOVERING...'
+            : phase === 'moon' ? '🚀 TO THE MOON...'
+            : 'SIMULATING...';
+    } else {
+        pb.className = 'play-btn ready';
+        pb.textContent = '▶ PLAY: ' + fmtPrice(startPrice) + ' → CRASH → $1M';
+    }
+
+    // Endgame
+    const eg = $('endgame');
+    eg.className = 'endgame' + (showEndgame ? ' visible' : '');
+    if (showEndgame) renderEndgame();
+
+    // Render SVG
+    renderTankSVG(m, dragPct, commonPct, col, prefColor, commonColor);
+}
+
+// ─── SVG Tank ───
+function renderTankSVG(m, dragPct, commonPct, col, prefColor, commonColor) {
+    const svg = $('tankSvg');
+    // Build gradient defs fresh
+    let defsHTML = `
+        <linearGradient id="prefGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="${dragPct > 40 ? '#ef4444' : '#ff6b35'}" stop-opacity="0.7"/>
+            <stop offset="100%" stop-color="${dragPct > 40 ? '#991b1b' : '#b34700'}" stop-opacity="0.9"/>
+        </linearGradient>
+        <linearGradient id="commonGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="${commonPct > 85 ? '#22c55e' : commonPct > 60 ? '#FF8C00' : '#fbbf24'}" stop-opacity="0.7"/>
+            <stop offset="100%" stop-color="${commonPct > 85 ? '#166534' : commonPct > 60 ? '#b34700' : '#854d0e'}" stop-opacity="0.9"/>
+        </linearGradient>
+        <linearGradient id="pureGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="${col}" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="${col}" stop-opacity="0.85"/>
+        </linearGradient>
+        <filter id="glow"><feGaussianBlur stdDeviation="1.5" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>`;
+
+    let bodyHTML = '';
+    if (m.isPure) {
+        bodyHTML = `
+            <path d="${wavePath('full', 92, waveOffset)}" fill="url(#pureGrad)"/>
+            <line x1="2" y1="8" x2="98" y2="8" stroke="${col}" stroke-width="0.5" opacity="0.4" filter="url(#glow)"/>`;
+    } else {
+        const pLevel = Math.min(dragPct * 1.1, 95);
+        const cLevel = Math.min(commonPct * 1.1, 98);
+        const pY = 100 - pLevel;
+        const cY = 100 - cLevel;
+        bodyHTML = `
+            <line x1="50" y1="0" x2="50" y2="100" stroke="rgba(255,140,0,0.15)" stroke-width="0.3" stroke-dasharray="2,2"/>
+            <path d="${wavePath('left', pLevel, waveOffset)}" fill="url(#prefGrad)"/>
+            <path d="${wavePath('right', cLevel, waveOffset + Math.PI)}" fill="url(#commonGrad)"/>
+            <line x1="2" y1="${pY}" x2="48" y2="${pY}" stroke="${dragPct > 40 ? '#ef4444' : '#FF8C00'}" stroke-width="0.5" opacity="0.4" filter="url(#glow)"/>
+            <line x1="52" y1="${cY}" x2="98" y2="${cY}" stroke="${commonPct > 85 ? '#22c55e' : '#FF8C00'}" stroke-width="0.5" opacity="0.4" filter="url(#glow)"/>`;
+    }
+
+    svg.innerHTML = '<defs>' + defsHTML + '</defs>' + bodyHTML;
+}
+
+// ─── Wave path ───
+function wavePath(side, level, offset) {
+    const amp = 3 + Math.sin(offset * 2) * 1.5;
+    let sx, ex;
+    if (side === 'full') { sx = 0; ex = 100; }
+    else if (side === 'left') { sx = 0; ex = 50; }
+    else { sx = 50; ex = 100; }
+    const y = 100 - level;
+    const pts = [sx + ',100'];
+    for (let x = sx; x <= ex; x += 2) {
+        const w = Math.sin((x - sx) * 0.15 + offset) * amp + Math.sin((x - sx) * 0.08 + offset * 1.3) * (amp * 0.5);
+        pts.push(x + ',' + (y + w));
+    }
+    pts.push(ex + ',100');
+    return 'M' + pts.join(' L') + 'Z';
+}
+
+// ─── Wave animation loop ───
+function startWaveLoop() {
+    function tick() {
+        waveOffset = (waveOffset + 0.03) % (Math.PI * 2);
+        if (companyData && companyData[selectedTicker]) {
+            const snap = companyData[selectedTicker];
+            const m = calc(snap, btcPrice);
+            renderTankSVG(m, m.drag * 100, m.commonPct * 100, TICKER_COLORS[selectedTicker],
+                m.drag * 100 > 40 ? '#ef4444' : m.drag * 100 > 20 ? '#eab308' : '#71717a',
+                m.commonPct * 100 > 85 ? '#22c55e' : m.commonPct * 100 > 60 ? '#f97316' : m.commonPct * 100 > 40 ? '#eab308' : '#ef4444');
+        }
+        requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+}
+
+// ─── Particle system ───
+function startParticleLoop() {
+    setInterval(() => {
+        const snap = companyData?.[selectedTicker];
+        if (!snap) return;
+        const m = calc(snap, btcPrice);
+        const commonPct = m.commonPct * 100;
+
+        // Update existing
+        particles = particles
+            .map(p => ({ ...p, x: p.x + p.vx, y: p.y + p.vy, life: p.life - 1, opacity: Math.max(0, p.life / p.maxLife) }))
+            .filter(p => p.life > 0);
+
+        // Spawn
+        if (Math.random() > 0.3) {
+            if (m.isPure) {
+                particles.push({
+                    x: 5 + Math.random() * 35, y: 20 + Math.random() * 55,
+                    vx: 0.15 + Math.random() * 0.35, vy: (Math.random() - 0.5) * 0.2,
+                    life: 80 + Math.random() * 40, maxLife: 120, opacity: 1, size: 2 + Math.random() * 3,
+                });
+            } else {
+                const fr = commonPct > 50;
+                particles.push({
+                    x: 50 + (Math.random() - 0.5) * 10, y: 30 + Math.random() * 40,
+                    vx: fr ? (0.3 + Math.random() * 0.5) : -(0.3 + Math.random() * 0.5),
+                    vy: (Math.random() - 0.5) * 0.3,
+                    life: 60 + Math.random() * 40, maxLife: 100, opacity: 1, size: 2 + Math.random() * 3,
+                });
+            }
+        }
+        particles = particles.slice(-80);
+
+        // Render particles
+        const layer = $('particleLayer');
+        const col = TICKER_COLORS[selectedTicker];
+        const dragPct = m.drag * 100;
+        layer.innerHTML = particles.map(p => {
+            const bg = m.isPure ? col : p.vx > 0 ? (commonPct > 85 ? '#22c55e' : '#FF8C00') : (dragPct > 40 ? '#ef4444' : '#FF8C00');
+            const glow = m.isPure ? col + '44' : p.vx > 0 ? '#FF8C0044' : '#ef444444';
+            return `<div class="particle" style="left:${p.x}%;top:${p.y}%;width:${p.size}px;height:${p.size}px;background:${bg};opacity:${(p.opacity * 0.6).toFixed(2)};box-shadow:0 0 ${p.size * 2}px ${glow}"></div>`;
+        }).join('');
+    }, 50);
+}
+
+// ─── Animation ───
+function clearAnimTimeouts() {
+    animTimeouts.forEach(clearTimeout);
+    animTimeouts = [];
+}
+
+function runAnimation() {
+    if (isAnimating) return;
+    isAnimating = true;
+    showEndgame = false;
+    clearAnimTimeouts();
+
+    const sp = startPrice;
+    const keyframes = [
+        { price: sp, duration: 400, ph: 'idle' },
+        { price: Math.round(sp * 0.85), duration: 1000, ph: 'crash' },
+        { price: Math.round(sp * 0.65), duration: 1400, ph: 'crash' },
+        { price: Math.round(sp * 0.35), duration: 1800, ph: 'crash' },
+        { price: Math.round(sp * 0.55), duration: 1200, ph: 'recovery' },
+        { price: sp, duration: 1200, ph: 'recovery' },
+        { price: Math.round(sp * 1.5), duration: 1200, ph: 'recovery' },
+        { price: 250000, duration: 1200, ph: 'moon' },
+        { price: 400000, duration: 1000, ph: 'moon' },
+        { price: 650000, duration: 1000, ph: 'moon' },
+        { price: 1000000, duration: 1500, ph: 'moon' },
+    ];
+
+    let totalDelay = 0;
+    keyframes.forEach((kf, i) => {
+        const from = i === 0 ? sp : keyframes[i - 1].price;
+        const steps = Math.max(20, Math.floor(kf.duration / 30));
+        const stepDelay = kf.duration / steps;
+        for (let s = 0; s <= steps; s++) {
+            const delay = totalDelay + s * stepDelay;
+            const tid = setTimeout(() => {
+                const t = s / steps;
+                const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+                btcPrice = Math.round(from + (kf.price - from) * eased);
+                phase = kf.ph;
+                render();
+            }, delay);
+            animTimeouts.push(tid);
+        }
+        totalDelay += kf.duration;
+    });
+
+    animTimeouts.push(setTimeout(() => { showEndgame = true; render(); }, totalDelay + 500));
+    animTimeouts.push(setTimeout(() => { isAnimating = false; render(); }, totalDelay + 3000));
+    render();
+}
+
+// ─── Endgame card ───
+function renderEndgame() {
+    const snap = companyData[selectedTicker];
+    const meta = COMPANY_META[selectedTicker];
+    const m = calc(snap, btcPrice);
+    const endM = calc(snap, 1000000);
+    const col = TICKER_COLORS[selectedTicker];
+
+    const card = $('endgameCard');
+    if (m.isPure) {
+        card.style.background = `linear-gradient(135deg, ${col}0a 0%, rgba(249,115,22,0.03) 100%)`;
+        card.style.border = `1px solid ${col}40`;
+        card.innerHTML = `
+            <div class="endgame-tag" style="color:${col}">THE ENDGAME</div>
+            <div class="endgame-title">${meta.name}: <span style="color:#22c55e">0% drag at every price</span></div>
+            <div class="endgame-body">No senior claims. No preferred holders. No debt sitting above you.
+                Common equity owns <span style="color:#22c55e;font-weight:600">100% of the Bitcoin</span> at
+                every price level. CEBE equals BPS — ${fmt(Math.round(endM.bps))} sats/share.</div>
+            <div class="endgame-punch" style="color:${col}">Pure equity. Pure exposure.</div>
+            <div class="endgame-footer">CEBE Framework by <span style="color:#FF8C00">@chcbearsfan</span> | cebetracker.io</div>`;
+    } else {
+        const claimsStr = m.netClaims >= 1e9 ? '$' + (m.netClaims / 1e9).toFixed(1) + 'B' : '$' + (m.netClaims / 1e6).toFixed(1) + 'M';
+        card.style.background = 'linear-gradient(135deg, rgba(34,197,94,0.08) 0%, rgba(255,140,0,0.05) 100%)';
+        card.style.border = '1px solid rgba(34,197,94,0.3)';
+        card.innerHTML = `
+            <div class="endgame-tag" style="color:#22c55e">THE ENDGAME</div>
+            <div class="endgame-title">At $1M Bitcoin, drag falls to <span style="color:#22c55e">${(endM.drag * 100).toFixed(1)}%</span></div>
+            <div class="endgame-body">${claimsStr} in senior claims becomes just ${fmt(Math.round(endM.claimsBtc))} BTC — less
+                than ${(endM.drag * 100).toFixed(1)}% of holdings. Common equity owns
+                <span style="color:#22c55e;font-weight:600">${(endM.commonPct * 100).toFixed(1)}% of the Bitcoin</span>.
+                The leverage that amplified the ride up? It becomes irrelevant.</div>
+            <div class="endgame-punch" style="color:#FF8C00">CEBE explains the endgame.</div>
+            <div class="endgame-footer">CEBE Framework by <span style="color:#FF8C00">@chcbearsfan</span> | cebetracker.io</div>`;
+    }
+}
+
+// ─── Event handlers ───
+$('priceSlider').addEventListener('input', e => {
+    if (isAnimating) return;
+    btcPrice = Number(e.target.value);
+    const sp = startPrice;
+    phase = btcPrice < sp * 0.6 ? 'crash' : btcPrice > sp * 2 ? 'moon' : btcPrice > sp * 1.2 ? 'recovery' : 'idle';
+    showEndgame = false;
+    render();
+});
+
+$('playBtn').addEventListener('click', runAnimation);
+
+// ─── Go ───
+loadData();
+</script>
+</body>
+</html>
