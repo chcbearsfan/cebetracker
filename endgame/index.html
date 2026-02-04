@@ -578,6 +578,7 @@
             <span>$1M</span>
         </div>
         <input type="range" id="priceSlider" min="20000" max="1000000" step="1000" value="80000">
+        <div id="sliderHint" style="text-align:center; margin-top:8px; font-size:10px; color:#3f3f46; letter-spacing:1px; font-family:'JetBrains Mono',monospace; transition: opacity 0.5s;">← drag to explore →</div>
     </div>
 
     <!-- Play button -->
@@ -893,16 +894,16 @@ function renderTankSVG(m, dragPct, commonPct, col, prefColor, commonColor) {
     // Build gradient defs fresh
     let defsHTML = `
         <linearGradient id="prefGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="${dragPct > 40 ? '#ef4444' : '#ff6b35'}" stop-opacity="0.7"/>
-            <stop offset="100%" stop-color="${dragPct > 40 ? '#991b1b' : '#b34700'}" stop-opacity="0.9"/>
+            <stop offset="0%" stop-color="${dragPct > 40 ? '#dc2626' : '#ea580c'}" stop-opacity="0.45"/>
+            <stop offset="100%" stop-color="${dragPct > 40 ? '#7f1d1d' : '#9a3412'}" stop-opacity="0.7"/>
         </linearGradient>
         <linearGradient id="commonGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="${commonPct > 85 ? '#22c55e' : commonPct > 60 ? '#FF8C00' : '#fbbf24'}" stop-opacity="0.7"/>
-            <stop offset="100%" stop-color="${commonPct > 85 ? '#166534' : commonPct > 60 ? '#b34700' : '#854d0e'}" stop-opacity="0.9"/>
+            <stop offset="0%" stop-color="${commonPct > 85 ? '#15803d' : commonPct > 60 ? '#c2410c' : '#a16207'}" stop-opacity="0.5"/>
+            <stop offset="100%" stop-color="${commonPct > 85 ? '#14532d' : commonPct > 60 ? '#7c2d12' : '#713f12'}" stop-opacity="0.75"/>
         </linearGradient>
         <linearGradient id="pureGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="${col}" stop-opacity="0.6"/>
-            <stop offset="100%" stop-color="${col}" stop-opacity="0.85"/>
+            <stop offset="0%" stop-color="${col}" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="${col}" stop-opacity="0.65"/>
         </linearGradient>
         <filter id="glow"><feGaussianBlur stdDeviation="1.5" result="blur"/>
             <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
@@ -1021,17 +1022,20 @@ function runAnimation() {
 
     const sp = startPrice;
     const keyframes = [
-        { price: sp, duration: 400, ph: 'idle' },
-        { price: Math.round(sp * 0.85), duration: 1000, ph: 'crash' },
-        { price: Math.round(sp * 0.65), duration: 1400, ph: 'crash' },
-        { price: Math.round(sp * 0.35), duration: 1800, ph: 'crash' },
-        { price: Math.round(sp * 0.55), duration: 1200, ph: 'recovery' },
-        { price: sp, duration: 1200, ph: 'recovery' },
-        { price: Math.round(sp * 1.5), duration: 1200, ph: 'recovery' },
-        { price: 250000, duration: 1200, ph: 'moon' },
-        { price: 400000, duration: 1000, ph: 'moon' },
-        { price: 650000, duration: 1000, ph: 'moon' },
-        { price: 1000000, duration: 1500, ph: 'moon' },
+        { price: sp, duration: 800, ph: 'idle' },
+        { price: Math.round(sp * 0.85), duration: 1800, ph: 'crash' },
+        { price: Math.round(sp * 0.65), duration: 2200, ph: 'crash' },
+        { price: Math.round(sp * 0.35), duration: 2800, ph: 'crash' },
+        // Dwell at the bottom — let the drag expansion sink in
+        { price: Math.round(sp * 0.33), duration: 2000, ph: 'crash' },
+        { price: Math.round(sp * 0.45), duration: 1800, ph: 'recovery' },
+        { price: Math.round(sp * 0.7), duration: 2000, ph: 'recovery' },
+        { price: sp, duration: 2000, ph: 'recovery' },
+        { price: Math.round(sp * 1.5), duration: 1800, ph: 'recovery' },
+        { price: 250000, duration: 1800, ph: 'moon' },
+        { price: 400000, duration: 1500, ph: 'moon' },
+        { price: 650000, duration: 1500, ph: 'moon' },
+        { price: 1000000, duration: 2200, ph: 'moon' },
     ];
 
     let totalDelay = 0;
@@ -1053,7 +1057,18 @@ function runAnimation() {
         totalDelay += kf.duration;
     });
 
-    animTimeouts.push(setTimeout(() => { showEndgame = true; render(); }, totalDelay + 500));
+    animTimeouts.push(setTimeout(() => {
+        showEndgame = true;
+        // Also fade slider hint during animation
+        const hint = $('sliderHint');
+        if (hint) hint.style.opacity = '0';
+        render();
+        // Auto-scroll to endgame card on mobile
+        setTimeout(() => {
+            const eg = $('endgame');
+            if (eg) eg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+    }, totalDelay + 500));
     animTimeouts.push(setTimeout(() => { isAnimating = false; render(); }, totalDelay + 3000));
     render();
 }
@@ -1097,6 +1112,9 @@ function renderEndgame() {
 // ─── Event handlers ───
 $('priceSlider').addEventListener('input', e => {
     if (isAnimating) return;
+    // Fade out the hint on first interaction
+    const hint = $('sliderHint');
+    if (hint) hint.style.opacity = '0';
     btcPrice = Number(e.target.value);
     const sp = startPrice;
     phase = btcPrice < sp * 0.6 ? 'crash' : btcPrice > sp * 2 ? 'moon' : btcPrice > sp * 1.2 ? 'recovery' : 'idle';
