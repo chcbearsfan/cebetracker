@@ -1381,4 +1381,12 @@ $('priceSlider').addEventListener('input', e => {
     updatePillStates();
 });
 
-$('price
+$('priceValue').addEventListener('click', enterPriceInput);
+
+$('playBtn').addEventListener('click', runAnimation);
+
+// ─── Go ───
+loadData().then(() => { renderPLTicks(); });
+</script>
+</body>
+</html>
