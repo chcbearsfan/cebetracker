@@ -698,15 +698,22 @@
         <a href="/">← cebetracker.io</a> · Live data from company filings · Not financial advice
         <div style="margin-top:10px;">
             <a id="tipLink" href="#" style="color:#52525b; text-decoration:none; transition: color 0.2s;" onmouseover="this.style.color='#f97316'" onmouseout="this.style.color='#52525b'">⚡ <span id="tipAddr"></span></a>
-            <script>var t='bobby_tierney',d='strike.me';document.getElementById('tipAddr').textContent=t+'@'+d;document.getElementById('tipLink').href='lightning:'+t+'@'+d;</script>
+            <script>var t='bobby_tierney',d='strike.me',a=String.fromCharCode(64);document.getElementById('tipAddr').textContent=t+a+d;document.getElementById('tipLink').href='lightning:'+t+a+d;</script>
         </div>
     </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>/* placeholder */</script>
+<script>
+window.onerror = function(msg, url, line) {
+    if (url && url.indexOf('email-decode') !== -1) return true;
+    if (url && url.indexOf('cloudflare') !== -1) return true;
+};
+</script>
+<script>
 // ============================================================
 // CEBE Endgame — Vanilla JS
-// cebetracker.io/endgame | @chcbearsfan
+// cebetracker.io/endgame
 // ============================================================
 
 const SHEET_ID = '1BNsCWGVU08PDinDcfzJccqcuj9_KrK1VZGETErzBZvg';
@@ -1344,7 +1351,7 @@ function renderEndgame() {
                 Common equity owns <span style="color:#22c55e;font-weight:600">100% of the Bitcoin</span> at
                 every price level. CEBE equals BPS — ${fmt(Math.round(endM.bps))} sats/share.</div>
             <div class="endgame-punch" style="color:${col}">Pure equity. Pure exposure.</div>
-            <div class="endgame-footer">CEBE Framework by <span style="color:#FF8C00">\x40chcbearsfan</span> | cebetracker.io</div>`;
+            <div class="endgame-footer">CEBE Framework by <span style="color:#FF8C00">${String.fromCharCode(64)}chcbearsfan</span> | cebetracker.io</div>`;
     } else {
         const claimsStr = m.netClaims >= 1e9 ? '$' + (m.netClaims / 1e9).toFixed(1) + 'B' : '$' + (m.netClaims / 1e6).toFixed(1) + 'M';
         card.style.background = 'linear-gradient(135deg, rgba(34,197,94,0.08) 0%, rgba(255,140,0,0.05) 100%)';
@@ -1357,7 +1364,7 @@ function renderEndgame() {
                 <span style="color:#22c55e;font-weight:600">${(endM.commonPct * 100).toFixed(1)}% of the Bitcoin</span>.
                 The leverage that amplified the ride up? It becomes irrelevant.</div>
             <div class="endgame-punch" style="color:#FF8C00">CEBE explains the endgame.</div>
-            <div class="endgame-footer">CEBE Framework by <span style="color:#FF8C00">\x40chcbearsfan</span> | cebetracker.io</div>`;
+            <div class="endgame-footer">CEBE Framework by <span style="color:#FF8C00">${String.fromCharCode(64)}chcbearsfan</span> | cebetracker.io</div>`;
     }
 }
 
