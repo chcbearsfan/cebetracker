@@ -401,6 +401,59 @@
             cursor: not-allowed;
         }
 
+        /* Power Law tick marks */
+        .slider-ticks {
+            position: relative;
+            height: 16px;
+            margin-top: 2px;
+        }
+        .pl-tick {
+            position: absolute;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform: translateX(-50%);
+            pointer-events: none;
+        }
+        .pl-tick-line {
+            width: 1px;
+            height: 8px;
+            background: #3f3f46;
+        }
+        .pl-tick-label {
+            font-size: 7px;
+            color: #3f3f46;
+            letter-spacing: 0.5px;
+            font-family: 'JetBrains Mono', monospace;
+            white-space: nowrap;
+            margin-top: 1px;
+        }
+
+        /* Price input mode */
+        .price-value { cursor: pointer; }
+        .price-input {
+            font-size: 48px;
+            font-weight: 700;
+            line-height: 1;
+            font-family: 'JetBrains Mono', monospace;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid var(--orange-primary);
+            color: var(--orange-primary);
+            text-align: center;
+            outline: none;
+            width: 260px;
+            caret-color: var(--orange-primary);
+        }
+        .price-input-hint {
+            font-size: 9px;
+            color: #3f3f46;
+            letter-spacing: 1px;
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 4px;
+        }
+
         /* Play button */
         .play-btn {
             width: 100%;
@@ -578,7 +631,8 @@
             <span>$1M</span>
         </div>
         <input type="range" id="priceSlider" min="20000" max="1000000" step="1000" value="80000">
-        <div id="sliderHint" style="text-align:center; margin-top:8px; font-size:10px; color:#3f3f46; letter-spacing:1px; font-family:'JetBrains Mono',monospace; transition: opacity 0.5s;">← drag to explore →</div>
+        <div id="plTicks" class="slider-ticks"></div>
+        <div id="sliderHint" style="text-align:center; margin-top:4px; font-size:10px; color:#3f3f46; letter-spacing:1px; font-family:'JetBrains Mono',monospace; transition: opacity 0.5s;">← drag to explore →</div>
     </div>
 
     <!-- Play button -->
@@ -681,6 +735,102 @@ function fmtPrice(p) {
     return '$' + p;
 }
 
+// ─── Power Law Model (Giovanni Santostasi) ───
+function getPowerLaw() {
+    const genesis = new Date('2009-01-03T00:00:00Z');
+    const days = Math.floor((Date.now() - genesis.getTime()) / 86400000);
+    const fair = Math.pow(10, -16.493) * Math.pow(days, 5.68);
+    const support = fair * 0.4; // ~-60% bearish band
+    return { fair: Math.round(fair), support: Math.round(support) };
+}
+
+function renderPLTicks() {
+    const pl = getPowerLaw();
+    const container = $('plTicks');
+    const min = 20000, max = 1000000;
+    const ticks = [];
+    if (pl.support >= min && pl.support <= max) {
+        ticks.push({ price: pl.support, label: 'PL SUPPORT' });
+    }
+    if (pl.fair >= min && pl.fair <= max) {
+        ticks.push({ price: pl.fair, label: 'PL FAIR' });
+    }
+    container.innerHTML = ticks.map(t => {
+        const pct = ((t.price - min) / (max - min)) * 100;
+        return `<div class="pl-tick" style="left:${pct}%">
+            <div class="pl-tick-line"></div>
+            <div class="pl-tick-label">${t.label} ${fmtPrice(t.price)}</div>
+        </div>`;
+    }).join('');
+}
+
+// ─── Type-in Price ───
+let priceInputMode = false;
+
+function enterPriceInput() {
+    if (isAnimating || priceInputMode) return;
+    priceInputMode = true;
+    const section = $('priceValue');
+    const currentPrice = btcPrice;
+    section.style.display = 'none';
+
+    // Create input
+    const wrapper = section.parentElement;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'priceInput';
+    input.className = 'price-input';
+    input.inputMode = 'numeric';
+    input.value = currentPrice.toLocaleString('en-US');
+    input.placeholder = '100000';
+
+    const hint = document.createElement('div');
+    hint.className = 'price-input-hint';
+    hint.id = 'priceInputHint';
+    hint.textContent = 'type a price, hit enter';
+
+    wrapper.insertBefore(input, section.nextSibling);
+    wrapper.insertBefore(hint, input.nextSibling);
+
+    input.focus();
+    input.select();
+
+    function commitPrice() {
+        const raw = input.value.replace(/[^0-9]/g, '');
+        const val = parseInt(raw);
+        if (val && val >= 20000 && val <= 1000000) {
+            btcPrice = val;
+            $('priceSlider').value = val;
+            const sp = startPrice;
+            phase = val < sp * 0.6 ? 'crash' : val > sp * 2 ? 'moon' : val > sp * 1.2 ? 'recovery' : 'idle';
+            showEndgame = false;
+        }
+        exitPriceInput();
+    }
+
+    function exitPriceInput() {
+        priceInputMode = false;
+        section.style.display = '';
+        const inp = $('priceInput');
+        const hnt = $('priceInputHint');
+        if (inp) inp.remove();
+        if (hnt) hnt.remove();
+        // Fade slider hint
+        const sh = $('sliderHint');
+        if (sh) sh.style.opacity = '0';
+        render();
+    }
+
+    input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); commitPrice(); }
+        if (e.key === 'Escape') { e.preventDefault(); exitPriceInput(); }
+    });
+    input.addEventListener('blur', () => {
+        // Small delay to allow click events to fire first
+        setTimeout(() => { if (priceInputMode) commitPrice(); }, 100);
+    });
+}
+
 // ─── DOM refs ───
 const $ = id => document.getElementById(id);
 
@@ -768,6 +918,9 @@ function render() {
     pv.style.color = priceColor;
     pv.style.textShadow = `0 0 40px ${priceColor}33, 0 0 80px ${priceColor}11`;
     pv.className = 'price-value' + (btcPrice >= 1000000 ? ' million' : '');
+
+    // Keep slider in sync (for type-in and animation)
+    $('priceSlider').value = btcPrice;
 
     // Break-even warning
     const bew = $('breakEvenWarn');
@@ -1122,10 +1275,12 @@ $('priceSlider').addEventListener('input', e => {
     render();
 });
 
+$('priceValue').addEventListener('click', enterPriceInput);
+
 $('playBtn').addEventListener('click', runAnimation);
 
 // ─── Go ───
-loadData();
+loadData().then(() => { renderPLTicks(); });
 </script>
 </body>
 </html>
