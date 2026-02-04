@@ -404,12 +404,11 @@
         /* Power Law tick marks */
         .slider-ticks {
             position: relative;
-            height: 20px;
+            height: 28px;
             margin-top: 2px;
         }
         .pl-tick {
             position: absolute;
-            top: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -418,16 +417,23 @@
         }
         .pl-tick-line {
             width: 1px;
-            height: 8px;
-            background: #3f3f46;
+            height: 6px;
+            background: #52525b;
         }
         .pl-tick-label {
-            font-size: 8px;
-            color: #52525b;
+            font-size: 9px;
+            color: #71717a;
             letter-spacing: 0.5px;
             font-family: 'JetBrains Mono', monospace;
             white-space: nowrap;
-            margin-top: 2px;
+            font-weight: 600;
+        }
+        .pl-tick-sublabel {
+            font-size: 7px;
+            color: #3f3f46;
+            letter-spacing: 1px;
+            font-family: 'JetBrains Mono', monospace;
+            white-space: nowrap;
         }
 
         /* Price input mode */
@@ -751,16 +757,24 @@ function renderPLTicks() {
     const min = 20000, max = 1000000;
     const ticks = [];
     if (pl.support >= min && pl.support <= max) {
-        ticks.push({ price: pl.support, label: 'PL SUPPORT' });
+        ticks.push({ price: pl.support, label: 'PL FLOOR', pos: 'top' });
     }
     if (pl.fair >= min && pl.fair <= max) {
-        ticks.push({ price: pl.fair, label: 'PL FAIR' });
+        ticks.push({ price: pl.fair, label: 'PL FAIR', pos: 'bottom' });
     }
     container.innerHTML = ticks.map(t => {
         const pct = ((t.price - min) / (max - min)) * 100;
-        return `<div class="pl-tick" style="left:${pct}%">
+        if (t.pos === 'bottom') {
+            return `<div class="pl-tick" style="left:${pct}%; top:0;">
+                <div class="pl-tick-line"></div>
+                <div class="pl-tick-label">${fmtPrice(t.price)}</div>
+                <div class="pl-tick-sublabel">${t.label}</div>
+            </div>`;
+        }
+        return `<div class="pl-tick" style="left:${pct}%; top:0;">
+            <div class="pl-tick-label">${fmtPrice(t.price)}</div>
+            <div class="pl-tick-sublabel">${t.label}</div>
             <div class="pl-tick-line"></div>
-            <div class="pl-tick-label">${t.label} ${fmtPrice(t.price)}</div>
         </div>`;
     }).join('');
 }
