@@ -70,7 +70,7 @@
             z-index: 1;
         }
 
-        /* ═══ HEADER ═══ */
+        /* â•â•â• HEADER â•â•â• */
         .header { text-align: center; margin-bottom: 28px; }
         .nav-back {
             display: inline-block;
@@ -140,26 +140,57 @@
         }
         .live-price { color: var(--text-secondary); }
 
-        /* ═══ SCENARIO CARDS ═══ */
+        /* â•â•â• SCENARIO CARDS â•â•â• */
         .scenarios-section { margin-bottom: 24px; }
-        .scenarios-label {
+        .scenario-group { margin-bottom: 14px; }
+        .scenario-group:last-child { margin-bottom: 0; }
+        .group-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            padding-left: 4px;
+        }
+        .group-label-badge {
+            font-size: 9px;
+            font-family: var(--mono);
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+        .group-label-badge.now {
+            background: rgba(255,255,255,0.04);
+            color: var(--text-muted);
+            border: 1px solid var(--border-subtle);
+        }
+        .group-label-badge.future {
+            background: rgba(249, 115, 22, 0.08);
+            color: var(--orange-primary);
+            border: 1px solid var(--orange-border);
+        }
+        .group-label-text {
             font-size: 9px;
             letter-spacing: 2px;
-            color: var(--text-muted);
-            text-align: center;
-            margin-bottom: 10px;
             font-weight: 600;
+            color: var(--text-muted);
         }
-        .scenarios {
+        .group-label-line {
+            flex: 1;
+            height: 1px;
+            background: var(--border-subtle);
+        }
+        .scenarios-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
         }
         @media (max-width: 500px) {
-            .scenarios { grid-template-columns: repeat(2, 1fr); }
+            .scenarios-row { grid-template-columns: repeat(2, 1fr); }
         }
         .scenario-card {
-            padding: 14px 12px;
+            padding: 16px 12px 14px;
             border-radius: 12px;
             border: 1.5px solid var(--border-subtle);
             background: var(--bg-card);
@@ -167,6 +198,7 @@
             transition: all 0.25s ease;
             text-align: center;
             user-select: none;
+            position: relative;
         }
         .scenario-card:hover {
             border-color: rgba(255,255,255,0.12);
@@ -178,15 +210,42 @@
             background: var(--orange-glow);
             box-shadow: 0 0 20px rgba(249,115,22,0.1);
         }
-        .scenario-icon { font-size: 24px; margin-bottom: 4px; }
+        .scenario-card.projection {
+            border-left: 3px solid rgba(249, 115, 22, 0.3);
+        }
+        .scenario-card.projection.active {
+            border-left-color: var(--orange-primary);
+        }
+        .horizon-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 9px;
+            font-weight: 700;
+            font-family: var(--mono);
+            padding: 2px 6px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+        .horizon-badge.now-badge {
+            background: rgba(255,255,255,0.04);
+            color: #52525b;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .horizon-badge.future-badge {
+            background: rgba(249, 115, 22, 0.1);
+            color: var(--orange-primary);
+            border: 1px solid var(--orange-border);
+        }
+        .scenario-icon { font-size: 22px; margin-bottom: 4px; }
         .scenario-name {
             font-size: 12px;
             font-weight: 600;
             letter-spacing: 0.5px;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
         .scenario-price {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 700;
             font-family: var(--mono);
             color: var(--orange-light);
@@ -195,10 +254,10 @@
             font-size: 10px;
             color: var(--text-muted);
             font-family: var(--mono);
-            margin-top: 2px;
+            margin-top: 4px;
         }
 
-        /* ═══ HERO ═══ */
+        /* â•â•â• HERO â•â•â• */
         .hero {
             text-align: center;
             padding: 28px 20px;
@@ -254,7 +313,7 @@
             font-weight: 600;
         }
 
-        /* ═══ NARRATIVE PANEL ═══ */
+        /* â•â•â• NARRATIVE PANEL â•â•â• */
         .narrative {
             background: var(--bg-card);
             border: 1px solid var(--border-subtle);
@@ -312,7 +371,7 @@
         .narr-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
         .narr-text strong { color: var(--text-primary); }
 
-        /* ═══ METRICS ROW ═══ */
+        /* â•â•â• METRICS ROW â•â•â• */
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
@@ -349,7 +408,7 @@
         .metric-value.warn { color: var(--yellow); }
         .metric-value.good { color: var(--green); }
 
-        /* ═══ COLLAPSIBLE SECTIONS ═══ */
+        /* â•â•â• COLLAPSIBLE SECTIONS â•â•â• */
         .collapse-section { margin-bottom: 12px; }
         .collapse-section summary {
             display: flex;
@@ -386,7 +445,7 @@
             border-radius: 0 0 12px 12px;
         }
 
-        /* ═══ CONTROLS ═══ */
+        /* â•â•â• CONTROLS â•â•â• */
         .controls-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -505,7 +564,7 @@
             background: var(--orange-glow);
         }
 
-        /* ═══ WATERFALL ═══ */
+        /* â•â•â• WATERFALL â•â•â• */
         .waterfall {
             display: flex;
             align-items: center;
@@ -544,7 +603,7 @@
             color: var(--text-muted);
         }
 
-        /* ═══ TABLE ═══ */
+        /* â•â•â• TABLE â•â•â• */
         .table-wrap {
             overflow-x: auto;
             border-radius: 10px;
@@ -591,7 +650,7 @@
         .cell-muted { color: var(--text-muted) !important; }
         .cell-bold { font-weight: 700 !important; }
 
-        /* ═══ SENSITIVITY MATRIX ═══ */
+        /* â•â•â• SENSITIVITY MATRIX â•â•â• */
         .matrix-table {
             width: 100%;
             border-collapse: collapse;
@@ -628,7 +687,7 @@
         .matrix-cell-gold { color: #fbbf24; background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2); }
         .matrix-cell-current { outline: 2px solid var(--orange-primary); outline-offset: -2px; border-radius: 4px; }
 
-        /* ═══ PREFERRED STACK TABLE ═══ */
+        /* â•â•â• PREFERRED STACK TABLE â•â•â• */
         .pref-stack {
             width: 100%;
             border-collapse: collapse;
@@ -660,7 +719,7 @@
         }
         .badge-cum { font-size: 9px; color: var(--text-muted); }
 
-        /* ═══ ASSUMPTIONS ═══ */
+        /* â•â•â• ASSUMPTIONS â•â•â• */
         .assumptions {
             padding: 14px 16px;
             background: rgba(255,255,255,0.02);
@@ -673,7 +732,7 @@
         }
         .assumptions strong { color: var(--text-secondary); }
 
-        /* ═══ FOOTER ═══ */
+        /* â•â•â• FOOTER â•â•â• */
         .footer {
             text-align: center;
             padding-top: 24px;
@@ -691,7 +750,7 @@
             margin-top: 8px;
         }
 
-        /* ═══ LOADING ═══ */
+        /* â•â•â• LOADING â•â•â• */
         .loading-screen {
             position: fixed;
             inset: 0;
@@ -713,7 +772,7 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         .loading-text { font-size: 12px; color: var(--text-muted); letter-spacing: 2px; }
 
-        /* ═══ RESPONSIVE ═══ */
+        /* â•â•â• RESPONSIVE â•â•â• */
         @media (max-width: 768px) {
             .hero-price { font-size: 48px; }
         }
@@ -749,10 +808,24 @@
         </div>
     </div>
 
-    <!-- Scenario Cards -->
+    <!-- Scenario Cards — Grouped -->
     <div class="scenarios-section">
-        <div class="scenarios-label">CHOOSE A SCENARIO</div>
-        <div class="scenarios" id="scenarioBar"></div>
+        <div class="scenario-group" id="snapshotGroup">
+            <div class="group-label">
+                <span class="group-label-badge now">&#9889; NOW</span>
+                <span class="group-label-text">WHAT IF BTC WERE AT THIS PRICE TODAY</span>
+                <div class="group-label-line"></div>
+            </div>
+            <div class="scenarios-row" id="snapshotBar"></div>
+        </div>
+        <div class="scenario-group" id="projectionGroup">
+            <div class="group-label">
+                <span class="group-label-badge future">&rarr; FORWARD</span>
+                <span class="group-label-text">PROJECTIONS WITH DIVIDEND DILUTION</span>
+                <div class="group-label-line"></div>
+            </div>
+            <div class="scenarios-row" id="projectionBar"></div>
+        </div>
     </div>
 
     <!-- Hero -->
@@ -857,13 +930,13 @@
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // CEBE MSTR SHARE PRICE MODELER v2
 // cebetracker.io/modeler
 // Scenario-first, narrative-driven redesign
-// ═══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-// ─── CONFIG ───
+// â”€â”€â”€ CONFIG â”€â”€â”€
 const SHEET_ID = '1BNsCWGVU08PDinDcfzJccqcuj9_KrK1VZGETErzBZvg';
 const SNAPSHOTS_GID = '771405586';
 const FINNHUB_API_KEY = 'd5tuehhr01qtjet1d7k0d5tuehhr01qtjet1d7kg';
@@ -895,14 +968,14 @@ const DEFAULTS = {
     mstr_price: 340,
 };
 
-// Scenarios
+// Scenarios — grouped: snapshots (horizon=0) vs projections (horizon>0)
 const SCENARIOS = [
-    { id: 'wipeout',      icon: '&#128128;', name: 'Wipeout',      btc: 25000,  mnav: 0.5, horizon: 5  },
-    { id: 'capitulation', icon: '&#128059;', name: 'Capitulation', btc: 50000,  mnav: 0.7, horizon: 3  },
-    { id: 'current',      icon: '&#128205;', name: 'Current',      btc: null,   mnav: 1.0, horizon: 0  },
-    { id: 'recovery',     icon: '&#128260;', name: 'Recovery',     btc: 150000, mnav: 1.2, horizon: 1  },
-    { id: 'bull',         icon: '&#128002;', name: 'Bull Run',     btc: 250000, mnav: 1.5, horizon: 3  },
-    { id: 'moon',         icon: '&#128640;', name: 'Moon Math',    btc: 500000, mnav: 2.0, horizon: 5  },
+    { id: 'wipeout',      icon: '💀', name: 'Wipeout',      btc: 25000,  mnav: 0.5, horizon: 0, group: 'snapshot'   },
+    { id: 'capitulation', icon: '🐻', name: 'Capitulation', btc: 50000,  mnav: 0.7, horizon: 0, group: 'snapshot'   },
+    { id: 'current',      icon: '📍', name: 'Current',      btc: null,   mnav: 1.0, horizon: 0, group: 'snapshot'   },
+    { id: 'recovery',     icon: '☀️', name: 'Recovery',     btc: 150000, mnav: 1.2, horizon: 1, group: 'projection' },
+    { id: 'bull',         icon: '🐂', name: 'Bull Run',     btc: 250000, mnav: 1.5, horizon: 3, group: 'projection' },
+    { id: 'moon',         icon: '🚀', name: 'Moon Math',    btc: 500000, mnav: 2.0, horizon: 5, group: 'projection' },
 ];
 
 const HORIZON_OPTIONS = [
@@ -917,7 +990,7 @@ const MNAV_PRESETS = [0.5, 0.75, 1.0, 1.5, 2.0, 3.0];
 const MATRIX_BTC_PRICES = [25000, 50000, 75000, 100000, 150000, 200000, 300000, 500000];
 const MATRIX_MNAVS = [0.5, 0.75, 1.0, 1.5, 2.0, 3.0];
 
-// ─── STATE ───
+// â”€â”€â”€ STATE â”€â”€â”€
 let sheetData = null;
 let liveBtcPrice = null;
 let liveMstrPrice = null;
@@ -926,7 +999,7 @@ let mnavMultiple = 1.0;
 let horizonYears = 0;
 let activeScenario = 'current';
 
-// ─── HELPERS ───
+// â”€â”€â”€ HELPERS â”€â”€â”€
 const $ = id => document.getElementById(id);
 const fmt = n => Math.round(n).toLocaleString('en-US');
 const fmtB = n => n >= 1e9 ? '$' + (n/1e9).toFixed(1) + 'B' : n >= 1e6 ? '$' + (n/1e6).toFixed(0) + 'M' : '$' + fmt(n);
@@ -939,7 +1012,7 @@ const fmtPrice = p => {
 const fmtPct = (p, dec=1) => (p * 100).toFixed(dec) + '%';
 const fmtSats = s => fmt(Math.round(s));
 
-// ─── CSV PARSER ───
+// â”€â”€â”€ CSV PARSER â”€â”€â”€
 function parseCSVLine(line) {
     const r = []; let c = '', q = false;
     for (const ch of line) { if (ch === '"') q = !q; else if (ch === ',' && !q) { r.push(c); c = ''; } else c += ch; }
@@ -956,7 +1029,7 @@ function parseCSV(text) {
     });
 }
 
-// ─── DATA LOADING ───
+// â”€â”€â”€ DATA LOADING â”€â”€â”€
 async function loadData() {
     try {
         const [btcRes, sheetText, mstrStockPrice] = await Promise.all([
@@ -1006,7 +1079,7 @@ async function fetchStockPrice(symbol) {
     return null;
 }
 
-// ─── GET FIELD VALUE ───
+// â”€â”€â”€ GET FIELD VALUE â”€â”€â”€
 function getVal(field, fallback) {
     if (sheetData && sheetData[field] !== undefined && sheetData[field] !== '') {
         const v = parseFloat(sheetData[field]);
@@ -1033,7 +1106,7 @@ function getInputs() {
     };
 }
 
-// ─── CEBE MATH ENGINE ───
+// â”€â”€â”€ CEBE MATH ENGINE â”€â”€â”€
 function calcCEBE(btcHoldings, shares, netClaimsUsd, btcPriceInput) {
     const p = btcPriceInput || btcPrice;
     const netClaimsBtc = p > 0 ? Math.max(0, netClaimsUsd / p) : 0;
@@ -1050,7 +1123,7 @@ function calcCEBE(btcHoldings, shares, netClaimsUsd, btcPriceInput) {
     return { commonBtc, cebeSats, cebeBtc, bpsSats, drag, amp, breakEven, navUsd, navPerShare, modeledPrice, btcHoldings, shares, netClaimsUsd };
 }
 
-// ─── YEAR-BY-YEAR PROJECTION ───
+// â”€â”€â”€ YEAR-BY-YEAR PROJECTION â”€â”€â”€
 function projectYears(years) {
     const inp = getInputs();
     let btcH = inp.btcHoldings;
@@ -1123,7 +1196,7 @@ function projectYears(years) {
     return results;
 }
 
-// ─── QUICK CALC (for sensitivity matrix) ───
+// â”€â”€â”€ QUICK CALC (for sensitivity matrix) â”€â”€â”€
 function quickCalc(btcP, mnav) {
     const inp = getInputs();
     const streUsd = inp.streFaceEur * inp.eurusd;
@@ -1135,9 +1208,9 @@ function quickCalc(btcP, mnav) {
 }
 
 
-// ═══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // RENDERING
-// ═══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function render() {
     const inp = getInputs();
@@ -1187,7 +1260,7 @@ function renderHero(final, marketPrice) {
     $('heroChange').textContent = sign + (pctChange * 100).toFixed(1) + '% (' + sign + '$' + Math.abs(price - marketPrice).toFixed(2) + ')';
     $('heroChange').className = 'hero-change ' + (pctChange >= 0 ? 'up' : 'down');
     el.className = 'hero-price ' + (pctChange > 0.05 ? 'positive' : pctChange < -0.05 ? 'negative' : 'neutral');
-    $('heroVs').textContent = 'vs MSTR market ' + fmtPrice(marketPrice) + ' \u00b7 ' + (horizonYears > 0 ? 'Year ' + horizonYears + ' projection' : 'at current inputs');
+    $('heroVs').textContent = 'vs MSTR market ' + fmtPrice(marketPrice) + ' \u00b7 ' + (horizonYears > 0 ? horizonYears + '-year projection with div dilution' : 'instant snapshot');
 
     // Implied mNAV
     const inp = getInputs();
@@ -1205,7 +1278,7 @@ function renderHero(final, marketPrice) {
     }
 }
 
-// ─── NARRATIVE PANEL ───
+// â”€â”€â”€ NARRATIVE PANEL â”€â”€â”€
 function renderNarrative(final, current, inp, marketPrice) {
     const items = [];
     const dragPct = final.drag * 100;
@@ -1400,19 +1473,34 @@ function renderAssumptions(inp) {
 }
 
 
-// ═══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // UI BUILDERS & EVENT HANDLERS
-// ═══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function buildScenarioBar() {
-    $('scenarioBar').innerHTML = SCENARIOS.map(s =>
-        '<div class="scenario-card ' + (s.id === activeScenario ? 'active' : '') + '" data-scenario="' + s.id + '">' +
-        '<div class="scenario-icon">' + s.icon + '</div>' +
-        '<div class="scenario-name">' + s.name + '</div>' +
-        '<div class="scenario-price">' + (s.btc ? (s.btc >= 1000 ? '$' + (s.btc/1000) + 'K' : '$' + s.btc) : fmtPrice(btcPrice)) + '</div>' +
-        '<div class="scenario-mnav">' + s.mnav.toFixed(1) + '\u00d7 mNAV</div>' +
-        '</div>'
-    ).join('');
+    const snapshots = SCENARIOS.filter(s => s.group === 'snapshot');
+    const projections = SCENARIOS.filter(s => s.group === 'projection');
+
+    function renderCard(s) {
+        const isProjection = s.group === 'projection';
+        const horizonLabel = s.horizon === 0 ? 'NOW' : s.horizon + 'Y';
+        const badgeClass = isProjection ? 'future-badge' : 'now-badge';
+        const cardClass = 'scenario-card' +
+            (isProjection ? ' projection' : '') +
+            (s.id === activeScenario ? ' active' : '');
+        const priceDisplay = s.btc ? (s.btc >= 1000 ? '$' + (s.btc/1000) + 'K' : '$' + s.btc) : fmtPrice(btcPrice);
+
+        return '<div class="' + cardClass + '" data-scenario="' + s.id + '">' +
+            '<span class="horizon-badge ' + badgeClass + '">' + horizonLabel + '</span>' +
+            '<div class="scenario-icon">' + s.icon + '</div>' +
+            '<div class="scenario-name">' + s.name + '</div>' +
+            '<div class="scenario-price">' + priceDisplay + '</div>' +
+            '<div class="scenario-mnav">' + s.mnav.toFixed(1) + '\u00d7 mNAV</div>' +
+            '</div>';
+    }
+
+    $('snapshotBar').innerHTML = snapshots.map(renderCard).join('');
+    $('projectionBar').innerHTML = projections.map(renderCard).join('');
 
     document.querySelectorAll('.scenario-card').forEach(card => {
         card.addEventListener('click', () => {
@@ -1498,7 +1586,7 @@ function updateSliderFills() {
     mnavSlider.style.background = 'linear-gradient(90deg, var(--orange-primary) ' + mnavPct + '%, #333 ' + mnavPct + '%)';
 }
 
-// ─── SLIDER EVENTS ───
+// â”€â”€â”€ SLIDER EVENTS â”€â”€â”€
 $('btcSlider').addEventListener('input', (e) => {
     btcPrice = parseInt(e.target.value);
     $('btcPriceDisplay').textContent = fmtPrice(btcPrice);
@@ -1516,7 +1604,7 @@ $('mnavSlider').addEventListener('input', (e) => {
     render();
 });
 
-// ─── KEYBOARD SHORTCUTS ───
+// â”€â”€â”€ KEYBOARD SHORTCUTS â”€â”€â”€
 document.addEventListener('keydown', (e) => {
     if (e.target.tagName === 'INPUT') return;
     if (e.key >= '1' && e.key <= '6') {
@@ -1536,7 +1624,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// ─── INIT ───
+// â”€â”€â”€ INIT â”€â”€â”€
 loadData();
 </script>
 </body>
