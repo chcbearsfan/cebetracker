@@ -980,8 +980,8 @@ const PREF_INSTRUMENTS = [
     { id: 'strf', name: 'STRF', rate: 0.10,   payment: 'cash',   cumulative: true,  currency: 'USD', seniority: 1 },
     { id: 'strc', name: 'STRC', rate: 0.1125, payment: 'cash',   cumulative: false, currency: 'USD', seniority: 2 },
     { id: 'stre', name: 'STRE', rate: 0.10,   payment: 'cash',   cumulative: true,  currency: 'EUR', seniority: 3 },
-    { id: 'strk', name: 'STRK', rate: 0.08,   payment: 'shares', cumulative: true,  currency: 'USD', seniority: 4 },
-    { id: 'strd', name: 'STRD', rate: 0.10,   payment: 'shares', cumulative: false, currency: 'USD', seniority: 5 },
+    { id: 'strk', name: 'STRK', rate: 0.08,   payment: 'cash',   cumulative: true,  currency: 'USD', seniority: 4 },
+    { id: 'strd', name: 'STRD', rate: 0.10,   payment: 'cash',   cumulative: false, currency: 'USD', seniority: 5 },
 ];
 
 // Fallback defaults
@@ -1176,56 +1176,61 @@ function projectYears(years) {
         const netClaims = debt + prefUsd - cash;
         const m = calcCEBE(btcH, shares, netClaims, btcPrice);
         let status = 'green', btcSold = 0, strcSkipped = false, strdSkipped = false;
-        let newSharesFromDiv = 0;
 
         if (y === 0) {
-            const cashDivAnnual = strfF * 0.10 + strcF * 0.1125 + streF_eur * eurusd * 0.10;
-            const netDrain = cashDivAnnual - softIncome;
+            // All dividends paid in cash
+            const totalDivAnnual = strfF * 0.10 + strcF * 0.1125 + streF_eur * eurusd * 0.10 + strkF * 0.08 + strdF * 0.10;
+            const netDrain = totalDivAnnual - softIncome;
             const runway = netDrain > 0 ? cash / netDrain : Infinity;
             results.push({ year: y, btcH, shares, cebeSats: m.cebeSats, drag: m.drag, navPerShare: m.navPerShare, modeledPrice: m.modeledPrice, cash, btcSold: 0, status: 'green', newShares: 0, amp: m.amp, breakEven: m.breakEven, cashRunway: runway });
             continue;
         }
 
-        // Cash-only dividends
-        const strfDiv = strfF * 0.10, strcDiv = strcF * 0.1125, streDiv = streF_eur * eurusd * 0.10;
-        const totalCashDiv = strfDiv + strcDiv + streDiv;
-        cash -= (totalCashDiv - softIncome);
+        // ALL dividends paid from cash first
+        const strfDiv = strfF * 0.10;
+        const strcDiv = strcF * 0.1125;
+        const streDiv = streF_eur * eurusd * 0.10;
+        const strkDiv = strkF * 0.08;
+        const strdDiv = strdF * 0.10;
+        const totalDiv = strfDiv + strcDiv + streDiv + strkDiv + strdDiv;
+        cash -= (totalDiv - softIncome);
 
-        if (cash >= 0) { status = 'green'; }
-        else {
-            cash += strcDiv; strcSkipped = true;
-            if (cash >= 0) { status = 'amber'; }
-            else {
-                const deficit = Math.abs(cash);
-                btcSold = btcPrice > 0 ? deficit / btcPrice : 0;
-                btcH = Math.max(0, btcH - btcSold);
-                cash = 0; status = 'red';
+        // Distress cascade if cash goes negative
+        if (cash >= 0) {
+            status = 'green';
+        } else {
+            // Step 1: Skip STRD (non-cumulative, most junior)
+            cash += strdDiv; strdSkipped = true;
+            if (cash >= 0) {
+                status = 'amber';
+            } else {
+                // Step 2: Skip STRC (non-cumulative)
+                cash += strcDiv; strcSkipped = true;
+                if (cash >= 0) {
+                    status = 'amber';
+                } else {
+                    // Step 3: Sell BTC to cover cumulative obligations
+                    const deficit = Math.abs(cash);
+                    btcSold = btcPrice > 0 ? deficit / btcPrice : 0;
+                    btcH = Math.max(0, btcH - btcSold);
+                    cash = 0;
+                    status = 'red';
+                }
             }
         }
 
-        // Share-payable dividends (reflexive)
-        const strkDiv = strkF * 0.08;
-        let strdDiv = strdF * 0.10;
-        if (status !== 'green') { strdDiv = 0; strdSkipped = true; }
-        const totalShareDiv = strkDiv + strdDiv;
-
-        const updatedNetClaims = debt + (strkF + strfF + strdF + strcF + streF_eur * eurusd) - cash;
-        const commonBtcNow = Math.max(0, btcH - (btcPrice > 0 ? updatedNetClaims / btcPrice : 0));
-
-        if (totalShareDiv > 0 && commonBtcNow > 0 && shares > 0 && btcPrice > 0) {
-            const denom = commonBtcNow * btcPrice * mnavMultiple - totalShareDiv;
-            if (denom > 0) { newSharesFromDiv = totalShareDiv * shares / denom; }
-            else { newSharesFromDiv = shares * 10; status = 'red'; }
-        }
-        shares += newSharesFromDiv;
-
         const finalNetClaims = debt + (strkF + strfF + strdF + strcF + streF_eur * eurusd) - cash;
         const finalM = calcCEBE(btcH, shares, finalNetClaims, btcPrice);
-        const cashDivNext = strfF * 0.10 + (strcSkipped ? 0 : strcF * 0.1125) + streF_eur * eurusd * 0.10;
-        const netDrainNext = cashDivNext - softIncome;
+
+        // Runway: based on next year's expected cash divs (excluding any skipped non-cums)
+        let nextDivs = strfDiv + streDiv + strkDiv;
+        if (!strcSkipped) nextDivs += strcDiv;
+        if (!strdSkipped) nextDivs += strdDiv;
+        const netDrainNext = nextDivs - softIncome;
         const runway = netDrainNext > 0 ? cash / netDrainNext : (cash > 0 ? Infinity : 0);
 
-        results.push({ year: y, btcH, shares, cebeSats: finalM.cebeSats, drag: finalM.drag, navPerShare: finalM.navPerShare, modeledPrice: finalM.modeledPrice, cash, btcSold, status, newShares: newSharesFromDiv, amp: finalM.amp, breakEven: finalM.breakEven, cashRunway: runway, strcSkipped, strdSkipped });
+        results.push({ year: y, btcH, shares, cebeSats: finalM.cebeSats, drag: finalM.drag, navPerShare: finalM.navPerShare, modeledPrice: finalM.modeledPrice, cash, btcSold, status, newShares: 0, amp: finalM.amp, breakEven: finalM.breakEven, cashRunway: runway, strcSkipped, strdSkipped });
+    }
     }
     return results;
 }
@@ -1347,15 +1352,15 @@ function renderNarrative(final, current, inp, marketPrice) {
 
     // Cash runway
     if (current.cashRunway < 3 && current.cashRunway > 0) {
-        items.push({ cls: 'amber', icon: '&#9200;', text: '<strong>Cash runway: ' + current.cashRunway.toFixed(1) + ' years.</strong> After depletion, STRC gets skipped (non-cumulative), but STRF and STRE (cumulative, cash-only) force BTC liquidation.' });
+        items.push({ cls: 'amber', icon: '&#9200;', text: '<strong>Cash runway: ' + current.cashRunway.toFixed(1) + ' years.</strong> After depletion, STRD and STRC get skipped (non-cumulative), then BTC must be sold to cover cumulative obligations (STRF, STRE, STRK).' });
     } else if (current.cashRunway >= 3 && current.cashRunway < Infinity) {
-        items.push({ cls: 'neutral', icon: '&#128176;', text: '<strong>Cash runway: ' + current.cashRunway.toFixed(1) + ' years.</strong> Reserves cover cash-only preferred dividends for ' + current.cashRunway.toFixed(1) + ' years before any BTC needs to be sold.' });
+        items.push({ cls: 'neutral', icon: '&#128176;', text: '<strong>Cash runway: ' + current.cashRunway.toFixed(1) + ' years.</strong> Reserves cover all preferred dividends for ' + current.cashRunway.toFixed(1) + ' years before any BTC needs to be sold.' });
     }
 
     // BTC liquidation in projection
     if (horizonYears > 0 && final.btcH < inp.btcHoldings) {
         const totalSold = inp.btcHoldings - final.btcH;
-        items.push({ cls: 'red', icon: '&#128293;', text: '<strong>BTC liquidation: ' + fmt(Math.round(totalSold)) + ' BTC sold</strong> over ' + horizonYears + ' years to cover cumulative preferred dividends. Selling BTC raises drag, lowering NAV, requiring more dilutive share dividends.' });
+        items.push({ cls: 'red', icon: '&#128293;', text: '<strong>BTC liquidation: ' + fmt(Math.round(totalSold)) + ' BTC sold</strong> over ' + horizonYears + ' years to cover cumulative preferred dividends after cash reserves depleted. Selling BTC raises drag and lowers NAV per share.' });
     }
 
     // STRK conversion zone
@@ -1377,8 +1382,7 @@ function renderNarrative(final, current, inp, marketPrice) {
 
 function renderMetrics(final, current, inp) {
     const streUsd = inp.streFaceEur * inp.eurusd;
-    const cashDivAnnual = inp.strfFace * 0.10 + inp.strcFace * 0.1125 + streUsd * 0.10;
-    const shareDivAnnual = inp.strkFace * 0.08 + inp.strdFace * 0.10;
+    const totalDivAnnual = inp.strfFace * 0.10 + inp.strcFace * 0.1125 + streUsd * 0.10 + inp.strkFace * 0.08 + inp.strdFace * 0.10;
 
     const metrics = [
         { label: 'CEBE', value: fmtSats(final.cebeSats), sub: 'sats/share', cls: final.cebeSats <= 0 ? 'danger' : '' },
@@ -1386,7 +1390,7 @@ function renderMetrics(final, current, inp) {
         { label: 'AMPLIFICATION', value: final.amp > 100 ? '\u221e' : final.amp.toFixed(2) + '\u00d7', sub: ((final.amp - 1) * 100).toFixed(0) + '% amplified', cls: '' },
         { label: 'BREAK-EVEN', value: fmtPrice(final.breakEven), sub: 'BTC floor', cls: btcPrice <= final.breakEven * 1.1 ? 'danger' : btcPrice <= final.breakEven * 1.5 ? 'warn' : '' },
         { label: 'NAV / SHARE', value: fmtPrice(final.navPerShare), sub: '\u00d7 ' + mnavMultiple.toFixed(2) + ' mNAV', cls: '' },
-        { label: 'CASH RUNWAY', value: current.cashRunway === Infinity ? '\u221e' : current.cashRunway.toFixed(1) + 'yr', sub: fmtB(cashDivAnnual) + '/yr cash div', cls: current.cashRunway < 2 ? 'danger' : current.cashRunway < 4 ? 'warn' : 'good' },
+        { label: 'CASH RUNWAY', value: current.cashRunway === Infinity ? '\u221e' : current.cashRunway.toFixed(1) + 'yr', sub: fmtB(totalDivAnnual) + '/yr total div', cls: current.cashRunway < 2 ? 'danger' : current.cashRunway < 4 ? 'warn' : 'good' },
     ];
 
     $('metricsGrid').innerHTML = metrics.map(m =>
@@ -1427,7 +1431,7 @@ function renderProjectionTable(proj) {
     $('projBody').innerHTML = proj.map(r => {
         const inp = getInputs();
         const statusEmoji = r.status === 'green' ? '&#128994;' : r.status === 'amber' ? '&#128993;' : '&#128308;';
-        const statusLabel = r.status === 'green' ? 'Healthy' : r.status === 'amber' ? 'STRC skip' : 'BTC sold';
+        const statusLabel = r.status === 'green' ? 'Healthy' : r.status === 'amber' ? (r.strcSkipped ? 'Skip STRD+C' : 'Skip STRD') : 'BTC sold';
         return '<tr><td>' + statusEmoji + ' Yr ' + r.year + '</td>' +
             '<td class="' + (r.btcH < inp.btcHoldings ? 'cell-red' : '') + '">' + fmt(Math.round(r.btcH)) + '</td>' +
             '<td class="' + (r.newShares > 0 ? 'cell-amber' : '') + '">' + (r.shares / 1e6).toFixed(1) + 'M</td>' +
@@ -1470,15 +1474,16 @@ function renderSensitivityMatrix() {
 
 function renderCustomize(inp, prefUsd, streUsd) {
     const instruments = [
-        { name: 'STRK', face: inp.strkFace, rate: '8.00%', pay: 'Shares', cum: 'Cumulative', annual: inp.strkFace * 0.08 },
+        { name: 'STRK', face: inp.strkFace, rate: '8.00%', pay: 'Cash', cum: 'Cumulative', annual: inp.strkFace * 0.08 },
         { name: 'STRF', face: inp.strfFace, rate: '10.00%', pay: 'Cash', cum: 'Cumulative', annual: inp.strfFace * 0.10 },
-        { name: 'STRD', face: inp.strdFace, rate: '10.00%', pay: 'Shares', cum: 'Non-cum', annual: inp.strdFace * 0.10 },
+        { name: 'STRD', face: inp.strdFace, rate: '10.00%', pay: 'Cash', cum: 'Non-cum', annual: inp.strdFace * 0.10 },
         { name: 'STRC', face: inp.strcFace, rate: '11.25%', pay: 'Cash', cum: 'Non-cum', annual: inp.strcFace * 0.1125 },
         { name: 'STRE', face: inp.streFaceEur * inp.eurusd, rate: '10.00%', pay: 'Cash (EUR)', cum: 'Cumulative', annual: inp.streFaceEur * inp.eurusd * 0.10 },
     ];
     const totalAnnual = instruments.reduce((s, i) => s + i.annual, 0);
-    const cashAnnual = instruments.filter(i => i.pay.includes('Cash')).reduce((s, i) => s + i.annual, 0);
-    const shareAnnual = instruments.filter(i => i.pay === 'Shares').reduce((s, i) => s + i.annual, 0);
+    const totalDivAnnual = instruments.reduce((s, i) => s + i.annual, 0);
+    const cumDivAnnual = instruments.filter(i => i.cum === 'Cumulative').reduce((s, i) => s + i.annual, 0);
+    const skippableDivAnnual = instruments.filter(i => i.cum === 'Non-cum').reduce((s, i) => s + i.annual, 0);
 
     $('customizeBody').innerHTML =
         '<div style="margin-bottom:16px">' +
@@ -1490,18 +1495,18 @@ function renderCustomize(inp, prefUsd, streUsd) {
         '<tr style="border-top:2px solid var(--border-subtle)"><td style="color:var(--orange-primary)">TOTAL</td><td style="color:var(--orange-primary);font-weight:700">' + fmtB(prefUsd) + '</td><td></td><td></td><td></td><td style="color:var(--orange-primary);font-weight:700">' + fmtB(totalAnnual) + '</td></tr>' +
         '</tbody></table></div>' +
         '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">' +
-        '<div class="metric-card"><div class="metric-label">CASH DIV</div><div class="metric-value">' + fmtB(cashAnnual) + '</div><div class="metric-sub">/yr drains cash</div></div>' +
-        '<div class="metric-card"><div class="metric-label">SHARE DIV</div><div class="metric-value">' + fmtB(shareAnnual) + '</div><div class="metric-sub">/yr dilutes equity</div></div>' +
+        '<div class="metric-card"><div class="metric-label">ANNUAL DIV</div><div class="metric-value">' + fmtB(totalDivAnnual) + '</div><div class="metric-sub">/yr all cash</div></div>' +
+        '<div class="metric-card"><div class="metric-label">SKIPPABLE</div><div class="metric-value">' + fmtB(skippableDivAnnual) + '</div><div class="metric-sub">STRC + STRD non-cum</div></div>' +
         '<div class="metric-card"><div class="metric-label">CONVERT DEBT</div><div class="metric-value">' + fmtB(inp.debtUsd) + '</div><div class="metric-sub">zero-coupon</div></div></div>' +
         '<div style="font-size:11px;color:var(--text-muted);line-height:1.6">' +
-        '<strong style="color:var(--text-secondary)">Payment hierarchy in distress:</strong> STRF (most senior, cash, cumulative) &rarr; STRC (cash, non-cumulative &mdash; can skip) &rarr; STRE (cash, cumulative, EUR) &rarr; STRK (shares, cumulative) &rarr; STRD (shares, non-cumulative &mdash; can skip)' +
+        '<strong style="color:var(--text-secondary)">Distress cascade:</strong> All dividends paid in cash. If reserves depleted: skip STRD (non-cum, most junior) &rarr; skip STRC (non-cum) &rarr; sell BTC to cover cumulative obligations (STRF, STRE, STRK). Share issuance is a last resort, not modeled.' +
         '<br><br><strong style="color:var(--text-secondary)">Key defense:</strong> No convertible debt has early call provisions. Creditors cannot force liquidation regardless of BTC price.' +
         '</div>';
 }
 
 function renderAssumptions(inp) {
     $('assumptions').innerHTML =
-        '<strong>Assumptions:</strong> Capital structure frozen at snapshot (' + inp.snapshotDate + '). BTC price static across projection years. Share-payable dividends computed reflexively. Software income ~' + fmtB(inp.softwareIncome) + '/yr offsets cash drain. Non-cumulative instruments (STRC, STRD) skipped in distress. mNAV held constant. Convertible bond conversion mechanics excluded from v1.' +
+        '<strong>Assumptions:</strong> Capital structure frozen at snapshot (' + inp.snapshotDate + '). BTC price static across projection years. All preferred dividends paid in cash (current practice). Distress cascade: skip non-cumulative (STRD, STRC) then sell BTC for cumulative obligations. Software income ~' + fmtB(inp.softwareIncome) + '/yr offsets cash drain. mNAV held constant. Convertible bond conversion mechanics excluded from v1.' +
         '<br><br><strong>Data sources:</strong> BTC holdings, shares, capital structure from Google Sheet (updated after 8-K filings). Live BTC price from CoinGecko. Live MSTR price from Finnhub. ' +
         (sheetData?.strk_face_usd ? 'Preferred face values from live sheet data.' : 'Using pre-Q4 estimates &mdash; update after earnings.');
 }
