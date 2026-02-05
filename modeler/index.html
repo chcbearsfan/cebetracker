@@ -63,24 +63,21 @@
         }
 
         .container {
-            max-width: 1100px;
+            max-width: 680px;
             margin: 0 auto;
             padding: 24px 16px 60px;
             position: relative;
             z-index: 1;
         }
 
-        /* â•â•â• HEADER â•â•â• */
-        .header {
-            text-align: center;
-            margin-bottom: 32px;
-        }
+        /* ═══ HEADER ═══ */
+        .header { text-align: center; margin-bottom: 28px; }
         .nav-back {
             display: inline-block;
             font-size: 12px;
             color: var(--text-muted);
             text-decoration: none;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             letter-spacing: 1px;
             transition: color 0.2s;
         }
@@ -143,21 +140,26 @@
         }
         .live-price { color: var(--text-secondary); }
 
-        /* â•â•â• SCENARIO CARDS â•â•â• */
-        .scenarios {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding: 4px 0 12px;
-            margin-bottom: 24px;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
+        /* ═══ SCENARIO CARDS ═══ */
+        .scenarios-section { margin-bottom: 24px; }
+        .scenarios-label {
+            font-size: 9px;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: 600;
         }
-        .scenarios::-webkit-scrollbar { display: none; }
+        .scenarios {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        @media (max-width: 500px) {
+            .scenarios { grid-template-columns: repeat(2, 1fr); }
+        }
         .scenario-card {
-            flex: 0 0 auto;
-            min-width: 120px;
-            padding: 12px 16px;
+            padding: 14px 12px;
             border-radius: 12px;
             border: 1.5px solid var(--border-subtle);
             background: var(--bg-card);
@@ -176,25 +178,31 @@
             background: var(--orange-glow);
             box-shadow: 0 0 20px rgba(249,115,22,0.1);
         }
-        .scenario-icon { font-size: 20px; margin-bottom: 4px; }
+        .scenario-icon { font-size: 24px; margin-bottom: 4px; }
         .scenario-name {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             letter-spacing: 0.5px;
             margin-bottom: 2px;
         }
         .scenario-price {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 700;
             font-family: var(--mono);
             color: var(--orange-light);
         }
+        .scenario-mnav {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-family: var(--mono);
+            margin-top: 2px;
+        }
 
-        /* â•â•â• HERO â•â•â• */
+        /* ═══ HERO ═══ */
         .hero {
             text-align: center;
-            padding: 32px 20px;
-            margin-bottom: 24px;
+            padding: 28px 20px;
+            margin-bottom: 20px;
             background: linear-gradient(180deg, rgba(249,115,22,0.04) 0%, transparent 100%);
             border-radius: 20px;
             border: 1px solid rgba(249,115,22,0.1);
@@ -203,7 +211,7 @@
             font-size: 10px;
             letter-spacing: 3px;
             color: var(--text-muted);
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-weight: 500;
         }
         .hero-price {
@@ -229,19 +237,93 @@
             font-size: 11px;
             color: var(--text-muted);
         }
+        .hero-implied {
+            margin-top: 10px;
+            font-size: 12px;
+            font-family: var(--mono);
+            color: var(--text-secondary);
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-subtle);
+            display: inline-block;
+        }
+        .hero-implied em {
+            font-style: normal;
+            color: var(--orange-primary);
+            font-weight: 600;
+        }
 
-        /* â•â•â• METRICS ROW â•â•â• */
+        /* ═══ NARRATIVE PANEL ═══ */
+        .narrative {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .narrative-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .narrative-body {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .narr-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .narr-item.green {
+            background: var(--green-muted);
+            border: 1px solid rgba(34,197,94,0.2);
+            color: #86efac;
+        }
+        .narr-item.red {
+            background: var(--red-muted);
+            border: 1px solid rgba(239,68,68,0.2);
+            color: #fca5a5;
+        }
+        .narr-item.amber {
+            background: var(--yellow-muted);
+            border: 1px solid rgba(234,179,8,0.2);
+            color: #fde68a;
+        }
+        .narr-item.info {
+            background: rgba(56,189,248,0.08);
+            border: 1px solid rgba(56,189,248,0.2);
+            color: #7dd3fc;
+        }
+        .narr-item.neutral {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+        }
+        .narr-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+        .narr-text strong { color: var(--text-primary); }
+
+        /* ═══ METRICS ROW ═══ */
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
             gap: 8px;
-            margin-bottom: 28px;
+            margin-bottom: 20px;
         }
         .metric-card {
             background: var(--bg-card);
             border: 1px solid var(--border-subtle);
             border-radius: 10px;
-            padding: 12px;
+            padding: 12px 10px;
             text-align: center;
         }
         .metric-label {
@@ -252,7 +334,7 @@
             font-weight: 600;
         }
         .metric-value {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 700;
             font-family: var(--mono);
             line-height: 1.2;
@@ -267,25 +349,60 @@
         .metric-value.warn { color: var(--yellow); }
         .metric-value.good { color: var(--green); }
 
-        /* â•â•â• CONTROLS â•â•â• */
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 28px;
-        }
-        @media (max-width: 640px) {
-            .controls { grid-template-columns: 1fr; }
-        }
-        .control-card {
+        /* ═══ COLLAPSIBLE SECTIONS ═══ */
+        .collapse-section { margin-bottom: 12px; }
+        .collapse-section summary {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 16px;
             background: var(--bg-card);
             border: 1px solid var(--border-subtle);
             border-radius: 12px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            list-style: none;
+            user-select: none;
+        }
+        .collapse-section summary::-webkit-details-marker { display: none; }
+        .collapse-section summary:hover {
+            border-color: rgba(255,255,255,0.12);
+            color: var(--text-primary);
+        }
+        .collapse-section[open] summary {
+            border-radius: 12px 12px 0 0;
+            border-bottom-color: transparent;
+            color: var(--orange-primary);
+        }
+        .collapse-body {
             padding: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-top: none;
+            border-radius: 0 0 12px 12px;
         }
-        .control-card.full-width {
-            grid-column: 1 / -1;
+
+        /* ═══ CONTROLS ═══ */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
         }
+        @media (max-width: 500px) {
+            .controls-grid { grid-template-columns: 1fr; }
+        }
+        .control-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 14px;
+        }
+        .control-card.full-width { grid-column: 1 / -1; }
         .control-header {
             display: flex;
             justify-content: space-between;
@@ -304,16 +421,12 @@
             font-family: var(--mono);
             color: var(--orange-light);
         }
-        .slider-track {
-            position: relative;
-            margin-bottom: 8px;
-        }
         input[type="range"] {
             -webkit-appearance: none;
             width: 100%;
             height: 6px;
             border-radius: 3px;
-            background: linear-gradient(90deg, var(--orange-primary) 0%, #333 0%);
+            background: #333;
             outline: none;
             cursor: pointer;
         }
@@ -341,9 +454,8 @@
             font-size: 9px;
             color: #444;
             font-family: var(--mono);
+            margin-top: 4px;
         }
-
-        /* Time horizon + mNAV presets */
         .toggle-row {
             display: flex;
             gap: 6px;
@@ -393,17 +505,13 @@
             background: var(--orange-glow);
         }
 
-        /* â•â•â• WATERFALL â•â•â• */
+        /* ═══ WATERFALL ═══ */
         .waterfall {
             display: flex;
             align-items: center;
             gap: 4px;
             overflow-x: auto;
-            padding: 16px;
-            margin-bottom: 28px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: 12px;
+            padding: 12px;
             scrollbar-width: none;
         }
         .waterfall::-webkit-scrollbar { display: none; }
@@ -412,13 +520,12 @@
             text-align: center;
             padding: 8px 12px;
             border-radius: 8px;
-            min-width: 90px;
+            min-width: 85px;
         }
         .wf-step.btc-val { background: rgba(249,115,22,0.08); border: 1px solid rgba(249,115,22,0.2); }
         .wf-step.claims { background: var(--red-muted); border: 1px solid rgba(239,68,68,0.2); }
         .wf-step.nav { background: var(--green-muted); border: 1px solid rgba(34,197,94,0.2); }
         .wf-step.shares { background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); }
-        .wf-step.mnav-step { background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); }
         .wf-step.result { background: rgba(249,115,22,0.12); border: 1px solid var(--orange-border); }
         .wf-label {
             font-size: 8px;
@@ -427,7 +534,7 @@
             margin-bottom: 2px;
         }
         .wf-value {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
             font-family: var(--mono);
         }
@@ -437,27 +544,12 @@
             color: var(--text-muted);
         }
 
-        /* â•â•â• SECTIONS â•â•â• */
-        .section {
-            margin-bottom: 28px;
-        }
-        .section-title {
-            font-size: 14px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .section-title .icon { font-size: 16px; }
-
-        /* â•â•â• PROJECTION TABLE â•â•â• */
+        /* ═══ TABLE ═══ */
         .table-wrap {
             overflow-x: auto;
-            border-radius: 12px;
+            border-radius: 10px;
             border: 1px solid var(--border-subtle);
-            background: var(--bg-card);
+            background: var(--bg-secondary);
             scrollbar-width: thin;
             scrollbar-color: #333 transparent;
         }
@@ -493,16 +585,13 @@
             color: var(--text-secondary);
         }
         tbody tr:hover { background: rgba(255,255,255,0.02); }
-        tbody tr.status-green td:first-child { color: var(--green); }
-        tbody tr.status-amber td:first-child { color: var(--yellow); }
-        tbody tr.status-red td:first-child { color: var(--red); }
         .cell-red { color: var(--red) !important; }
         .cell-green { color: var(--green) !important; }
         .cell-amber { color: var(--yellow) !important; }
         .cell-muted { color: var(--text-muted) !important; }
         .cell-bold { font-weight: 700 !important; }
 
-        /* â•â•â• SENSITIVITY MATRIX â•â•â• */
+        /* ═══ SENSITIVITY MATRIX ═══ */
         .matrix-table {
             width: 100%;
             border-collapse: collapse;
@@ -539,71 +628,7 @@
         .matrix-cell-gold { color: #fbbf24; background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2); }
         .matrix-cell-current { outline: 2px solid var(--orange-primary); outline-offset: -2px; border-radius: 4px; }
 
-        /* â•â•â• WARNINGS â•â•â• */
-        .warnings { margin-bottom: 24px; }
-        .warning-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            padding: 12px 16px;
-            border-radius: 10px;
-            margin-bottom: 8px;
-            font-size: 13px;
-            line-height: 1.5;
-        }
-        .warning-item.red {
-            background: var(--red-muted);
-            border: 1px solid rgba(239,68,68,0.25);
-            color: #fca5a5;
-        }
-        .warning-item.amber {
-            background: var(--yellow-muted);
-            border: 1px solid rgba(234,179,8,0.25);
-            color: #fde68a;
-        }
-        .warning-item.info {
-            background: rgba(56,189,248,0.08);
-            border: 1px solid rgba(56,189,248,0.2);
-            color: #7dd3fc;
-        }
-        .warning-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-
-        /* â•â•â• CUSTOMIZE EXPANDER â•â•â• */
-        .customize {
-            margin-bottom: 28px;
-        }
-        .customize summary {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 14px 16px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            letter-spacing: 0.5px;
-            transition: all 0.2s;
-            list-style: none;
-        }
-        .customize summary::-webkit-details-marker { display: none; }
-        .customize summary:hover {
-            border-color: rgba(255,255,255,0.12);
-            color: var(--text-primary);
-        }
-        .customize[open] summary {
-            border-radius: 12px 12px 0 0;
-            border-bottom-color: transparent;
-        }
-        .customize-body {
-            padding: 20px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-top: none;
-            border-radius: 0 0 12px 12px;
-        }
+        /* ═══ PREFERRED STACK TABLE ═══ */
         .pref-stack {
             width: 100%;
             border-collapse: collapse;
@@ -625,17 +650,17 @@
             border-bottom: 1px solid rgba(255,255,255,0.03);
         }
         .pref-stack td:first-child { font-weight: 600; color: var(--text-secondary); }
-        .badge-cash { 
-            font-size: 9px; padding: 2px 6px; border-radius: 4px; 
+        .badge-cash {
+            font-size: 9px; padding: 2px 6px; border-radius: 4px;
             background: rgba(239,68,68,0.12); color: #fca5a5; font-weight: 600;
         }
-        .badge-shares { 
-            font-size: 9px; padding: 2px 6px; border-radius: 4px; 
+        .badge-shares {
+            font-size: 9px; padding: 2px 6px; border-radius: 4px;
             background: rgba(34,197,94,0.12); color: #86efac; font-weight: 600;
         }
         .badge-cum { font-size: 9px; color: var(--text-muted); }
 
-        /* â•â•â• ASSUMPTIONS â•â•â• */
+        /* ═══ ASSUMPTIONS ═══ */
         .assumptions {
             padding: 14px 16px;
             background: rgba(255,255,255,0.02);
@@ -644,17 +669,18 @@
             font-size: 11px;
             color: var(--text-muted);
             line-height: 1.6;
-            margin-bottom: 28px;
+            margin-top: 16px;
         }
         .assumptions strong { color: var(--text-secondary); }
 
-        /* â•â•â• FOOTER â•â•â• */
+        /* ═══ FOOTER ═══ */
         .footer {
             text-align: center;
             padding-top: 24px;
             border-top: 1px solid var(--border-subtle);
             font-size: 11px;
             color: var(--text-muted);
+            margin-top: 24px;
         }
         .footer a { color: var(--orange-primary); text-decoration: none; }
         .footer a:hover { text-decoration: underline; }
@@ -665,7 +691,7 @@
             margin-top: 8px;
         }
 
-        /* â•â•â• LOADING â•â•â• */
+        /* ═══ LOADING ═══ */
         .loading-screen {
             position: fixed;
             inset: 0;
@@ -687,16 +713,12 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         .loading-text { font-size: 12px; color: var(--text-muted); letter-spacing: 2px; }
 
-        /* â•â•â• RESPONSIVE â•â•â• */
+        /* ═══ RESPONSIVE ═══ */
         @media (max-width: 768px) {
             .hero-price { font-size: 48px; }
-            .metrics-grid { grid-template-columns: repeat(3, 1fr); }
-            .wf-step { min-width: 70px; padding: 6px 8px; }
-            .wf-value { font-size: 11px; }
         }
         @media (max-width: 480px) {
             .hero-price { font-size: 40px; }
-            .metrics-grid { grid-template-columns: repeat(2, 1fr); }
             .control-value { font-size: 16px; }
             .logo-main { font-size: 24px; letter-spacing: 10px; padding-left: 10px; }
         }
@@ -713,97 +735,113 @@
 
     <!-- Header -->
     <div class="header">
-        <a href="/" class="nav-back">â† cebetracker.io</a>
+        <a href="/" class="nav-back">&larr; cebetracker.io</a>
         <div class="logo-row">
             <div class="logo-main">CEBE</div>
             <div class="logo-badge">MSTR MODELER</div>
         </div>
-        <div class="header-sub">What's your MSTR worth? Pick a scenario. See the math.</div>
+        <div class="header-sub">Pick a scenario. See what your MSTR is worth.</div>
         <div class="live-strip" id="liveStrip">
             <span><span class="live-dot"></span> Live Data</span>
-            <span class="live-price" id="liveBtcDisplay">BTC $â€”</span>
-            <span class="live-price" id="liveMstrDisplay">MSTR $â€”</span>
-            <span class="live-price" id="liveDataDate">â€”</span>
+            <span class="live-price" id="liveBtcDisplay">BTC $&mdash;</span>
+            <span class="live-price" id="liveMstrDisplay">MSTR $&mdash;</span>
+            <span class="live-price" id="liveDataDate">&mdash;</span>
         </div>
     </div>
 
     <!-- Scenario Cards -->
-    <div class="scenarios" id="scenarioBar"></div>
+    <div class="scenarios-section">
+        <div class="scenarios-label">CHOOSE A SCENARIO</div>
+        <div class="scenarios" id="scenarioBar"></div>
+    </div>
 
     <!-- Hero -->
     <div class="hero">
         <div class="hero-label">MODELED MSTR SHARE PRICE</div>
-        <div class="hero-price neutral" id="heroPrice">$â€”</div>
-        <div class="hero-change" id="heroChange">â€”</div>
+        <div class="hero-price neutral" id="heroPrice">$&mdash;</div>
+        <div class="hero-change" id="heroChange">&mdash;</div>
         <div class="hero-vs" id="heroVs">vs current market price</div>
+        <div class="hero-implied" id="heroImplied" style="display:none">
+            Market implies <em id="impliedMnavVal">&mdash;</em> mNAV
+        </div>
     </div>
 
-    <!-- Metrics -->
+    <!-- Narrative Panel -->
+    <div class="narrative" id="narrativePanel">
+        <div class="narrative-title" id="narrativeTitle">&#128269; What happens here</div>
+        <div class="narrative-body" id="narrativeBody"></div>
+    </div>
+
+    <!-- Key Metrics -->
     <div class="metrics-grid" id="metricsGrid"></div>
 
-    <!-- Controls -->
-    <div class="controls">
-        <div class="control-card">
-            <div class="control-header">
-                <span class="control-label">BTC PRICE</span>
-                <span class="control-value" id="btcPriceDisplay">$â€”</span>
+    <!-- Advanced Controls (collapsed) -->
+    <details class="collapse-section" id="controlsSection">
+        <summary>&#9881; Adjust Inputs</summary>
+        <div class="collapse-body">
+            <div class="controls-grid">
+                <div class="control-card">
+                    <div class="control-header">
+                        <span class="control-label">BTC PRICE</span>
+                        <span class="control-value" id="btcPriceDisplay">$&mdash;</span>
+                    </div>
+                    <input type="range" id="btcSlider" min="20000" max="1000000" step="1000" value="100000">
+                    <div class="slider-labels"><span>$20K</span><span>$500K</span><span>$1M</span></div>
+                </div>
+                <div class="control-card">
+                    <div class="control-header">
+                        <span class="control-label">mNAV MULTIPLE</span>
+                        <span class="control-value" id="mnavDisplay">1.00&times;</span>
+                    </div>
+                    <input type="range" id="mnavSlider" min="30" max="400" value="100">
+                    <div class="mnav-presets" id="mnavPresets"></div>
+                </div>
+                <div class="control-card full-width">
+                    <div class="control-header">
+                        <span class="control-label">TIME HORIZON</span>
+                        <span class="control-value" id="horizonDisplay">Now</span>
+                    </div>
+                    <div class="toggle-row" id="horizonBar"></div>
+                </div>
             </div>
-            <div class="slider-track">
-                <input type="range" id="btcSlider" min="0" max="1000" value="500">
+        </div>
+    </details>
+
+    <!-- Value Waterfall (collapsed) -->
+    <details class="collapse-section">
+        <summary>&#128256; Value Waterfall</summary>
+        <div class="collapse-body" style="padding:0;">
+            <div class="waterfall" id="waterfall"></div>
+        </div>
+    </details>
+
+    <!-- Year-by-Year Projection (collapsed, shows only if horizon > 0) -->
+    <details class="collapse-section" id="projectionSection" style="display:none">
+        <summary>&#128197; Year-by-Year Projection</summary>
+        <div class="collapse-body" style="padding:0;">
+            <div class="table-wrap">
+                <table id="projectionTable">
+                    <thead id="projHead"></thead>
+                    <tbody id="projBody"></tbody>
+                </table>
             </div>
-            <div class="slider-labels"><span>$10K</span><span>$100K</span><span>$1M</span></div>
         </div>
-        <div class="control-card">
-            <div class="control-header">
-                <span class="control-label">mNAV MULTIPLE</span>
-                <span class="control-value" id="mnavDisplay">1.00Ã—</span>
+    </details>
+
+    <!-- Sensitivity Matrix (collapsed) -->
+    <details class="collapse-section">
+        <summary>&#127919; Price Sensitivity Matrix</summary>
+        <div class="collapse-body" style="padding:0;">
+            <div class="table-wrap">
+                <table class="matrix-table" id="matrixTable"></table>
             </div>
-            <div class="slider-track">
-                <input type="range" id="mnavSlider" min="30" max="400" value="100">
-            </div>
-            <div class="mnav-presets" id="mnavPresets"></div>
         </div>
-        <div class="control-card full-width">
-            <div class="control-header">
-                <span class="control-label">TIME HORIZON</span>
-                <span class="control-value" id="horizonDisplay">Now</span>
-            </div>
-            <div class="toggle-row" id="horizonBar"></div>
-        </div>
-    </div>
+    </details>
 
-    <!-- Value Waterfall -->
-    <div class="section">
-        <div class="section-title"><span class="icon">ðŸ”€</span> Value Waterfall</div>
-        <div class="waterfall" id="waterfall"></div>
-    </div>
-
-    <!-- Year-by-Year Projection -->
-    <div class="section" id="projectionSection" style="display:none">
-        <div class="section-title"><span class="icon">ðŸ“…</span> Year-by-Year Projection</div>
-        <div class="table-wrap">
-            <table id="projectionTable">
-                <thead id="projHead"></thead>
-                <tbody id="projBody"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Sensitivity Matrix -->
-    <div class="section">
-        <div class="section-title"><span class="icon">ðŸŽ¯</span> Price Sensitivity Matrix <span style="font-size:10px;color:var(--text-muted);font-weight:400">(BTC Price Ã— mNAV)</span></div>
-        <div class="table-wrap">
-            <table class="matrix-table" id="matrixTable"></table>
-        </div>
-    </div>
-
-    <!-- Warnings -->
-    <div class="warnings" id="warnings"></div>
-
-    <!-- Customize -->
-    <details class="customize" id="customizePanel">
-        <summary>âš™ Capital Structure &amp; Preferred Stack</summary>
-        <div class="customize-body" id="customizeBody"></div>
+    <!-- Capital Structure (collapsed) -->
+    <details class="collapse-section" id="customizePanel">
+        <summary>&#9881; Capital Structure &amp; Preferred Stack</summary>
+        <div class="collapse-body" id="customizeBody"></div>
     </details>
 
     <!-- Assumptions -->
@@ -811,25 +849,26 @@
 
     <!-- Footer -->
     <div class="footer">
-        <p>CEBE Framework by <a href="https://x.com/chcbearsfan" target="_blank">@chcbearsfan</a> Â· <a href="/" >cebetracker.io</a></p>
-        <p style="margin-top:4px">Data updates after each 8-K filing Â· Not financial advice</p>
-        <p class="footer-formula">Share Price = CEBE Ã— BTC Price Ã— mNAV</p>
+        <p>CEBE Framework by <a href="https://x.com/chcbearsfan" target="_blank">@chcbearsfan</a> &middot; <a href="/">cebetracker.io</a></p>
+        <p style="margin-top:4px">Data updates after each 8-K filing &middot; Not financial advice</p>
+        <p class="footer-formula">Share Price = CEBE &times; BTC Price &times; mNAV</p>
     </div>
 
 </div>
 
 <script>
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// CEBE MSTR SHARE PRICE MODELER
+// ═══════════════════════════════════════════════════════════════
+// CEBE MSTR SHARE PRICE MODELER v2
 // cebetracker.io/modeler
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// Scenario-first, narrative-driven redesign
+// ═══════════════════════════════════════════════════════════════
 
-// â”€â”€â”€ CONFIG â”€â”€â”€
+// ─── CONFIG ───
 const SHEET_ID = '1BNsCWGVU08PDinDcfzJccqcuj9_KrK1VZGETErzBZvg';
 const SNAPSHOTS_GID = '771405586';
 const FINNHUB_API_KEY = 'd5tuehhr01qtjet1d7k0d5tuehhr01qtjet1d7kg';
 
-// Preferred instrument terms (contract terms â€” don't change)
+// Preferred instrument terms
 const PREF_INSTRUMENTS = [
     { id: 'strf', name: 'STRF', rate: 0.10,   payment: 'cash',   cumulative: true,  currency: 'USD', seniority: 1 },
     { id: 'strc', name: 'STRC', rate: 0.1125, payment: 'cash',   cumulative: false, currency: 'USD', seniority: 2 },
@@ -838,7 +877,7 @@ const PREF_INSTRUMENTS = [
     { id: 'strd', name: 'STRD', rate: 0.10,   payment: 'shares', cumulative: false, currency: 'USD', seniority: 5 },
 ];
 
-// Fallback defaults (pre-Q4 estimates â€” replaced by sheet data when available)
+// Fallback defaults
 const DEFAULTS = {
     btc_holdings: 713502,
     shares_outstanding: 365000000,
@@ -852,18 +891,18 @@ const DEFAULTS = {
     stre_face_eur: 775000000,
     eurusd_rate: 1.04,
     software_income_usd: 75000000,
-    btc_price: 71400,
-    mstr_price: 132,
+    btc_price: 97000,
+    mstr_price: 340,
 };
 
-// Scenario presets
+// Scenarios
 const SCENARIOS = [
-    { id: 'wipeout',      icon: 'ðŸ’€', name: 'Wipeout',      btc: 25000,  mnav: 0.5, horizon: 5  },
-    { id: 'capitulation', icon: 'ðŸ»', name: 'Capitulation', btc: 50000,  mnav: 0.7, horizon: 3  },
-    { id: 'current',      icon: 'ðŸ“', name: 'Current',      btc: null,   mnav: 1.0, horizon: 0  },
-    { id: 'recovery',     icon: 'ðŸ”„', name: 'Recovery',     btc: 100000, mnav: 1.2, horizon: 1  },
-    { id: 'bull',         icon: 'ðŸ‚', name: 'Bull',         btc: 200000, mnav: 1.5, horizon: 3  },
-    { id: 'moon',         icon: 'ðŸš€', name: 'Moon Math',    btc: 500000, mnav: 2.0, horizon: 5  },
+    { id: 'wipeout',      icon: '&#128128;', name: 'Wipeout',      btc: 25000,  mnav: 0.5, horizon: 5  },
+    { id: 'capitulation', icon: '&#128059;', name: 'Capitulation', btc: 50000,  mnav: 0.7, horizon: 3  },
+    { id: 'current',      icon: '&#128205;', name: 'Current',      btc: null,   mnav: 1.0, horizon: 0  },
+    { id: 'recovery',     icon: '&#128260;', name: 'Recovery',     btc: 150000, mnav: 1.2, horizon: 1  },
+    { id: 'bull',         icon: '&#128002;', name: 'Bull Run',     btc: 250000, mnav: 1.5, horizon: 3  },
+    { id: 'moon',         icon: '&#128640;', name: 'Moon Math',    btc: 500000, mnav: 2.0, horizon: 5  },
 ];
 
 const HORIZON_OPTIONS = [
@@ -875,27 +914,19 @@ const HORIZON_OPTIONS = [
 ];
 
 const MNAV_PRESETS = [0.5, 0.75, 1.0, 1.5, 2.0, 3.0];
-
 const MATRIX_BTC_PRICES = [25000, 50000, 75000, 100000, 150000, 200000, 300000, 500000];
 const MATRIX_MNAVS = [0.5, 0.75, 1.0, 1.5, 2.0, 3.0];
 
-// Log slider mapping: 0-1000 â†’ $10K-$1M
-const LOG_MIN = Math.log(10000);
-const LOG_MAX = Math.log(1000000);
-
-function sliderToPrice(val) { return Math.round(Math.exp(LOG_MIN + (val / 1000) * (LOG_MAX - LOG_MIN))); }
-function priceToSlider(price) { return Math.round(1000 * (Math.log(Math.max(10000, Math.min(1000000, price))) - LOG_MIN) / (LOG_MAX - LOG_MIN)); }
-
-// â”€â”€â”€ STATE â”€â”€â”€
-let sheetData = null;        // Raw MSTR snapshot from Google Sheet
-let liveBtcPrice = null;     // From CoinGecko
-let liveMstrPrice = null;    // From Finnhub
+// ─── STATE ───
+let sheetData = null;
+let liveBtcPrice = null;
+let liveMstrPrice = null;
 let btcPrice = DEFAULTS.btc_price;
 let mnavMultiple = 1.0;
 let horizonYears = 0;
 let activeScenario = 'current';
 
-// â”€â”€â”€ HELPERS â”€â”€â”€
+// ─── HELPERS ───
 const $ = id => document.getElementById(id);
 const fmt = n => Math.round(n).toLocaleString('en-US');
 const fmtB = n => n >= 1e9 ? '$' + (n/1e9).toFixed(1) + 'B' : n >= 1e6 ? '$' + (n/1e6).toFixed(0) + 'M' : '$' + fmt(n);
@@ -903,13 +934,12 @@ const fmtPrice = p => {
     if (p >= 1e6) return '$' + (p/1e6).toFixed(1) + 'M';
     if (p >= 1000) return '$' + fmt(p);
     if (p >= 1) return '$' + p.toFixed(2);
-    if (p >= 0) return '$' + p.toFixed(2);
     return '$0.00';
 };
 const fmtPct = (p, dec=1) => (p * 100).toFixed(dec) + '%';
 const fmtSats = s => fmt(Math.round(s));
 
-// â”€â”€â”€ CSV PARSER (matches main site) â”€â”€â”€
+// ─── CSV PARSER ───
 function parseCSVLine(line) {
     const r = []; let c = '', q = false;
     for (const ch of line) { if (ch === '"') q = !q; else if (ch === ',' && !q) { r.push(c); c = ''; } else c += ch; }
@@ -926,7 +956,7 @@ function parseCSV(text) {
     });
 }
 
-// â”€â”€â”€ DATA LOADING â”€â”€â”€
+// ─── DATA LOADING ───
 async function loadData() {
     try {
         const [btcRes, sheetText, mstrStockPrice] = await Promise.all([
@@ -937,7 +967,6 @@ async function loadData() {
             fetchStockPrice('MSTR'),
         ]);
 
-        // Parse sheet, get latest MSTR snapshot
         const rows = parseCSV(sheetText);
         let mstrRow = null;
         rows.forEach(r => {
@@ -945,21 +974,17 @@ async function loadData() {
                 if (!mstrRow || r.snapshot_date > mstrRow.snapshot_date) mstrRow = r;
             }
         });
-
         if (mstrRow) sheetData = mstrRow;
 
         liveBtcPrice = btcRes?.bitcoin?.usd || null;
         liveMstrPrice = mstrStockPrice;
 
-        // Set initial BTC price from live data
         btcPrice = liveBtcPrice || parseFloat(sheetData?.btc_price) || DEFAULTS.btc_price;
         SCENARIOS.find(s => s.id === 'current').btc = btcPrice;
 
-        // Show app
         $('loadingScreen').style.display = 'none';
         $('app').style.display = 'block';
 
-        // Build UI
         buildScenarioBar();
         buildHorizonBar();
         buildMnavPresets();
@@ -967,26 +992,21 @@ async function loadData() {
         render();
     } catch (err) {
         console.error('Load failed:', err);
-        $('loadingScreen').innerHTML = `
-            <div style="text-align:center;color:#a1a1aa;font-size:13px">
-                <p style="margin-bottom:12px">Failed to load data</p>
-                <p style="font-size:11px;color:#52525b">${err.message}</p>
-                <p style="margin-top:12px"><a href="/" style="color:#f97316">â† Back to cebetracker.io</a></p>
-            </div>`;
+        $('loadingScreen').innerHTML = '<div style="text-align:center;color:#a1a1aa;font-size:13px"><p style="margin-bottom:12px">Failed to load data</p><p style="font-size:11px;color:#52525b">' + err.message + '</p><p style="margin-top:12px"><a href="/" style="color:#f97316">&larr; Back to cebetracker.io</a></p></div>';
     }
 }
 
 async function fetchStockPrice(symbol) {
     if (!FINNHUB_API_KEY || FINNHUB_API_KEY === 'YOUR_FINNHUB_KEY_HERE') return null;
     try {
-        const res = await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_API_KEY}`);
+        const res = await fetch('https://finnhub.io/api/v1/quote?symbol=' + symbol + '&token=' + FINNHUB_API_KEY);
         const data = await res.json();
         if (data.c && data.c > 0) return data.c;
     } catch (e) { console.error('Finnhub failed:', e); }
     return null;
 }
 
-// â”€â”€â”€ GET FIELD VALUE (sheet â†’ fallback) â”€â”€â”€
+// ─── GET FIELD VALUE ───
 function getVal(field, fallback) {
     if (sheetData && sheetData[field] !== undefined && sheetData[field] !== '') {
         const v = parseFloat(sheetData[field]);
@@ -1009,11 +1029,11 @@ function getInputs() {
         streFaceEur:    getVal('stre_face_eur', DEFAULTS.stre_face_eur),
         eurusd:         getVal('eurusd_rate', DEFAULTS.eurusd_rate),
         softwareIncome: getVal('software_income_usd', DEFAULTS.software_income_usd),
-        snapshotDate:   sheetData?.snapshot_date || 'â€”',
+        snapshotDate:   sheetData?.snapshot_date || '&mdash;',
     };
 }
 
-// â”€â”€â”€ CEBE MATH ENGINE â”€â”€â”€
+// ─── CEBE MATH ENGINE ───
 function calcCEBE(btcHoldings, shares, netClaimsUsd, btcPriceInput) {
     const p = btcPriceInput || btcPrice;
     const netClaimsBtc = p > 0 ? Math.max(0, netClaimsUsd / p) : 0;
@@ -1027,162 +1047,97 @@ function calcCEBE(btcHoldings, shares, netClaimsUsd, btcPriceInput) {
     const navUsd = Math.max(0, (btcHoldings * p) - netClaimsUsd);
     const navPerShare = shares > 0 ? navUsd / shares : 0;
     const modeledPrice = navPerShare * mnavMultiple;
-    const cashRunway = null; // calculated separately in projection
-
     return { commonBtc, cebeSats, cebeBtc, bpsSats, drag, amp, breakEven, navUsd, navPerShare, modeledPrice, btcHoldings, shares, netClaimsUsd };
 }
 
-// â”€â”€â”€ YEAR-BY-YEAR PROJECTION ENGINE â”€â”€â”€
+// ─── YEAR-BY-YEAR PROJECTION ───
 function projectYears(years) {
     const inp = getInputs();
     let btcH = inp.btcHoldings;
     let shares = inp.shares;
     let cash = inp.cashUsd;
     const debt = inp.debtUsd;
-
-    // Preferred face values
-    let strkF = inp.strkFace;
-    let strfF = inp.strfFace;
-    let strdF = inp.strdFace;
-    let strcF = inp.strcFace;
-    let streF_eur = inp.streFaceEur;
+    let strkF = inp.strkFace, strfF = inp.strfFace, strdF = inp.strdFace;
+    let strcF = inp.strcFace, streF_eur = inp.streFaceEur;
     const eurusd = inp.eurusd;
     const softIncome = inp.softwareIncome;
-
     const streF_usd = streF_eur * eurusd;
-    const totalPrefFace = strkF + strfF + strdF + strcF + streF_usd;
-
     const results = [];
 
     for (let y = 0; y <= years; y++) {
-        // Calculate net claims
-        const prefUsd = strkF + strfF + strdF + strcF + streF_usd;
+        const prefUsd = strkF + strfF + strdF + strcF + streF_eur * eurusd;
         const netClaims = debt + prefUsd - cash;
         const m = calcCEBE(btcH, shares, netClaims, btcPrice);
-
-        let status = 'green';
-        let btcSold = 0;
-        let strcSkipped = false;
-        let strdSkipped = false;
+        let status = 'green', btcSold = 0, strcSkipped = false, strdSkipped = false;
         let newSharesFromDiv = 0;
-        let cashDivPaid = 0;
-        let shareDivPaid = 0;
 
         if (y === 0) {
-            // Year 0 = current state, no dividends yet
             const cashDivAnnual = strfF * 0.10 + strcF * 0.1125 + streF_eur * eurusd * 0.10;
             const netDrain = cashDivAnnual - softIncome;
             const runway = netDrain > 0 ? cash / netDrain : Infinity;
-
-            results.push({
-                year: y, btcH, shares, cebeSats: m.cebeSats, drag: m.drag, 
-                navPerShare: m.navPerShare, modeledPrice: m.modeledPrice,
-                cash, btcSold: 0, status: 'green', newShares: 0,
-                amp: m.amp, breakEven: m.breakEven, cashRunway: runway,
-            });
+            results.push({ year: y, btcH, shares, cebeSats: m.cebeSats, drag: m.drag, navPerShare: m.navPerShare, modeledPrice: m.modeledPrice, cash, btcSold: 0, status: 'green', newShares: 0, amp: m.amp, breakEven: m.breakEven, cashRunway: runway });
             continue;
         }
 
-        // â”€â”€ Step 1: Cash-only dividends â”€â”€
-        const strfDiv = strfF * 0.10;
-        const strcDiv = strcF * 0.1125;
-        const streDiv = streF_eur * eurusd * 0.10;
+        // Cash-only dividends
+        const strfDiv = strfF * 0.10, strcDiv = strcF * 0.1125, streDiv = streF_eur * eurusd * 0.10;
         const totalCashDiv = strfDiv + strcDiv + streDiv;
-        const netCashDrain = totalCashDiv - softIncome;
+        cash -= (totalCashDiv - softIncome);
 
-        cash -= netCashDrain;
-        cashDivPaid = totalCashDiv;
-
-        if (cash >= 0) {
-            status = 'green';
-        } else {
-            // Try skipping STRC (non-cumulative)
-            cash += strcDiv;
-            strcSkipped = true;
-            cashDivPaid -= strcDiv;
-
-            if (cash >= 0) {
-                status = 'amber';
-            } else {
-                // Must sell BTC to cover cumulative cash obligations
+        if (cash >= 0) { status = 'green'; }
+        else {
+            cash += strcDiv; strcSkipped = true;
+            if (cash >= 0) { status = 'amber'; }
+            else {
                 const deficit = Math.abs(cash);
                 btcSold = btcPrice > 0 ? deficit / btcPrice : 0;
                 btcH = Math.max(0, btcH - btcSold);
-                cash = 0;
-                status = 'red';
+                cash = 0; status = 'red';
             }
         }
 
-        // â”€â”€ Step 2: Share-payable dividends (reflexive) â”€â”€
+        // Share-payable dividends (reflexive)
         const strkDiv = strkF * 0.08;
         let strdDiv = strdF * 0.10;
-        
-        // Skip STRD if distressed (non-cumulative)
-        if (status !== 'green') {
-            strdDiv = 0;
-            strdSkipped = true;
-        }
-
+        if (status !== 'green') { strdDiv = 0; strdSkipped = true; }
         const totalShareDiv = strkDiv + strdDiv;
-        shareDivPaid = totalShareDiv;
 
-        // Recalculate with updated BTC holdings
         const updatedNetClaims = debt + (strkF + strfF + strdF + strcF + streF_eur * eurusd) - cash;
         const commonBtcNow = Math.max(0, btcH - (btcPrice > 0 ? updatedNetClaims / btcPrice : 0));
 
         if (totalShareDiv > 0 && commonBtcNow > 0 && shares > 0 && btcPrice > 0) {
-            // Closed-form reflexive solution:
-            // newShares = D Ã— S / (C Ã— P Ã— m - D)
             const denom = commonBtcNow * btcPrice * mnavMultiple - totalShareDiv;
-            if (denom > 0) {
-                newSharesFromDiv = totalShareDiv * shares / denom;
-            } else {
-                // Can't cover â€” wipeout territory
-                newSharesFromDiv = shares * 10; // massive dilution indicator
-                status = 'red';
-            }
+            if (denom > 0) { newSharesFromDiv = totalShareDiv * shares / denom; }
+            else { newSharesFromDiv = shares * 10; status = 'red'; }
         }
-
         shares += newSharesFromDiv;
 
-        // â”€â”€ Step 3: Recalculate final metrics â”€â”€
         const finalNetClaims = debt + (strkF + strfF + strdF + strcF + streF_eur * eurusd) - cash;
         const finalM = calcCEBE(btcH, shares, finalNetClaims, btcPrice);
-
         const cashDivNext = strfF * 0.10 + (strcSkipped ? 0 : strcF * 0.1125) + streF_eur * eurusd * 0.10;
         const netDrainNext = cashDivNext - softIncome;
         const runway = netDrainNext > 0 ? cash / netDrainNext : (cash > 0 ? Infinity : 0);
 
-        results.push({
-            year: y, btcH, shares, cebeSats: finalM.cebeSats, drag: finalM.drag,
-            navPerShare: finalM.navPerShare, modeledPrice: finalM.modeledPrice,
-            cash, btcSold, status, newShares: newSharesFromDiv,
-            amp: finalM.amp, breakEven: finalM.breakEven, cashRunway: runway,
-            strcSkipped, strdSkipped,
-        });
+        results.push({ year: y, btcH, shares, cebeSats: finalM.cebeSats, drag: finalM.drag, navPerShare: finalM.navPerShare, modeledPrice: finalM.modeledPrice, cash, btcSold, status, newShares: newSharesFromDiv, amp: finalM.amp, breakEven: finalM.breakEven, cashRunway: runway, strcSkipped, strdSkipped });
     }
-
     return results;
 }
 
-// â”€â”€â”€ QUICK CALC (for sensitivity matrix â€” no time projection) â”€â”€â”€
+// ─── QUICK CALC (for sensitivity matrix) ───
 function quickCalc(btcP, mnav) {
     const inp = getInputs();
     const streUsd = inp.streFaceEur * inp.eurusd;
     const prefUsd = inp.strkFace + inp.strfFace + inp.strdFace + inp.strcFace + streUsd;
     const netClaims = inp.debtUsd + prefUsd - inp.cashUsd;
-    const netClaimsBtc = btcP > 0 ? Math.max(0, netClaims / btcP) : 0;
-    const commonBtc = Math.max(0, inp.btcHoldings - netClaimsBtc);
-    const navPerShare = inp.shares > 0 ? (commonBtc * btcP) / inp.shares : 0;
-    // Subtract the claims from total BTC value more precisely
     const nav = Math.max(0, (inp.btcHoldings * btcP) - netClaims);
     const navPS = inp.shares > 0 ? nav / inp.shares : 0;
     return navPS * mnav;
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// UI RENDERING
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+// ═══════════════════════════════════════════════════════════════
+// RENDERING
+// ═══════════════════════════════════════════════════════════════
 
 function render() {
     const inp = getInputs();
@@ -1190,28 +1145,24 @@ function render() {
     const prefUsd = inp.strkFace + inp.strfFace + inp.strdFace + inp.strcFace + streUsd;
     const netClaims = inp.debtUsd + prefUsd - inp.cashUsd;
 
-    // Get projection
     const proj = projectYears(horizonYears);
     const current = proj[0];
     const final = proj[proj.length - 1];
-
-    // Current market price
     const marketPrice = liveMstrPrice || DEFAULTS.mstr_price;
 
-    // Render hero
     renderHero(final, marketPrice);
+    renderNarrative(final, current, inp, marketPrice);
     renderMetrics(final, current, inp);
     renderWaterfall(final, inp);
     renderProjectionTable(proj);
     renderSensitivityMatrix();
-    renderWarnings(final, current);
     renderCustomize(inp, prefUsd, streUsd);
     renderAssumptions(inp);
 
     // Live strip
-    $('liveBtcDisplay').textContent = `BTC ${fmtPrice(liveBtcPrice || btcPrice)}`;
-    $('liveMstrDisplay').textContent = `MSTR ${fmtPrice(marketPrice)}`;
-    $('liveDataDate').textContent = inp.snapshotDate !== 'â€”' ? `Data: ${inp.snapshotDate}` : '';
+    $('liveBtcDisplay').textContent = 'BTC ' + fmtPrice(liveBtcPrice || btcPrice);
+    $('liveMstrDisplay').textContent = 'MSTR ' + fmtPrice(marketPrice);
+    $('liveDataDate').textContent = inp.snapshotDate !== '&mdash;' ? 'Data: ' + inp.snapshotDate : '';
 
     updateSliderFills();
 }
@@ -1219,50 +1170,121 @@ function render() {
 function renderHero(final, marketPrice) {
     const price = final.modeledPrice;
     const el = $('heroPrice');
-    
+
     if (price <= 0 || !isFinite(price)) {
         el.textContent = '$0.00';
         el.className = 'hero-price negative';
-        $('heroChange').textContent = 'âˆ’100%';
+        $('heroChange').textContent = '\u2212100%';
         $('heroChange').className = 'hero-change down';
-        $('heroVs').textContent = `common equity wiped out`;
+        $('heroVs').textContent = 'common equity wiped out';
+        $('heroImplied').style.display = 'none';
         return;
     }
 
     el.textContent = fmtPrice(price);
-    
     const pctChange = ((price - marketPrice) / marketPrice);
     const sign = pctChange >= 0 ? '+' : '';
-    $('heroChange').textContent = `${sign}${(pctChange * 100).toFixed(1)}% (${sign}$${Math.abs(price - marketPrice).toFixed(2)})`;
+    $('heroChange').textContent = sign + (pctChange * 100).toFixed(1) + '% (' + sign + '$' + Math.abs(price - marketPrice).toFixed(2) + ')';
     $('heroChange').className = 'hero-change ' + (pctChange >= 0 ? 'up' : 'down');
     el.className = 'hero-price ' + (pctChange > 0.05 ? 'positive' : pctChange < -0.05 ? 'negative' : 'neutral');
-    $('heroVs').textContent = `vs MSTR market ${fmtPrice(marketPrice)} Â· ${horizonYears > 0 ? `Year ${horizonYears} projection` : 'at current inputs'}`;
+    $('heroVs').textContent = 'vs MSTR market ' + fmtPrice(marketPrice) + ' \u00b7 ' + (horizonYears > 0 ? 'Year ' + horizonYears + ' projection' : 'at current inputs');
+
+    // Implied mNAV
+    const inp = getInputs();
+    const streUsd = inp.streFaceEur * inp.eurusd;
+    const prefUsd = inp.strkFace + inp.strfFace + inp.strdFace + inp.strcFace + streUsd;
+    const netClaimsVal = inp.debtUsd + prefUsd - inp.cashUsd;
+    const navNow = Math.max(0, (inp.btcHoldings * btcPrice) - netClaimsVal);
+    const navPsNow = inp.shares > 0 ? navNow / inp.shares : 0;
+    if (navPsNow > 0 && marketPrice > 0) {
+        const impliedMnav = marketPrice / navPsNow;
+        $('impliedMnavVal').textContent = impliedMnav.toFixed(2) + '\u00d7';
+        $('heroImplied').style.display = 'inline-block';
+    } else {
+        $('heroImplied').style.display = 'none';
+    }
+}
+
+// ─── NARRATIVE PANEL ───
+function renderNarrative(final, current, inp, marketPrice) {
+    const items = [];
+    const dragPct = final.drag * 100;
+    const commonPct = (1 - final.drag) * 100;
+    const scenarioObj = SCENARIOS.find(s => s.id === activeScenario);
+    const scenarioName = scenarioObj ? scenarioObj.name : 'Custom';
+
+    // Title
+    $('narrativeTitle').innerHTML = '&#128269; ' + scenarioName + ' &mdash; ' + fmtPrice(btcPrice) + ' BTC';
+
+    // Drag status
+    if (final.drag < 0.05) {
+        items.push({ cls: 'green', icon: '&#9989;', text: '<strong>Drag nearly zero (' + dragPct.toFixed(1) + '%).</strong> Common shareholders own ' + commonPct.toFixed(1) + '% of the Bitcoin. Senior claims are irrelevant at this price.' });
+    } else if (final.drag < 0.20) {
+        items.push({ cls: 'green', icon: '&#128201;', text: '<strong>Low drag (' + dragPct.toFixed(1) + '%).</strong> Common shareholders own ' + commonPct.toFixed(1) + '% of the Bitcoin. Compression is well advanced.' });
+    } else if (final.drag < 0.40) {
+        items.push({ cls: 'neutral', icon: '&#9878;', text: '<strong>Moderate drag (' + dragPct.toFixed(1) + '%).</strong> Common owns ' + commonPct.toFixed(1) + '% of the BTC. Senior claims of ' + fmtB(final.netClaimsUsd) + ' consume ' + fmt(Math.round(btcPrice > 0 ? final.netClaimsUsd / btcPrice : 0)) + ' BTC.' });
+    } else if (final.drag < 0.70) {
+        items.push({ cls: 'amber', icon: '&#9888;', text: '<strong>High drag (' + dragPct.toFixed(1) + '%).</strong> Senior claims consume ' + commonPct.toFixed(1) + '% of Bitcoin is left for common. Leverage is amplifying both directions.' });
+    } else {
+        items.push({ cls: 'red', icon: '&#128165;', text: '<strong>Critical drag (' + dragPct.toFixed(1) + '%).</strong> Senior claims consume most of the Bitcoin value. Common equity is severely impaired.' });
+    }
+
+    // Break-even proximity
+    if (btcPrice <= final.breakEven * 1.15 && btcPrice > final.breakEven) {
+        items.push({ cls: 'red', icon: '&#9888;', text: '<strong>Near break-even.</strong> BTC is only ' + ((btcPrice / final.breakEven - 1) * 100).toFixed(0) + '% above the ' + fmtPrice(final.breakEven) + ' floor where common equity hits zero.' });
+    } else if (btcPrice <= final.breakEven) {
+        items.push({ cls: 'red', icon: '&#128128;', text: '<strong>Below break-even (' + fmtPrice(final.breakEven) + ').</strong> Senior claims exceed total BTC value. Common equity is theoretically worth $0. No callable debt means creditors cannot force liquidation.' });
+    } else if (btcPrice > final.breakEven * 3) {
+        items.push({ cls: 'green', icon: '&#128737;', text: '<strong>Break-even safety margin: ' + ((btcPrice / final.breakEven - 1) * 100).toFixed(0) + '%.</strong> BTC would need to fall to ' + fmtPrice(final.breakEven) + ' before common equity is wiped out.' });
+    }
+
+    // Cash runway
+    if (current.cashRunway < 3 && current.cashRunway > 0) {
+        items.push({ cls: 'amber', icon: '&#9200;', text: '<strong>Cash runway: ' + current.cashRunway.toFixed(1) + ' years.</strong> After depletion, STRC gets skipped (non-cumulative), but STRF and STRE (cumulative, cash-only) force BTC liquidation.' });
+    } else if (current.cashRunway >= 3 && current.cashRunway < Infinity) {
+        items.push({ cls: 'neutral', icon: '&#128176;', text: '<strong>Cash runway: ' + current.cashRunway.toFixed(1) + ' years.</strong> Reserves cover cash-only preferred dividends for ' + current.cashRunway.toFixed(1) + ' years before any BTC needs to be sold.' });
+    }
+
+    // BTC liquidation in projection
+    if (horizonYears > 0 && final.btcH < inp.btcHoldings) {
+        const totalSold = inp.btcHoldings - final.btcH;
+        items.push({ cls: 'red', icon: '&#128293;', text: '<strong>BTC liquidation: ' + fmt(Math.round(totalSold)) + ' BTC sold</strong> over ' + horizonYears + ' years to cover cumulative preferred dividends. Selling BTC raises drag, lowering NAV, requiring more dilutive share dividends.' });
+    }
+
+    // STRK conversion zone
+    if (final.modeledPrice >= 800 && final.modeledPrice < 1000) {
+        items.push({ cls: 'amber', icon: '&#9889;', text: '<strong>Approaching STRK conversion zone.</strong> STRK converts 10:1 into MSTR common at $1,000/share. Modeled price is ' + fmtPrice(final.modeledPrice) + '.' });
+    } else if (final.modeledPrice >= 1000) {
+        items.push({ cls: 'info', icon: '&#9889;', text: '<strong>STRK conversion would trigger.</strong> At ' + fmtPrice(final.modeledPrice) + ', STRK holders convert, removing ~' + fmtB(inp.strkFace) + ' in preferred claims but adding ~' + fmt(Math.round(inp.strkFace / 100 * 0.1)) + ' shares.' });
+    }
+
+    // Amplification note
+    if (final.amp > 1.1 && final.amp < 100) {
+        items.push({ cls: 'neutral', icon: '&#128200;', text: '<strong>Amplification: ' + final.amp.toFixed(2) + '\u00d7.</strong> Common equity moves ' + ((final.amp - 1) * 100).toFixed(0) + '% faster than BTC. This leverage works both ways.' });
+    }
+
+    $('narrativeBody').innerHTML = items.map(i =>
+        '<div class="narr-item ' + i.cls + '"><span class="narr-icon">' + i.icon + '</span><span class="narr-text">' + i.text + '</span></div>'
+    ).join('');
 }
 
 function renderMetrics(final, current, inp) {
     const streUsd = inp.streFaceEur * inp.eurusd;
     const cashDivAnnual = inp.strfFace * 0.10 + inp.strcFace * 0.1125 + streUsd * 0.10;
     const shareDivAnnual = inp.strkFace * 0.08 + inp.strdFace * 0.10;
-    const totalDivAnnual = cashDivAnnual + shareDivAnnual;
 
     const metrics = [
         { label: 'CEBE', value: fmtSats(final.cebeSats), sub: 'sats/share', cls: final.cebeSats <= 0 ? 'danger' : '' },
         { label: 'DRAG', value: fmtPct(final.drag), sub: fmtPct(1 - final.drag) + ' to common', cls: final.drag > 0.5 ? 'danger' : final.drag > 0.35 ? 'warn' : '' },
-        { label: 'AMPLIFICATION', value: final.amp > 100 ? 'âˆž' : final.amp.toFixed(2) + 'Ã—', sub: `${((final.amp - 1) * 100).toFixed(0)}% amplified`, cls: '' },
-        { label: 'BREAK-EVEN', value: fmtPrice(final.breakEven), sub: 'BTC price floor', cls: btcPrice <= final.breakEven * 1.1 ? 'danger' : btcPrice <= final.breakEven * 1.5 ? 'warn' : '' },
-        { label: 'NAV / SHARE', value: fmtPrice(final.navPerShare), sub: `Ã— ${mnavMultiple.toFixed(2)} mNAV`, cls: '' },
-        { label: 'BTC HOLDINGS', value: fmt(Math.round(final.btcH)), sub: final.btcH < inp.btcHoldings ? `âˆ’${fmt(Math.round(inp.btcHoldings - final.btcH))} sold` : 'no BTC sold', cls: final.btcH < inp.btcHoldings ? 'danger' : '' },
-        { label: 'CASH RUNWAY', value: current.cashRunway === Infinity ? 'âˆž' : current.cashRunway.toFixed(1) + 'yr', sub: fmtB(cashDivAnnual) + '/yr cash div', cls: current.cashRunway < 2 ? 'danger' : current.cashRunway < 4 ? 'warn' : 'good' },
-        { label: 'ANNUAL DIVIDENDS', value: fmtB(totalDivAnnual), sub: `${fmtB(cashDivAnnual)} cash Â· ${fmtB(shareDivAnnual)} shares`, cls: '' },
+        { label: 'AMPLIFICATION', value: final.amp > 100 ? '\u221e' : final.amp.toFixed(2) + '\u00d7', sub: ((final.amp - 1) * 100).toFixed(0) + '% amplified', cls: '' },
+        { label: 'BREAK-EVEN', value: fmtPrice(final.breakEven), sub: 'BTC floor', cls: btcPrice <= final.breakEven * 1.1 ? 'danger' : btcPrice <= final.breakEven * 1.5 ? 'warn' : '' },
+        { label: 'NAV / SHARE', value: fmtPrice(final.navPerShare), sub: '\u00d7 ' + mnavMultiple.toFixed(2) + ' mNAV', cls: '' },
+        { label: 'CASH RUNWAY', value: current.cashRunway === Infinity ? '\u221e' : current.cashRunway.toFixed(1) + 'yr', sub: fmtB(cashDivAnnual) + '/yr cash div', cls: current.cashRunway < 2 ? 'danger' : current.cashRunway < 4 ? 'warn' : 'good' },
     ];
 
-    $('metricsGrid').innerHTML = metrics.map(m => `
-        <div class="metric-card">
-            <div class="metric-label">${m.label}</div>
-            <div class="metric-value ${m.cls}">${m.value}</div>
-            <div class="metric-sub">${m.sub}</div>
-        </div>
-    `).join('');
+    $('metricsGrid').innerHTML = metrics.map(m =>
+        '<div class="metric-card"><div class="metric-label">' + m.label + '</div><div class="metric-value ' + m.cls + '">' + m.value + '</div><div class="metric-sub">' + m.sub + '</div></div>'
+    ).join('');
 }
 
 function renderWaterfall(final, inp) {
@@ -1272,166 +1294,71 @@ function renderWaterfall(final, inp) {
     const netClaims = inp.debtUsd + prefUsd - final.cash;
     const nav = Math.max(0, totalBtcValue - netClaims);
 
-    $('waterfall').innerHTML = `
-        <div class="wf-step btc-val"><div class="wf-label">BTC VALUE</div><div class="wf-value">${fmtB(totalBtcValue)}</div></div>
-        <div class="wf-arrow">â†’</div>
-        <div class="wf-step claims"><div class="wf-label">âˆ’ CLAIMS</div><div class="wf-value">${fmtB(netClaims)}</div></div>
-        <div class="wf-arrow">â†’</div>
-        <div class="wf-step nav"><div class="wf-label">= NAV</div><div class="wf-value">${fmtB(nav)}</div></div>
-        <div class="wf-arrow">â†’</div>
-        <div class="wf-step shares"><div class="wf-label">Ã· ${(final.shares/1e6).toFixed(0)}M</div><div class="wf-value">SHARES</div></div>
-        <div class="wf-arrow">â†’</div>
-        <div class="wf-step shares"><div class="wf-label">NAV/SHARE</div><div class="wf-value">${fmtPrice(final.navPerShare)}</div></div>
-        <div class="wf-arrow">â†’</div>
-        <div class="wf-step mnav-step"><div class="wf-label">Ã— mNAV</div><div class="wf-value">${mnavMultiple.toFixed(2)}Ã—</div></div>
-        <div class="wf-arrow">â†’</div>
-        <div class="wf-step result"><div class="wf-label">PRICE</div><div class="wf-value" style="color:var(--orange-primary)">${fmtPrice(final.modeledPrice)}</div></div>
-    `;
+    $('waterfall').innerHTML =
+        '<div class="wf-step btc-val"><div class="wf-label">BTC VALUE</div><div class="wf-value">' + fmtB(totalBtcValue) + '</div></div>' +
+        '<div class="wf-arrow">&rarr;</div>' +
+        '<div class="wf-step claims"><div class="wf-label">&minus; CLAIMS</div><div class="wf-value">' + fmtB(netClaims) + '</div></div>' +
+        '<div class="wf-arrow">&rarr;</div>' +
+        '<div class="wf-step nav"><div class="wf-label">= NAV</div><div class="wf-value">' + fmtB(nav) + '</div></div>' +
+        '<div class="wf-arrow">&rarr;</div>' +
+        '<div class="wf-step shares"><div class="wf-label">&divide; ' + (final.shares/1e6).toFixed(0) + 'M</div><div class="wf-value">SHARES</div></div>' +
+        '<div class="wf-arrow">&rarr;</div>' +
+        '<div class="wf-step shares"><div class="wf-label">NAV/SHARE</div><div class="wf-value">' + fmtPrice(final.navPerShare) + '</div></div>' +
+        '<div class="wf-arrow">&rarr;</div>' +
+        '<div class="wf-step shares"><div class="wf-label">&times; mNAV</div><div class="wf-value">' + mnavMultiple.toFixed(2) + '\u00d7</div></div>' +
+        '<div class="wf-arrow">&rarr;</div>' +
+        '<div class="wf-step result"><div class="wf-label">PRICE</div><div class="wf-value" style="color:var(--orange-primary)">' + fmtPrice(final.modeledPrice) + '</div></div>';
 }
 
 function renderProjectionTable(proj) {
     const section = $('projectionSection');
-    if (horizonYears === 0) {
-        section.style.display = 'none';
-        return;
-    }
+    if (horizonYears === 0) { section.style.display = 'none'; return; }
     section.style.display = 'block';
 
-    $('projHead').innerHTML = `<tr>
-        <th style="text-align:center">YEAR</th>
-        <th>BTC HOLDINGS</th>
-        <th>SHARES (M)</th>
-        <th>CEBE (SATS)</th>
-        <th>DRAG</th>
-        <th>NAV/SHARE</th>
-        <th>PRICE</th>
-        <th>CASH</th>
-        <th>BTC SOLD</th>
-        <th>STATUS</th>
-    </tr>`;
+    $('projHead').innerHTML = '<tr><th style="text-align:center">YEAR</th><th>BTC</th><th>SHARES</th><th>CEBE</th><th>DRAG</th><th>NAV/SH</th><th>PRICE</th><th>CASH</th><th>STATUS</th></tr>';
 
     $('projBody').innerHTML = proj.map(r => {
-        const statusEmoji = r.status === 'green' ? 'ðŸŸ¢' : r.status === 'amber' ? 'ðŸŸ¡' : 'ðŸ”´';
-        const statusLabel = r.status === 'green' ? 'Healthy' : r.status === 'amber' ? 'STRC skipped' : 'BTC liquidation';
-        const rowClass = `status-${r.status}`;
         const inp = getInputs();
-        
-        return `<tr class="${rowClass}">
-            <td>${statusEmoji} Yr ${r.year}</td>
-            <td class="${r.btcH < inp.btcHoldings ? 'cell-red' : ''}">${fmt(Math.round(r.btcH))}</td>
-            <td class="${r.newShares > 0 ? 'cell-amber' : ''}">${(r.shares / 1e6).toFixed(1)}M</td>
-            <td class="cell-bold">${fmtSats(r.cebeSats)}</td>
-            <td class="${r.drag > 0.5 ? 'cell-red' : r.drag > 0.35 ? 'cell-amber' : ''}">${fmtPct(r.drag)}</td>
-            <td>${fmtPrice(r.navPerShare)}</td>
-            <td class="cell-bold" style="color:${r.modeledPrice > 0 ? 'var(--text-primary)' : 'var(--red)'}">
-                ${fmtPrice(r.modeledPrice)}
-            </td>
-            <td class="${r.cash <= 0 ? 'cell-red' : ''}">${fmtB(r.cash)}</td>
-            <td class="${r.btcSold > 0 ? 'cell-red cell-bold' : 'cell-muted'}">${r.btcSold > 0 ? fmt(Math.round(r.btcSold)) : 'â€”'}</td>
-            <td style="font-size:10px">${statusLabel}</td>
-        </tr>`;
+        const statusEmoji = r.status === 'green' ? '&#128994;' : r.status === 'amber' ? '&#128993;' : '&#128308;';
+        const statusLabel = r.status === 'green' ? 'Healthy' : r.status === 'amber' ? 'STRC skip' : 'BTC sold';
+        return '<tr><td>' + statusEmoji + ' Yr ' + r.year + '</td>' +
+            '<td class="' + (r.btcH < inp.btcHoldings ? 'cell-red' : '') + '">' + fmt(Math.round(r.btcH)) + '</td>' +
+            '<td class="' + (r.newShares > 0 ? 'cell-amber' : '') + '">' + (r.shares / 1e6).toFixed(1) + 'M</td>' +
+            '<td class="cell-bold">' + fmtSats(r.cebeSats) + '</td>' +
+            '<td class="' + (r.drag > 0.5 ? 'cell-red' : r.drag > 0.35 ? 'cell-amber' : '') + '">' + fmtPct(r.drag) + '</td>' +
+            '<td>' + fmtPrice(r.navPerShare) + '</td>' +
+            '<td class="cell-bold" style="color:' + (r.modeledPrice > 0 ? 'var(--text-primary)' : 'var(--red)') + '">' + fmtPrice(r.modeledPrice) + '</td>' +
+            '<td class="' + (r.cash <= 0 ? 'cell-red' : '') + '">' + fmtB(r.cash) + '</td>' +
+            '<td style="font-size:10px">' + statusLabel + '</td></tr>';
     }).join('');
 }
 
 function renderSensitivityMatrix() {
     const marketPrice = liveMstrPrice || DEFAULTS.mstr_price;
-    
-    let html = '<thead><tr><th>BTC â†“ mNAV â†’</th>';
-    MATRIX_MNAVS.forEach(m => { html += `<th>${m.toFixed(2)}Ã—</th>`; });
+    let html = '<thead><tr><th>BTC &darr; mNAV &rarr;</th>';
+    MATRIX_MNAVS.forEach(m => { html += '<th>' + m.toFixed(2) + '\u00d7</th>'; });
     html += '</tr></thead><tbody>';
 
     MATRIX_BTC_PRICES.forEach(bp => {
-        html += `<tr><td class="row-label">${bp >= 1000 ? '$' + (bp/1000) + 'K' : '$' + bp}</td>`;
+        html += '<tr><td class="row-label">' + (bp >= 1000 ? '$' + (bp/1000) + 'K' : '$' + bp) + '</td>';
         MATRIX_MNAVS.forEach(mn => {
             const price = quickCalc(bp, mn);
             const pctDiff = marketPrice > 0 ? (price - marketPrice) / marketPrice : 0;
-            
             let cls = '';
             if (price >= 1000) cls = 'matrix-cell-gold';
             else if (pctDiff > 0.5) cls = 'matrix-cell-green';
             else if (pctDiff > 0.1) cls = 'matrix-cell-lightgreen';
             else if (pctDiff < -0.5) cls = 'matrix-cell-red';
             else if (pctDiff < -0.1) cls = 'matrix-cell-lightred';
-
-            // Highlight current BTC price row approximately
             const isCurrentBtc = Math.abs(bp - btcPrice) / btcPrice < 0.15;
             const isCurrentMnav = Math.abs(mn - mnavMultiple) < 0.05;
             if (isCurrentBtc && isCurrentMnav) cls += ' matrix-cell-current';
-
-            html += `<td class="${cls}">${price <= 0 ? '$0' : fmtPrice(price)}</td>`;
+            html += '<td class="' + cls + '">' + (price <= 0 ? '$0' : fmtPrice(price)) + '</td>';
         });
         html += '</tr>';
     });
     html += '</tbody>';
     $('matrixTable').innerHTML = html;
-}
-
-function renderWarnings(final, current) {
-    const warnings = [];
-    const inp = getInputs();
-
-    // STRK conversion warning
-    if (final.modeledPrice >= 800) {
-        warnings.push({
-            type: final.modeledPrice >= 1000 ? 'info' : 'amber',
-            icon: 'âš¡',
-            text: `<strong>STRK conversion zone.</strong> STRK converts 10:1 into MSTR at $1,000/share. Modeled price: ${fmtPrice(final.modeledPrice)}. ${final.modeledPrice >= 1000 ? 'Conversion would remove STRK claims but add ~' + fmt(Math.round(inp.strkFace / 100 * 0.1)) + ' shares.' : 'Approaching threshold.'}`,
-        });
-    }
-
-    // Break-even proximity
-    if (btcPrice <= final.breakEven * 1.1 && btcPrice > final.breakEven * 0.5) {
-        warnings.push({
-            type: 'red',
-            icon: 'âš ',
-            text: `<strong>Near break-even.</strong> At ${fmtPrice(btcPrice)} BTC, Strategy is ${btcPrice > final.breakEven ? 'only ' + ((btcPrice/final.breakEven - 1)*100).toFixed(0) + '% above' : ((1 - btcPrice/final.breakEven)*100).toFixed(0) + '% below'} break-even (${fmtPrice(final.breakEven)}).`,
-        });
-    }
-
-    // Below break-even
-    if (btcPrice < final.breakEven * 0.5) {
-        warnings.push({
-            type: 'red',
-            icon: 'ðŸ’€',
-            text: `<strong>Deep underwater.</strong> At ${fmtPrice(btcPrice)}, senior claims exceed BTC value. Common equity is theoretically worth $0. Note: no callable debt means creditors cannot force liquidation.`,
-        });
-    }
-
-    // Cash depletion
-    if (current.cashRunway < 3 && current.cashRunway > 0) {
-        warnings.push({
-            type: 'amber',
-            icon: 'â°',
-            text: `<strong>Cash runway: ${current.cashRunway.toFixed(1)} years.</strong> Cash reserves deplete from preferred dividends. After depletion, STRC gets skipped (non-cumulative), but STRF and STRE (cumulative, cash-only) force BTC liquidation.`,
-        });
-    }
-
-    // BTC sold in projection
-    if (final.btcSold > 0 || final.btcH < inp.btcHoldings) {
-        const totalSold = inp.btcHoldings - final.btcH;
-        warnings.push({
-            type: 'red',
-            icon: 'ðŸ”¥',
-            text: `<strong>BTC liquidation triggered.</strong> ${fmt(Math.round(totalSold))} BTC sold over ${horizonYears} years to cover cumulative preferred dividends. This is the death spiral: selling BTC â†’ more drag â†’ lower NAV â†’ more dilutive share dividends.`,
-        });
-    }
-
-    // Average cost basis
-    const avgCost = 76052;
-    if (btcPrice < avgCost) {
-        warnings.push({
-            type: 'amber',
-            icon: 'ðŸ“‰',
-            text: `<strong>Below cost basis.</strong> Strategy's average BTC cost is ~$76,052. At ${fmtPrice(btcPrice)}, holdings are ${((1 - btcPrice/avgCost)*100).toFixed(1)}% underwater.`,
-        });
-    }
-
-    $('warnings').innerHTML = warnings.map(w => `
-        <div class="warning-item ${w.type}">
-            <span class="warning-icon">${w.icon}</span>
-            <span>${w.text}</span>
-        </div>
-    `).join('');
 }
 
 function renderCustomize(inp, prefUsd, streUsd) {
@@ -1440,107 +1367,62 @@ function renderCustomize(inp, prefUsd, streUsd) {
         { name: 'STRF', face: inp.strfFace, rate: '10.00%', pay: 'Cash', cum: 'Cumulative', annual: inp.strfFace * 0.10 },
         { name: 'STRD', face: inp.strdFace, rate: '10.00%', pay: 'Shares', cum: 'Non-cum', annual: inp.strdFace * 0.10 },
         { name: 'STRC', face: inp.strcFace, rate: '11.25%', pay: 'Cash', cum: 'Non-cum', annual: inp.strcFace * 0.1125 },
-        { name: 'STRE', face: inp.streFaceEur * inp.eurusd, rate: '10.00%', pay: 'Cash (EUR)', cum: 'Cumulative', annual: inp.streFaceEur * inp.eurusd * 0.10, note: `â‚¬${fmt(Math.round(inp.streFaceEur/1e6))}M @ ${inp.eurusd} EUR/USD` },
+        { name: 'STRE', face: inp.streFaceEur * inp.eurusd, rate: '10.00%', pay: 'Cash (EUR)', cum: 'Cumulative', annual: inp.streFaceEur * inp.eurusd * 0.10 },
     ];
-
     const totalAnnual = instruments.reduce((s, i) => s + i.annual, 0);
     const cashAnnual = instruments.filter(i => i.pay.includes('Cash')).reduce((s, i) => s + i.annual, 0);
     const shareAnnual = instruments.filter(i => i.pay === 'Shares').reduce((s, i) => s + i.annual, 0);
 
-    $('customizeBody').innerHTML = `
-        <div style="margin-bottom:16px">
-            <div style="font-size:11px;color:var(--text-muted);letter-spacing:1px;margin-bottom:8px;font-weight:600">PREFERRED STOCK STACK</div>
-            <table class="pref-stack">
-                <thead><tr>
-                    <th>INSTRUMENT</th><th>FACE VALUE</th><th>RATE</th><th>PAYMENT</th><th>TYPE</th><th>ANNUAL COST</th>
-                </tr></thead>
-                <tbody>
-                    ${instruments.map(i => `<tr>
-                        <td>${i.name}</td>
-                        <td>${fmtB(i.face)}</td>
-                        <td>${i.rate}</td>
-                        <td><span class="${i.pay.includes('Cash') ? 'badge-cash' : 'badge-shares'}">${i.pay}</span></td>
-                        <td><span class="badge-cum">${i.cum}</span></td>
-                        <td>${fmtB(i.annual)}</td>
-                    </tr>`).join('')}
-                    <tr style="border-top:2px solid var(--border-subtle)">
-                        <td style="color:var(--orange-primary)">TOTAL</td>
-                        <td style="color:var(--orange-primary);font-weight:700">${fmtB(prefUsd)}</td>
-                        <td></td><td></td><td></td>
-                        <td style="color:var(--orange-primary);font-weight:700">${fmtB(totalAnnual)}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
-            <div class="metric-card">
-                <div class="metric-label">CASH DIVIDENDS</div>
-                <div class="metric-value">${fmtB(cashAnnual)}</div>
-                <div class="metric-sub">/year Â· drains reserves</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-label">SHARE DIVIDENDS</div>
-                <div class="metric-value">${fmtB(shareAnnual)}</div>
-                <div class="metric-sub">/year Â· dilutes common</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-label">CONVERTIBLE DEBT</div>
-                <div class="metric-value">${fmtB(inp.debtUsd)}</div>
-                <div class="metric-sub">zero-coupon + low coupon</div>
-            </div>
-        </div>
-        <div style="font-size:11px;color:var(--text-muted);line-height:1.6">
-            <strong style="color:var(--text-secondary)">Payment hierarchy in distress:</strong> 
-            STRF (most senior, cash, cumulative) â†’ STRC (cash, non-cumulative â€” can skip) â†’ STRE (cash, cumulative, EUR) â†’ STRK (shares, cumulative) â†’ STRD (shares, non-cumulative â€” can skip)
-            <br><br>
-            <strong style="color:var(--text-secondary)">The doom loop:</strong>
-            Miss preferred dividend â†’ can't issue common via ATM â†’ can't raise cash â†’ can't pay dividends â†’ can't issue shares. Cash-only cumulative instruments (STRF, STRE) force BTC liquidation when cash depletes.
-            <br><br>
-            <strong style="color:var(--text-secondary)">Key defense:</strong>
-            No convertible debt has early call provisions. Creditors cannot force liquidation regardless of BTC price. The only hard triggers are maturity dates and put option dates.
-        </div>
-    `;
+    $('customizeBody').innerHTML =
+        '<div style="margin-bottom:16px">' +
+        '<div style="font-size:11px;color:var(--text-muted);letter-spacing:1px;margin-bottom:8px;font-weight:600">PREFERRED STOCK STACK</div>' +
+        '<table class="pref-stack"><thead><tr><th>INSTRUMENT</th><th>FACE VALUE</th><th>RATE</th><th>PAYMENT</th><th>TYPE</th><th>ANNUAL</th></tr></thead><tbody>' +
+        instruments.map(i =>
+            '<tr><td>' + i.name + '</td><td>' + fmtB(i.face) + '</td><td>' + i.rate + '</td><td><span class="' + (i.pay.includes('Cash') ? 'badge-cash' : 'badge-shares') + '">' + i.pay + '</span></td><td><span class="badge-cum">' + i.cum + '</span></td><td>' + fmtB(i.annual) + '</td></tr>'
+        ).join('') +
+        '<tr style="border-top:2px solid var(--border-subtle)"><td style="color:var(--orange-primary)">TOTAL</td><td style="color:var(--orange-primary);font-weight:700">' + fmtB(prefUsd) + '</td><td></td><td></td><td></td><td style="color:var(--orange-primary);font-weight:700">' + fmtB(totalAnnual) + '</td></tr>' +
+        '</tbody></table></div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">' +
+        '<div class="metric-card"><div class="metric-label">CASH DIV</div><div class="metric-value">' + fmtB(cashAnnual) + '</div><div class="metric-sub">/yr drains cash</div></div>' +
+        '<div class="metric-card"><div class="metric-label">SHARE DIV</div><div class="metric-value">' + fmtB(shareAnnual) + '</div><div class="metric-sub">/yr dilutes equity</div></div>' +
+        '<div class="metric-card"><div class="metric-label">CONVERT DEBT</div><div class="metric-value">' + fmtB(inp.debtUsd) + '</div><div class="metric-sub">zero-coupon</div></div></div>' +
+        '<div style="font-size:11px;color:var(--text-muted);line-height:1.6">' +
+        '<strong style="color:var(--text-secondary)">Payment hierarchy in distress:</strong> STRF (most senior, cash, cumulative) &rarr; STRC (cash, non-cumulative &mdash; can skip) &rarr; STRE (cash, cumulative, EUR) &rarr; STRK (shares, cumulative) &rarr; STRD (shares, non-cumulative &mdash; can skip)' +
+        '<br><br><strong style="color:var(--text-secondary)">Key defense:</strong> No convertible debt has early call provisions. Creditors cannot force liquidation regardless of BTC price.' +
+        '</div>';
 }
 
 function renderAssumptions(inp) {
-    $('assumptions').innerHTML = `
-        <strong>Assumptions:</strong> Capital structure frozen at snapshot (${inp.snapshotDate}). 
-        BTC price static at slider value across all projection years. 
-        Share-payable dividends computed reflexively (Annual Div Cost Ã· Modeled Price = New Shares/Year). 
-        Software operating income ~${fmtB(inp.softwareIncome)}/yr offsets cash drain. 
-        In distress: STRC and STRD skipped (non-cumulative). STRF and STRE force BTC liquidation when cash depletes. 
-        mNAV held constant across projection. Convertible bond conversion mechanics excluded from v1.
-        <br><br>
-        <strong>Data sources:</strong> BTC holdings, shares, capital structure from Google Sheet (updated after 8-K filings). 
-        Live BTC price from CoinGecko. Live MSTR price from Finnhub. 
-        Individual preferred face values ${sheetData?.strk_face_usd ? 'from live sheet data' : 'using pre-Q4 estimates â€” update after earnings'}.
-    `;
+    $('assumptions').innerHTML =
+        '<strong>Assumptions:</strong> Capital structure frozen at snapshot (' + inp.snapshotDate + '). BTC price static across projection years. Share-payable dividends computed reflexively. Software income ~' + fmtB(inp.softwareIncome) + '/yr offsets cash drain. Non-cumulative instruments (STRC, STRD) skipped in distress. mNAV held constant. Convertible bond conversion mechanics excluded from v1.' +
+        '<br><br><strong>Data sources:</strong> BTC holdings, shares, capital structure from Google Sheet (updated after 8-K filings). Live BTC price from CoinGecko. Live MSTR price from Finnhub. ' +
+        (sheetData?.strk_face_usd ? 'Preferred face values from live sheet data.' : 'Using pre-Q4 estimates &mdash; update after earnings.');
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+// ═══════════════════════════════════════════════════════════════
 // UI BUILDERS & EVENT HANDLERS
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════
 
 function buildScenarioBar() {
-    $('scenarioBar').innerHTML = SCENARIOS.map(s => `
-        <div class="scenario-card ${s.id === activeScenario ? 'active' : ''}" data-scenario="${s.id}">
-            <div class="scenario-icon">${s.icon}</div>
-            <div class="scenario-name">${s.name}</div>
-            <div class="scenario-price">${s.btc ? (s.btc >= 1000 ? '$' + (s.btc/1000) + 'K' : '$' + s.btc) : fmtPrice(btcPrice)}</div>
-        </div>
-    `).join('');
+    $('scenarioBar').innerHTML = SCENARIOS.map(s =>
+        '<div class="scenario-card ' + (s.id === activeScenario ? 'active' : '') + '" data-scenario="' + s.id + '">' +
+        '<div class="scenario-icon">' + s.icon + '</div>' +
+        '<div class="scenario-name">' + s.name + '</div>' +
+        '<div class="scenario-price">' + (s.btc ? (s.btc >= 1000 ? '$' + (s.btc/1000) + 'K' : '$' + s.btc) : fmtPrice(btcPrice)) + '</div>' +
+        '<div class="scenario-mnav">' + s.mnav.toFixed(1) + '\u00d7 mNAV</div>' +
+        '</div>'
+    ).join('');
 
     document.querySelectorAll('.scenario-card').forEach(card => {
         card.addEventListener('click', () => {
             const id = card.dataset.scenario;
             const scenario = SCENARIOS.find(s => s.id === id);
             if (!scenario) return;
-
             activeScenario = id;
             btcPrice = scenario.btc || (liveBtcPrice || DEFAULTS.btc_price);
             mnavMultiple = scenario.mnav;
             horizonYears = scenario.horizon;
-
             syncSliders();
             buildScenarioBar();
             updateHorizonBar();
@@ -1551,15 +1433,16 @@ function buildScenarioBar() {
 }
 
 function buildHorizonBar() {
-    $('horizonBar').innerHTML = HORIZON_OPTIONS.map(h => `
-        <button class="toggle-btn ${h.years === horizonYears ? 'active' : ''}" data-years="${h.years}">${h.label}</button>
-    `).join('');
+    $('horizonBar').innerHTML = HORIZON_OPTIONS.map(h =>
+        '<button class="toggle-btn ' + (h.years === horizonYears ? 'active' : '') + '" data-years="' + h.years + '">' + h.label + '</button>'
+    ).join('');
 
     document.querySelectorAll('#horizonBar .toggle-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             horizonYears = parseInt(btn.dataset.years);
             activeScenario = '';
             updateHorizonBar();
+            buildScenarioBar();
             render();
         });
     });
@@ -1569,19 +1452,19 @@ function updateHorizonBar() {
     document.querySelectorAll('#horizonBar .toggle-btn').forEach(btn => {
         btn.classList.toggle('active', parseInt(btn.dataset.years) === horizonYears);
     });
-    $('horizonDisplay').textContent = horizonYears === 0 ? 'Now' : `${horizonYears}Y`;
+    $('horizonDisplay').textContent = horizonYears === 0 ? 'Now' : horizonYears + 'Y';
 }
 
 function buildMnavPresets() {
-    $('mnavPresets').innerHTML = MNAV_PRESETS.map(m => `
-        <button class="mnav-btn ${Math.abs(m - mnavMultiple) < 0.01 ? 'active' : ''}" data-mnav="${m}">${m.toFixed(m % 1 === 0 ? 0 : 2)}Ã—</button>
-    `).join('');
+    $('mnavPresets').innerHTML = MNAV_PRESETS.map(m =>
+        '<button class="mnav-btn ' + (Math.abs(m - mnavMultiple) < 0.01 ? 'active' : '') + '" data-mnav="' + m + '">' + m.toFixed(m % 1 === 0 ? 0 : 2) + '\u00d7</button>'
+    ).join('');
 
     document.querySelectorAll('.mnav-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             mnavMultiple = parseFloat(btn.dataset.mnav);
             $('mnavSlider').value = mnavMultiple * 100;
-            $('mnavDisplay').textContent = mnavMultiple.toFixed(2) + 'Ã—';
+            $('mnavDisplay').textContent = mnavMultiple.toFixed(2) + '\u00d7';
             activeScenario = '';
             updateMnavPresets();
             buildScenarioBar();
@@ -1597,27 +1480,27 @@ function updateMnavPresets() {
 }
 
 function syncSliders() {
-    $('btcSlider').value = priceToSlider(btcPrice);
+    $('btcSlider').value = btcPrice;
     $('btcPriceDisplay').textContent = fmtPrice(btcPrice);
     $('mnavSlider').value = mnavMultiple * 100;
-    $('mnavDisplay').textContent = mnavMultiple.toFixed(2) + 'Ã—';
+    $('mnavDisplay').textContent = mnavMultiple.toFixed(2) + '\u00d7';
     updateHorizonBar();
     updateMnavPresets();
 }
 
 function updateSliderFills() {
     const btcSlider = $('btcSlider');
-    const btcPct = btcSlider.value / 1000 * 100;
-    btcSlider.style.background = `linear-gradient(90deg, var(--orange-primary) ${btcPct}%, #333 ${btcPct}%)`;
+    const btcPct = ((btcSlider.value - 20000) / (1000000 - 20000)) * 100;
+    btcSlider.style.background = 'linear-gradient(90deg, var(--orange-primary) ' + btcPct + '%, #333 ' + btcPct + '%)';
 
     const mnavSlider = $('mnavSlider');
     const mnavPct = ((mnavSlider.value - 30) / (400 - 30)) * 100;
-    mnavSlider.style.background = `linear-gradient(90deg, var(--orange-primary) ${mnavPct}%, #333 ${mnavPct}%)`;
+    mnavSlider.style.background = 'linear-gradient(90deg, var(--orange-primary) ' + mnavPct + '%, #333 ' + mnavPct + '%)';
 }
 
-// â”€â”€â”€ SLIDER EVENTS â”€â”€â”€
+// ─── SLIDER EVENTS ───
 $('btcSlider').addEventListener('input', (e) => {
-    btcPrice = sliderToPrice(parseInt(e.target.value));
+    btcPrice = parseInt(e.target.value);
     $('btcPriceDisplay').textContent = fmtPrice(btcPrice);
     activeScenario = '';
     buildScenarioBar();
@@ -1626,15 +1509,16 @@ $('btcSlider').addEventListener('input', (e) => {
 
 $('mnavSlider').addEventListener('input', (e) => {
     mnavMultiple = parseInt(e.target.value) / 100;
-    $('mnavDisplay').textContent = mnavMultiple.toFixed(2) + 'Ã—';
+    $('mnavDisplay').textContent = mnavMultiple.toFixed(2) + '\u00d7';
     activeScenario = '';
     updateMnavPresets();
     buildScenarioBar();
     render();
 });
 
-// â”€â”€â”€ KEYBOARD SHORTCUTS â”€â”€â”€
+// ─── KEYBOARD SHORTCUTS ───
 document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT') return;
     if (e.key >= '1' && e.key <= '6') {
         const idx = parseInt(e.key) - 1;
         if (SCENARIOS[idx]) {
@@ -1652,9 +1536,8 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// â”€â”€â”€ INIT â”€â”€â”€
+// ─── INIT ───
 loadData();
-
 </script>
 </body>
 </html>
