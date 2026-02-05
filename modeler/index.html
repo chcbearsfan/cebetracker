@@ -142,55 +142,24 @@
 
         /* â•â•â• SCENARIO CARDS â•â•â• */
         .scenarios-section { margin-bottom: 24px; }
-        .scenario-group { margin-bottom: 14px; }
-        .scenario-group:last-child { margin-bottom: 0; }
-        .group-label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 8px;
-            padding-left: 4px;
-        }
-        .group-label-badge {
-            font-size: 9px;
-            font-family: var(--mono);
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            padding: 3px 8px;
-            border-radius: 4px;
-            white-space: nowrap;
-        }
-        .group-label-badge.now {
-            background: rgba(255,255,255,0.04);
-            color: var(--text-muted);
-            border: 1px solid var(--border-subtle);
-        }
-        .group-label-badge.future {
-            background: rgba(249, 115, 22, 0.08);
-            color: var(--orange-primary);
-            border: 1px solid var(--orange-border);
-        }
-        .group-label-text {
+        .scenarios-label {
             font-size: 9px;
             letter-spacing: 2px;
-            font-weight: 600;
             color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: 600;
         }
-        .group-label-line {
-            flex: 1;
-            height: 1px;
-            background: var(--border-subtle);
-        }
-        .scenarios-row {
+        .scenarios {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
         }
         @media (max-width: 500px) {
-            .scenarios-row { grid-template-columns: repeat(2, 1fr); }
+            .scenarios { grid-template-columns: repeat(2, 1fr); }
         }
         .scenario-card {
-            padding: 16px 12px 14px;
+            padding: 14px 12px;
             border-radius: 12px;
             border: 1.5px solid var(--border-subtle);
             background: var(--bg-card);
@@ -198,7 +167,6 @@
             transition: all 0.25s ease;
             text-align: center;
             user-select: none;
-            position: relative;
         }
         .scenario-card:hover {
             border-color: rgba(255,255,255,0.12);
@@ -210,42 +178,15 @@
             background: var(--orange-glow);
             box-shadow: 0 0 20px rgba(249,115,22,0.1);
         }
-        .scenario-card.projection {
-            border-left: 3px solid rgba(249, 115, 22, 0.3);
-        }
-        .scenario-card.projection.active {
-            border-left-color: var(--orange-primary);
-        }
-        .horizon-badge {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            font-size: 9px;
-            font-weight: 700;
-            font-family: var(--mono);
-            padding: 2px 6px;
-            border-radius: 4px;
-            letter-spacing: 0.5px;
-        }
-        .horizon-badge.now-badge {
-            background: rgba(255,255,255,0.04);
-            color: #52525b;
-            border: 1px solid rgba(255,255,255,0.06);
-        }
-        .horizon-badge.future-badge {
-            background: rgba(249, 115, 22, 0.1);
-            color: var(--orange-primary);
-            border: 1px solid var(--orange-border);
-        }
-        .scenario-icon { font-size: 22px; margin-bottom: 4px; }
+        .scenario-icon { font-size: 24px; margin-bottom: 4px; }
         .scenario-name {
             font-size: 12px;
             font-weight: 600;
             letter-spacing: 0.5px;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
         .scenario-price {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 700;
             font-family: var(--mono);
             color: var(--orange-light);
@@ -254,7 +195,7 @@
             font-size: 10px;
             color: var(--text-muted);
             font-family: var(--mono);
-            margin-top: 4px;
+            margin-top: 2px;
         }
 
         /* â•â•â• HERO â•â•â• */
@@ -808,24 +749,10 @@
         </div>
     </div>
 
-    <!-- Scenario Cards — Grouped -->
+    <!-- Scenario Cards -->
     <div class="scenarios-section">
-        <div class="scenario-group" id="snapshotGroup">
-            <div class="group-label">
-                <span class="group-label-badge now">&#9889; NOW</span>
-                <span class="group-label-text">WHAT IF BTC WERE AT THIS PRICE TODAY</span>
-                <div class="group-label-line"></div>
-            </div>
-            <div class="scenarios-row" id="snapshotBar"></div>
-        </div>
-        <div class="scenario-group" id="projectionGroup">
-            <div class="group-label">
-                <span class="group-label-badge future">&rarr; FORWARD</span>
-                <span class="group-label-text">PROJECTIONS WITH DIVIDEND DILUTION</span>
-                <div class="group-label-line"></div>
-            </div>
-            <div class="scenarios-row" id="projectionBar"></div>
-        </div>
+        <div class="scenarios-label">CHOOSE A SCENARIO</div>
+        <div class="scenarios" id="scenarioBar"></div>
     </div>
 
     <!-- Hero -->
@@ -922,8 +849,8 @@
 
     <!-- Footer -->
     <div class="footer">
-        <p>CEBE Framework by <a href="https://x.com/chcbearsfan" target="_blank">@chcbearsfan</a> &middot; <a href="/">cebetracker.io</a></p>
-        <p style="margin-top:4px">Data updates after each 8-K filing &middot; Not financial advice</p>
+        <p>CEBE Framework by <a href="https://x.com/chcbearsfan" target="_blank">&#64;chcbearsfan</a> &middot; <a href="/">cebetracker.io</a> &middot; <a href="https://x.com/chcbearsfan/status/2014767364819063207" target="_blank">Read the Framework</a></p>
+        <p style="margin-top:4px">Not financial advice &middot; Data updates after each filing</p>
         <p class="footer-formula">Share Price = CEBE &times; BTC Price &times; mNAV</p>
     </div>
 
@@ -968,14 +895,14 @@ const DEFAULTS = {
     mstr_price: 340,
 };
 
-// Scenarios — grouped: snapshots (horizon=0) vs projections (horizon>0)
+// Scenarios
 const SCENARIOS = [
-    { id: 'wipeout',      icon: '💀', name: 'Wipeout',      btc: 25000,  mnav: 0.5, horizon: 0, group: 'snapshot'   },
-    { id: 'capitulation', icon: '🐻', name: 'Capitulation', btc: 50000,  mnav: 0.7, horizon: 0, group: 'snapshot'   },
-    { id: 'current',      icon: '📍', name: 'Current',      btc: null,   mnav: 1.0, horizon: 0, group: 'snapshot'   },
-    { id: 'recovery',     icon: '☀️', name: 'Recovery',     btc: 150000, mnav: 1.2, horizon: 1, group: 'projection' },
-    { id: 'bull',         icon: '🐂', name: 'Bull Run',     btc: 250000, mnav: 1.5, horizon: 3, group: 'projection' },
-    { id: 'moon',         icon: '🚀', name: 'Moon Math',    btc: 500000, mnav: 2.0, horizon: 5, group: 'projection' },
+    { id: 'wipeout',      icon: '&#128128;', name: 'Wipeout',      btc: 25000,  mnav: 0.5, horizon: 5  },
+    { id: 'capitulation', icon: '&#128059;', name: 'Capitulation', btc: 50000,  mnav: 0.7, horizon: 3  },
+    { id: 'current',      icon: '&#128205;', name: 'Current',      btc: null,   mnav: 1.0, horizon: 0  },
+    { id: 'recovery',     icon: '&#128260;', name: 'Recovery',     btc: 150000, mnav: 1.2, horizon: 1  },
+    { id: 'bull',         icon: '&#128002;', name: 'Bull Run',     btc: 250000, mnav: 1.5, horizon: 3  },
+    { id: 'moon',         icon: '&#128640;', name: 'Moon Math',    btc: 500000, mnav: 2.0, horizon: 5  },
 ];
 
 const HORIZON_OPTIONS = [
@@ -1260,7 +1187,7 @@ function renderHero(final, marketPrice) {
     $('heroChange').textContent = sign + (pctChange * 100).toFixed(1) + '% (' + sign + '$' + Math.abs(price - marketPrice).toFixed(2) + ')';
     $('heroChange').className = 'hero-change ' + (pctChange >= 0 ? 'up' : 'down');
     el.className = 'hero-price ' + (pctChange > 0.05 ? 'positive' : pctChange < -0.05 ? 'negative' : 'neutral');
-    $('heroVs').textContent = 'vs MSTR market ' + fmtPrice(marketPrice) + ' \u00b7 ' + (horizonYears > 0 ? horizonYears + '-year projection with div dilution' : 'instant snapshot');
+    $('heroVs').textContent = 'vs MSTR market ' + fmtPrice(marketPrice) + ' \u00b7 ' + (horizonYears > 0 ? 'Year ' + horizonYears + ' projection' : 'at current inputs');
 
     // Implied mNAV
     const inp = getInputs();
@@ -1478,29 +1405,14 @@ function renderAssumptions(inp) {
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function buildScenarioBar() {
-    const snapshots = SCENARIOS.filter(s => s.group === 'snapshot');
-    const projections = SCENARIOS.filter(s => s.group === 'projection');
-
-    function renderCard(s) {
-        const isProjection = s.group === 'projection';
-        const horizonLabel = s.horizon === 0 ? 'NOW' : s.horizon + 'Y';
-        const badgeClass = isProjection ? 'future-badge' : 'now-badge';
-        const cardClass = 'scenario-card' +
-            (isProjection ? ' projection' : '') +
-            (s.id === activeScenario ? ' active' : '');
-        const priceDisplay = s.btc ? (s.btc >= 1000 ? '$' + (s.btc/1000) + 'K' : '$' + s.btc) : fmtPrice(btcPrice);
-
-        return '<div class="' + cardClass + '" data-scenario="' + s.id + '">' +
-            '<span class="horizon-badge ' + badgeClass + '">' + horizonLabel + '</span>' +
-            '<div class="scenario-icon">' + s.icon + '</div>' +
-            '<div class="scenario-name">' + s.name + '</div>' +
-            '<div class="scenario-price">' + priceDisplay + '</div>' +
-            '<div class="scenario-mnav">' + s.mnav.toFixed(1) + '\u00d7 mNAV</div>' +
-            '</div>';
-    }
-
-    $('snapshotBar').innerHTML = snapshots.map(renderCard).join('');
-    $('projectionBar').innerHTML = projections.map(renderCard).join('');
+    $('scenarioBar').innerHTML = SCENARIOS.map(s =>
+        '<div class="scenario-card ' + (s.id === activeScenario ? 'active' : '') + '" data-scenario="' + s.id + '">' +
+        '<div class="scenario-icon">' + s.icon + '</div>' +
+        '<div class="scenario-name">' + s.name + '</div>' +
+        '<div class="scenario-price">' + (s.btc ? (s.btc >= 1000 ? '$' + (s.btc/1000) + 'K' : '$' + s.btc) : fmtPrice(btcPrice)) + '</div>' +
+        '<div class="scenario-mnav">' + s.mnav.toFixed(1) + '\u00d7 mNAV</div>' +
+        '</div>'
+    ).join('');
 
     document.querySelectorAll('.scenario-card').forEach(card => {
         card.addEventListener('click', () => {
