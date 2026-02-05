@@ -82,24 +82,55 @@
             transition: color 0.2s;
         }
         .nav-back:hover { color: var(--orange-primary); }
-        .logo-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
+        .logo-container {
+            position: relative;
+            display: inline-block;
             margin-bottom: 6px;
         }
-        .logo-main {
+        .logo {
             font-size: 32px;
             font-weight: 300;
             letter-spacing: 16px;
             padding-left: 16px;
-            background: linear-gradient(135deg, var(--orange-primary), var(--orange-light));
+            color: var(--text-primary);
+            position: relative;
+            z-index: 1;
+        }
+        .logo span {
+            background: linear-gradient(135deg, var(--orange-primary) 0%, var(--orange-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 600;
+        }
+        .logo-whisper {
+            font-size: 11px;
+            font-weight: 400;
+            letter-spacing: 8px;
+            padding-left: 8px;
+            margin-top: 2px;
+            text-transform: lowercase;
+            background: linear-gradient(180deg, 
+                rgba(161, 161, 170, 0.6) 0%, 
+                rgba(82, 82, 91, 0.2) 100%
+            );
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+        .logo-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 180px;
+            height: 50px;
+            background: radial-gradient(ellipse, rgba(249, 115, 22, 0.3) 0%, transparent 70%);
+            filter: blur(20px);
+            z-index: 0;
+        }
         .logo-badge {
+            display: inline-block;
             font-size: 11px;
             font-weight: 600;
             padding: 4px 10px;
@@ -109,6 +140,7 @@
             color: var(--orange-primary);
             letter-spacing: 1px;
             font-family: var(--mono);
+            margin-top: 8px;
         }
         .header-sub {
             font-size: 13px;
@@ -779,7 +811,7 @@
         @media (max-width: 480px) {
             .hero-price { font-size: 40px; }
             .control-value { font-size: 16px; }
-            .logo-main { font-size: 24px; letter-spacing: 10px; padding-left: 10px; }
+            .logo { font-size: 24px; letter-spacing: 10px; padding-left: 10px; }
         }
     </style>
 </head>
@@ -795,10 +827,12 @@
     <!-- Header -->
     <div class="header">
         <a href="/" class="nav-back">&larr; cebetracker.io</a>
-        <div class="logo-row">
-            <div class="logo-main">CEBE</div>
-            <div class="logo-badge">MSTR MODELER</div>
+        <div class="logo-container">
+            <div class="logo-glow"></div>
+            <div class="logo"><span>CEBE</span></div>
+            <p class="logo-whisper">tracker</p>
         </div>
+        <div class="logo-badge">MSTR MODELER</div>
         <div class="header-sub">Pick a scenario. See what your MSTR is worth.</div>
         <div class="live-strip" id="liveStrip">
             <span><span class="live-dot"></span> Live Data</span>
@@ -922,8 +956,8 @@
 
     <!-- Footer -->
     <div class="footer">
-        <p>CEBE Framework by <a href="https://x.com/chcbearsfan" target="_blank">@chcbearsfan</a> &middot; <a href="/">cebetracker.io</a></p>
-        <p style="margin-top:4px">Data updates after each 8-K filing &middot; Not financial advice</p>
+        <p>CEBE Framework by <a href="https://x.com/chcbearsfan" target="_blank">&#64;chcbearsfan</a> &middot; <a href="/">cebetracker.io</a> &middot; <a href="https://x.com/chcbearsfan/status/2014767364819063207" target="_blank">Read the Framework</a></p>
+        <p style="margin-top:4px">Not financial advice &middot; Data updates after each filing</p>
         <p class="footer-formula">Share Price = CEBE &times; BTC Price &times; mNAV</p>
     </div>
 
