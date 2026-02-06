@@ -15,7 +15,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script defer src="/_vercel/insights/script.js"></script>
 
     <style>
         :root {
@@ -1011,6 +1010,7 @@ const SCENARIOS = [
     { id: 'recovery',     icon: '☀️', name: 'Recovery',     btc: 150000, mnav: 1.2, horizon: 1, group: 'projection' },
     { id: 'bull',         icon: '🐂', name: 'Bull Run',     btc: 250000, mnav: 1.5, horizon: 3, group: 'projection' },
     { id: 'moon',         icon: '🚀', name: 'Moon Math',    btc: 500000, mnav: 2.0, horizon: 5, group: 'projection' },
+    { id: 'terminal',     icon: '♾️', name: 'Terminal',     btc: 1000000, mnav: 3.0, horizon: 10, group: 'projection' },
 ];
 
 const HORIZON_OPTIONS = [
@@ -1022,7 +1022,7 @@ const HORIZON_OPTIONS = [
 ];
 
 const MNAV_PRESETS = [0.5, 0.75, 1.0, 1.5, 2.0, 3.0];
-const MATRIX_BTC_PRICES = [25000, 50000, 75000, 100000, 150000, 200000, 300000, 500000];
+const MATRIX_BTC_PRICES = [25000, 50000, 75000, 100000, 150000, 200000, 300000, 500000, 1000000];
 const MATRIX_MNAVS = [0.5, 0.75, 1.0, 1.5, 2.0, 3.0];
 
 // â”€â”€â”€ STATE â”€â”€â”€
@@ -1375,6 +1375,13 @@ function renderNarrative(final, current, inp, marketPrice) {
         items.push({ cls: 'neutral', icon: '&#128200;', text: '<strong>Amplification: ' + final.amp.toFixed(2) + '\u00d7.</strong> Common equity moves ' + ((final.amp - 1) * 100).toFixed(0) + '% faster than BTC. This leverage works both ways.' });
     }
 
+    // Terminal Accumulation insight — when drag is trivial and price is extreme
+    if (final.drag < 0.03 && btcPrice >= 500000) {
+        const bps = (inp.btcHoldings / final.shares) * 1e8;
+        const convergence = final.cebeSats / bps * 100;
+        items.push({ cls: 'green', icon: '&#9854;', text: '<strong>Terminal convergence.</strong> CEBE is ' + convergence.toFixed(1) + '% of BPS &mdash; senior claims are a rounding error against ' + fmtB(inp.btcHoldings * btcPrice) + ' in BTC reserves. At this level, mNAV becomes the entire conversation.' });
+    }
+
     $('narrativeBody').innerHTML = items.map(i =>
         '<div class="narr-item ' + i.cls + '"><span class="narr-icon">' + i.icon + '</span><span class="narr-text">' + i.text + '</span></div>'
     ).join('');
@@ -1527,7 +1534,7 @@ function buildScenarioBar() {
         const cardClass = 'scenario-card' +
             (isProjection ? ' projection' : '') +
             (s.id === activeScenario ? ' active' : '');
-        const priceDisplay = s.btc ? (s.btc >= 1000 ? '$' + (s.btc/1000) + 'K' : '$' + s.btc) : fmtPrice(btcPrice);
+        const priceDisplay = s.btc ? (s.btc >= 1000000 ? '$' + (s.btc/1000000) + 'M' : s.btc >= 1000 ? '$' + (s.btc/1000) + 'K' : '$' + s.btc) : fmtPrice(btcPrice);
 
         return '<div class="' + cardClass + '" data-scenario="' + s.id + '">' +
             '<span class="horizon-badge ' + badgeClass + '">' + horizonLabel + '</span>' +
