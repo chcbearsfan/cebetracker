@@ -1099,7 +1099,7 @@
                     <h2 class="modal-title" id="modalTitle">Company</h2>
                     <span class="modal-ticker" id="modalTicker">TICKER</span>
                 </div>
-                <button class="modal-close" id="modalClose">Ã—</button>
+                <button class="modal-close" id="modalClose">Ã-</button>
             </div>
             <div class="modal-body" id="modalBody"></div>
         </div>
@@ -1148,30 +1148,25 @@
                     console.log(`[Finnhub] âœ“ Got price for ${symbol}: $${data.c}`);
                     return data.c;
                 }
-                console.log(`[Finnhub] âœ— No valid price for ${symbol}, trying Yahoo Finance...`);
+                console.log(`[Finnhub] âœ- No valid price for ${symbol}, trying Yahoo Finance...`);
             } catch (error) {
-                console.error(`[Finnhub] âœ— Failed to fetch ${symbol}:`, error);
+                console.error(`[Finnhub] âœ- Failed to fetch ${symbol}:`, error);
             }
             
-            // Fallback to Yahoo Finance for European stocks (via CORS proxy)
+            // Fallback to our own Yahoo proxy API
             try {
-                const yahooSymbol = symbol;
-                const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSymbol}?interval=1d&range=1d`;
-                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`;
-                console.log(`[Yahoo] Fetching price for ${yahooSymbol} via proxy...`);
-                console.log(`[Yahoo] Proxy URL: ${proxyUrl}`);
-                const response = await fetch(proxyUrl);
+                console.log(`[CEBE API] Fetching price for ${symbol}...`);
+                const response = await fetch(`/api/stock-price?symbol=${symbol}`);
                 const data = await response.json();
-                console.log(`[Yahoo] Response:`, data);
-                const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
-                if (price && price > 0) {
-                    liveStockPrices[symbol] = price;
-                    console.log(`[Yahoo] âœ“ Got price for ${yahooSymbol}: â‚¬${price}`);
-                    return price;
+                console.log(`[CEBE API] Response:`, data);
+                if (data.price && data.price > 0) {
+                    liveStockPrices[symbol] = data.price;
+                    console.log(`[CEBE API] Got price for ${symbol}: ${data.price} ${data.currency || ''}`);
+                    return data.price;
                 }
-                console.log(`[Yahoo] âœ— No valid price for ${yahooSymbol}`);
+                console.log(`[CEBE API] No valid price for ${symbol}`);
             } catch (error) {
-                console.error(`[Yahoo] âœ— Failed to fetch ${symbol}:`, error);
+                console.error(`[CEBE API] Failed to fetch ${symbol}:`, error);
             }
             
             return null;
@@ -1185,7 +1180,7 @@
             ASST: 'ASST',
             TSWCF: 'TSWCF',
             ALCPB: 'ALCPB.PA',  // Euronext Paris suffix for Finnhub
-            OBTC3: 'OBTC3.SA'   // B3 Brazil suffix for Finnhub
+            OBTC3: 'OBTC3.SA'   // B3 Brazil suffix
         };
         
         // Company metadata
@@ -1629,8 +1624,8 @@
                                 <div class="step-number">4</div>
                                 <div class="step-content">
                                     <div class="step-title">Calculate CEBE (sats/share)</div>
-                                    <div class="step-formula">Common Equity BTC Ã· Shares Ã— 100M</div>
-                                    <div class="step-calc">${formatNumber(Math.round(m.commonEquityBtc))} Ã· ${formatNumber(parseFloat(data.shares_outstanding))} Ã— 100M = <span class="highlight">${formatNumber(Math.round(m.cebe))} sats</span></div>
+                                    <div class="step-formula">Common Equity BTC Ã· Shares Ã- 100M</div>
+                                    <div class="step-calc">${formatNumber(Math.round(m.commonEquityBtc))} Ã· ${formatNumber(parseFloat(data.shares_outstanding))} Ã- 100M = <span class="highlight">${formatNumber(Math.round(m.cebe))} sats</span></div>
                                 </div>
                             </div>
                             <div class="formula-step">
