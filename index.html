@@ -207,6 +207,36 @@
             letter-spacing: 0.5px;
         }
         
+        /* Multi-ticker display */
+        .company-tickers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+        
+        .ticker-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--orange-primary);
+            background: rgba(249, 115, 22, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            letter-spacing: 0.3px;
+        }
+        
+        .ticker-badge.primary {
+            font-size: 14px;
+            background: rgba(249, 115, 22, 0.15);
+            padding: 3px 8px;
+        }
+        
+        .ticker-separator {
+            color: var(--text-muted);
+            font-size: 10px;
+        }
+        
         .company-name { 
             font-size: 13px; 
             color: var(--text-secondary);
@@ -322,7 +352,7 @@
             align-items: center;
         }
         
-        .modal-title-group { display: flex; align-items: baseline; gap: 10px; }
+        .modal-title-group { display: flex; flex-direction: column; gap: 4px; }
         
         .modal-title { 
             font-size: 20px; 
@@ -330,11 +360,20 @@
             color: var(--text-primary);
         }
         
+        .modal-tickers {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
         .modal-ticker { 
             color: var(--orange-primary); 
             font-family: 'JetBrains Mono', monospace;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 500;
+            background: rgba(249, 115, 22, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
         }
         
         .modal-close {
@@ -1035,6 +1074,9 @@
             .metric-value { font-size: 14px; }
             .modal { border-radius: 16px; }
             .modal-body { padding: 20px; }
+            .company-tickers { gap: 4px; }
+            .ticker-badge { font-size: 10px; padding: 2px 4px; }
+            .ticker-badge.primary { font-size: 12px; }
         }
     </style>
     <script>
@@ -1084,11 +1126,11 @@
         
         <footer class="footer">
             <p class="footer-text">
-                CEBE Framework by <a href="https://x.com/chcbearsfan" class="footer-link" target="_blank">&#64;chcbearsfan</a> &middot; 
+                CEBE Framework by <a href="https://x.com/chcbearsfan" class="footer-link" target="_blank">@chcbearsfan</a> &middot; 
                 <a href="https://x.com/chcbearsfan/status/2014767364819063207" class="footer-link" target="_blank">Read the Framework</a>
             </p>
             <p class="footer-text" style="margin-top:4px">Not financial advice &middot; Data updates after each filing</p>
-            <p class="footer-formula">CEBE = (Total BTC &minus; Senior Claims in BTC) &divide; Shares</p>
+            <p class="footer-formula">CEBE = (Total BTC - Senior Claims in BTC) / Shares</p>
         </footer>
     </div>
     
@@ -1097,9 +1139,9 @@
             <div class="modal-header">
                 <div class="modal-title-group">
                     <h2 class="modal-title" id="modalTitle">Company</h2>
-                    <span class="modal-ticker" id="modalTicker">TICKER</span>
+                    <div class="modal-tickers" id="modalTickers"></div>
                 </div>
-                <button class="modal-close" id="modalClose">x</button>
+                <button class="modal-close" id="modalClose">&times;</button>
             </div>
             <div class="modal-body" id="modalBody"></div>
         </div>
@@ -1130,7 +1172,7 @@
             }
         }
         
-        // Fetch live stock price from Finnhub (with Yahoo Finance fallback for European stocks)
+        // Fetch live stock price from Finnhub (with CEBE API fallback)
         async function fetchStockPrice(symbol) {
             if (FINNHUB_API_KEY === 'YOUR_FINNHUB_KEY_HERE') {
                 console.log(`[Finnhub] No API key configured for ${symbol}`);
@@ -1145,15 +1187,15 @@
                 console.log(`[Finnhub] Response for ${symbol}:`, data);
                 if (data.c && data.c > 0) {
                     liveStockPrices[symbol] = data.c;
-                    console.log(`[Finnhub] [OK] Got price for ${symbol}: $${data.c}`);
+                    console.log(`[Finnhub] Got price for ${symbol}: $${data.c}`);
                     return data.c;
                 }
-                console.log(`[Finnhub] [X] No valid price for ${symbol}, trying Yahoo Finance...`);
+                console.log(`[Finnhub] No valid price for ${symbol}, trying CEBE API...`);
             } catch (error) {
-                console.error(`[Finnhub] [X] Failed to fetch ${symbol}:`, error);
+                console.error(`[Finnhub] Failed to fetch ${symbol}:`, error);
             }
             
-            // Fallback to our own Yahoo proxy API
+            // Fallback to CEBE API proxy
             try {
                 console.log(`[CEBE API] Fetching price for ${symbol}...`);
                 const response = await fetch(`/api/stock-price?symbol=${symbol}`);
@@ -1172,26 +1214,58 @@
             return null;
         }
         
-        // Ticker symbol mapping for Finnhub
-        // Note: ALCPB is on Euronext Growth Paris - trying .PA suffix
+        // Ticker symbol mapping for Finnhub/Yahoo
         const tickerToStock = {
             MSTR: 'MSTR',
             MTPLF: 'MTPLF',
             ASST: 'ASST',
             TSWCF: 'TSWCF',
-            ALCPB: 'ALCPB.PA',  // Euronext Paris suffix for Finnhub
-            OBTC3: 'OBTC3.SA'   // B3 Brazil suffix
+            ALCPB: 'ALCPB.PA',
+            OBTC3: 'OBTC3.SA'
         };
         
-        // Company metadata
-        // UPDATED: Added Capital B (ALCPB)
+        // Company metadata with multi-ticker support
         const companyMeta = {
-            MSTR: { name: 'Strategy', exchange: 'Nasdaq: MSTR' },
-            MTPLF: { name: 'Metaplanet', exchange: 'TYO: 3350 / OTC: MTPLF', fx_note: 'JPY claims at snapshot FX' },
-            ASST: { name: 'Strive', exchange: 'Nasdaq: ASST' },
-            TSWCF: { name: 'Smarter Web Co', exchange: 'Aquis: SWC / OTC: TSWCF', fx_note: 'GBP claims at snapshot FX' },
-            ALCPB: { name: 'Capital B', exchange: 'Euronext: ALCPB', fx_note: 'EUR claims at snapshot FX' },
-            OBTC3: { name: 'OranjeBTC', exchange: 'B3: OBTC3', fx_note: 'BRL claims converted to USD' }
+            MSTR: { 
+                name: 'Strategy', 
+                exchange: 'Nasdaq: MSTR',
+                displayTickers: ['MSTR'],
+                primaryTicker: 'MSTR'
+            },
+            MTPLF: { 
+                name: 'Metaplanet', 
+                exchange: 'TYO: 3350 / OTC: MPJPY, MTPLF / FRA: DN3', 
+                fx_note: 'JPY claims at snapshot FX',
+                displayTickers: ['3350', 'MPJPY', 'MTPLF', 'DN3'],
+                primaryTicker: '3350'
+            },
+            ASST: { 
+                name: 'Strive', 
+                exchange: 'Nasdaq: ASST',
+                displayTickers: ['ASST'],
+                primaryTicker: 'ASST'
+            },
+            TSWCF: { 
+                name: 'Smarter Web Co', 
+                exchange: 'LSE: SWC / OTC: TSWCF / FRA: 3M8', 
+                fx_note: 'GBP claims at snapshot FX',
+                displayTickers: ['SWC', 'TSWCF', '3M8'],
+                primaryTicker: 'SWC'
+            },
+            ALCPB: { 
+                name: 'Capital B', 
+                exchange: 'Euronext: ALCPB / OTC: CPTLF', 
+                fx_note: 'EUR claims at snapshot FX',
+                displayTickers: ['ALCPB', 'CPTLF'],
+                primaryTicker: 'ALCPB'
+            },
+            OBTC3: { 
+                name: 'OranjeBTC', 
+                exchange: 'B3: OBTC3', 
+                fx_note: 'BRL claims converted to USD',
+                displayTickers: ['OBTC3'],
+                primaryTicker: 'OBTC3'
+            }
         };
         
         let allSnapshots = [];
@@ -1248,7 +1322,6 @@
             const debt = parseFloat(snapshot.debt_usd) || 0;
             const preferred = parseFloat(snapshot.preferred_usd) || 0;
             const cash = parseFloat(snapshot.cash_usd) || 0;
-            // Use live BTC price from CoinGecko, fall back to sheet price only if API failed
             const btcPrice = liveBtcPrice || parseFloat(snapshot.btc_price) || 100000;
             
             const netClaimsUsd = debt + preferred - cash;
@@ -1290,7 +1363,6 @@
         
         function getLatestSnapshots(snapshots) {
             const latest = {};
-            // UPDATED: Added ALCPB to display order
             const order = ['MSTR', 'MTPLF', 'ASST', 'TSWCF', 'ALCPB', 'OBTC3'];
             
             snapshots.forEach(s => {
@@ -1303,6 +1375,20 @@
             return order.filter(t => latest[t]).map(t => latest[t]);
         }
         
+        // Generate ticker display HTML
+        function renderTickerDisplay(meta) {
+            const tickers = meta.displayTickers || [meta.primaryTicker];
+            if (tickers.length === 1) {
+                return `<div class="company-ticker">${tickers[0]}</div>`;
+            }
+            
+            return `<div class="company-tickers">
+                ${tickers.map((t, i) => 
+                    `<span class="ticker-badge ${i === 0 ? 'primary' : ''}">${t}</span>`
+                ).join('')}
+            </div>`;
+        }
+        
         function renderTable(snapshots) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
@@ -1311,7 +1397,7 @@
             
             snapshots.forEach(snapshot => {
                 const ticker = snapshot.ticker;
-                const meta = companyMeta[ticker] || { name: ticker, exchange: '' };
+                const meta = companyMeta[ticker] || { name: ticker, exchange: '', displayTickers: [ticker], primaryTicker: ticker };
                 const metrics = calculateMetrics(snapshot);
                 
                 if (snapshot.snapshot_date > latestDate) latestDate = snapshot.snapshot_date;
@@ -1331,13 +1417,13 @@
                     <td>
                         <div class="company-cell">
                             <div class="company-info">
-                                <div class="company-ticker">${ticker}</div>
+                                ${renderTickerDisplay(meta)}
                                 <div class="company-name">${meta.name}</div>
                             </div>
                         </div>
                     </td>
                     <td>
-                        <div class="metric-value stock-price" data-symbol="${tickerToStock[ticker] || ticker}">-</div>
+                        <div class="metric-value stock-price" data-symbol="${tickerToStock[ticker] || ticker}">-</div>
                         <div class="metric-label">USD</div>
                     </td>
                     <td>
@@ -1386,7 +1472,12 @@
             const history = getCompanyHistory(ticker);
             
             document.getElementById('modalTitle').textContent = data.name;
-            document.getElementById('modalTicker').textContent = ticker;
+            
+            // Render all tickers in modal header
+            const tickers = data.displayTickers || [ticker];
+            document.getElementById('modalTickers').innerHTML = tickers.map(t => 
+                `<span class="modal-ticker">${t}</span>`
+            ).join('');
             
             // Build history chart
             let historyHTML = '<p style="color: var(--text-muted); font-size: 13px;">No historical data available yet.</p>';
@@ -1560,11 +1651,11 @@
                                 <div class="sim-stock-result">
                                     <div class="sim-stock-row">
                                         <span>Current Price</span>
-                                        <span id="simCurrentStock">$-</span>
+                                        <span id="simCurrentStock">$-</span>
                                     </div>
                                     <div class="sim-stock-row">
                                         <span>Current mNAV</span>
-                                        <span id="simMnav">-</span>
+                                        <span id="simMnav">-</span>
                                     </div>
                                     <div class="sim-stock-row mnav-input-row">
                                         <span>Projected mNAV</span>
@@ -1575,11 +1666,11 @@
                                     </div>
                                     <div class="sim-stock-row highlight-row">
                                         <span>Projected Price</span>
-                                        <span id="simProjStock">$-</span>
+                                        <span id="simProjStock">$-</span>
                                     </div>
                                     <div class="sim-stock-row change-row">
                                         <span>Change</span>
-                                        <span id="simStockChange">-</span>
+                                        <span id="simStockChange">-</span>
                                     </div>
                                 </div>
                             </div>
@@ -1800,7 +1891,6 @@
                     document.getElementById('simStockPrice').value = price.toFixed(2);
                     updateSimulation();
                 } else {
-                    // If API fails, show message
                     document.getElementById('simStockPrice').placeholder = 'API unavailable';
                 }
                 
@@ -1831,7 +1921,7 @@
         // Initialize
         async function init() {
             try {
-                // Fetch live BTC price FIRST - so calculations use live price
+                // Fetch live BTC price FIRST
                 const price = await fetchBtcPrice();
                 if (price) {
                     const el = document.getElementById('headerBtcPrice');
@@ -1842,7 +1932,7 @@
                 
                 allSnapshots = await fetchSheetData(SNAPSHOTS_GID);
                 
-                // Filter to only show 'live' status rows (or rows without status column for backwards compatibility)
+                // Filter to only show 'live' status rows
                 const liveSnapshots = allSnapshots.filter(s => !s.status || s.status.toLowerCase() === 'live');
                 
                 const latest = getLatestSnapshots(liveSnapshots);
@@ -1855,7 +1945,7 @@
                     if (price) {
                         el.textContent = '$' + price.toFixed(2);
                     } else {
-                        el.textContent = '-';
+                        el.textContent = '-';
                     }
                 });
                 
