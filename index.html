@@ -1059,7 +1059,7 @@
             <p class="last-updated" id="lastUpdated">Loading data...</p>
         </header>
         
-        <p class="table-hint">Click any company to view full CEBE breakdown, simulations, and historical tracking â†’</p>
+        <p class="table-hint">Click any company to view full CEBE breakdown, simulations, and historical tracking</p>
         
         <div class="table-container">
             <div class="loading" id="loadingState">
@@ -1099,7 +1099,7 @@
                     <h2 class="modal-title" id="modalTitle">Company</h2>
                     <span class="modal-ticker" id="modalTicker">TICKER</span>
                 </div>
-                <button class="modal-close" id="modalClose">Ã-</button>
+                <button class="modal-close" id="modalClose">x</button>
             </div>
             <div class="modal-body" id="modalBody"></div>
         </div>
@@ -1145,12 +1145,12 @@
                 console.log(`[Finnhub] Response for ${symbol}:`, data);
                 if (data.c && data.c > 0) {
                     liveStockPrices[symbol] = data.c;
-                    console.log(`[Finnhub] âœ“ Got price for ${symbol}: $${data.c}`);
+                    console.log(`[Finnhub] [OK] Got price for ${symbol}: $${data.c}`);
                     return data.c;
                 }
-                console.log(`[Finnhub] âœ- No valid price for ${symbol}, trying Yahoo Finance...`);
+                console.log(`[Finnhub] [X] No valid price for ${symbol}, trying Yahoo Finance...`);
             } catch (error) {
-                console.error(`[Finnhub] âœ- Failed to fetch ${symbol}:`, error);
+                console.error(`[Finnhub] [X] Failed to fetch ${symbol}:`, error);
             }
             
             // Fallback to our own Yahoo proxy API
@@ -1337,7 +1337,7 @@
                         </div>
                     </td>
                     <td>
-                        <div class="metric-value stock-price" data-symbol="${tickerToStock[ticker] || ticker}">â€”</div>
+                        <div class="metric-value stock-price" data-symbol="${tickerToStock[ticker] || ticker}">-</div>
                         <div class="metric-label">USD</div>
                     </td>
                     <td>
@@ -1358,7 +1358,7 @@
                     <td>
                         <div class="source-cell">
                             <span class="source-text" title="${snapshot.source || 'N/A'}">${sourceShort}</span>
-                            <span class="click-hint">Click for details â†’</span>
+                            <span class="click-hint">Click for details</span>
                         </div>
                     </td>
                 `;
@@ -1455,7 +1455,7 @@
                             </div>
                             <div class="capital-item">
                                 <span class="capital-label">Cash Offset</span>
-                                <span class="capital-value">âˆ’${formatCurrency(m.cash)}</span>
+                                <span class="capital-value">-${formatCurrency(m.cash)}</span>
                             </div>
                             <div class="capital-item total">
                                 <span class="capital-label">Net Senior Claims</span>
@@ -1482,7 +1482,7 @@
                                 <div class="sim-input-row">
                                     <span class="sim-currency">$</span>
                                     <input type="number" id="simBtcPrice" class="sim-input" value="${Math.round(m.btcPrice)}" min="10000" max="1000000" step="1000">
-                                    <button class="sim-live-btn" id="fetchBtcBtn" title="Fetch live price">âŸ³ Live</button>
+                                    <button class="sim-live-btn" id="fetchBtcBtn" title="Fetch live price">Live</button>
                                 </div>
                                 <input type="range" id="simBtcSlider" class="sim-slider" min="25000" max="500000" step="5000" value="${Math.round(m.btcPrice)}">
                                 <div class="sim-slider-labels">
@@ -1496,7 +1496,7 @@
                                 <div class="sim-input-row">
                                     <span class="sim-currency">$</span>
                                     <input type="number" id="simStockPrice" class="sim-input" value="" placeholder="Enter price" min="0" step="0.01">
-                                    <button class="sim-live-btn" id="fetchStockBtn" title="Fetch live price" data-symbol="${tickerToStock[ticker] || ticker}">âŸ³ Live</button>
+                                    <button class="sim-live-btn" id="fetchStockBtn" title="Fetch live price" data-symbol="${tickerToStock[ticker] || ticker}">Live</button>
                                 </div>
                             </div>
                             
@@ -1533,7 +1533,7 @@
                                         <span class="sim-metric-value" id="simTodayOwn">${(m.commonEquityPct * 100).toFixed(1)}%</span>
                                     </div>
                                 </div>
-                                <div class="sim-arrow">â†’</div>
+                                <div class="sim-arrow">-></div>
                                 <div class="sim-col projected">
                                     <div class="sim-col-header" id="simProjHeader">Projected</div>
                                     <div class="sim-metric">
@@ -1560,11 +1560,11 @@
                                 <div class="sim-stock-result">
                                     <div class="sim-stock-row">
                                         <span>Current Price</span>
-                                        <span id="simCurrentStock">$â€”</span>
+                                        <span id="simCurrentStock">$-</span>
                                     </div>
                                     <div class="sim-stock-row">
                                         <span>Current mNAV</span>
-                                        <span id="simMnav">â€”</span>
+                                        <span id="simMnav">-</span>
                                     </div>
                                     <div class="sim-stock-row mnav-input-row">
                                         <span>Projected mNAV</span>
@@ -1575,18 +1575,18 @@
                                     </div>
                                     <div class="sim-stock-row highlight-row">
                                         <span>Projected Price</span>
-                                        <span id="simProjStock">$â€”</span>
+                                        <span id="simProjStock">$-</span>
                                     </div>
                                     <div class="sim-stock-row change-row">
                                         <span>Change</span>
-                                        <span id="simStockChange">â€”</span>
+                                        <span id="simStockChange">-</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
                         <div class="sim-disclaimer">
-                            âš ï¸ For educational purposes only. Assumes no changes to capital structure. Not financial advice. Actual results will vary.
+                            For educational purposes only. Assumes no changes to capital structure. Not financial advice. Actual results will vary.
                         </div>
                     </div>
                 </div>
@@ -1600,40 +1600,40 @@
                                 <div class="step-number">1</div>
                                 <div class="step-content">
                                     <div class="step-title">Calculate Net Senior Claims (USD)</div>
-                                    <div class="step-formula">Debt + Preferred âˆ’ Cash</div>
-                                    <div class="step-calc">${formatCurrency(m.debt)} + ${formatCurrency(m.preferred)} âˆ’ ${formatCurrency(m.cash)} = <span class="highlight">${formatCurrency(m.netClaimsUsd)}</span></div>
+                                    <div class="step-formula">Debt + Preferred - Cash</div>
+                                    <div class="step-calc">${formatCurrency(m.debt)} + ${formatCurrency(m.preferred)} - ${formatCurrency(m.cash)} = <span class="highlight">${formatCurrency(m.netClaimsUsd)}</span></div>
                                 </div>
                             </div>
                             <div class="formula-step">
                                 <div class="step-number">2</div>
                                 <div class="step-content">
                                     <div class="step-title">Convert Claims to BTC</div>
-                                    <div class="step-formula">Net Claims Ã· BTC Price</div>
-                                    <div class="step-calc">${formatCurrency(m.netClaimsUsd)} Ã· $${formatNumber(m.btcPrice)} = <span class="highlight">${formatNumber(Math.round(m.netClaimsBtc))} BTC</span></div>
+                                    <div class="step-formula">Net Claims / BTC Price</div>
+                                    <div class="step-calc">${formatCurrency(m.netClaimsUsd)} / $${formatNumber(m.btcPrice)} = <span class="highlight">${formatNumber(Math.round(m.netClaimsBtc))} BTC</span></div>
                                 </div>
                             </div>
                             <div class="formula-step">
                                 <div class="step-number">3</div>
                                 <div class="step-content">
                                     <div class="step-title">Calculate Common Equity BTC</div>
-                                    <div class="step-formula">Total BTC âˆ’ Claims BTC</div>
-                                    <div class="step-calc">${formatNumber(parseFloat(data.btc_holdings))} âˆ’ ${formatNumber(Math.round(m.netClaimsBtc))} = <span class="highlight">${formatNumber(Math.round(m.commonEquityBtc))} BTC</span></div>
+                                    <div class="step-formula">Total BTC - Claims BTC</div>
+                                    <div class="step-calc">${formatNumber(parseFloat(data.btc_holdings))} - ${formatNumber(Math.round(m.netClaimsBtc))} = <span class="highlight">${formatNumber(Math.round(m.commonEquityBtc))} BTC</span></div>
                                 </div>
                             </div>
                             <div class="formula-step">
                                 <div class="step-number">4</div>
                                 <div class="step-content">
                                     <div class="step-title">Calculate CEBE (sats/share)</div>
-                                    <div class="step-formula">Common Equity BTC Ã· Shares Ã- 100M</div>
-                                    <div class="step-calc">${formatNumber(Math.round(m.commonEquityBtc))} Ã· ${formatNumber(parseFloat(data.shares_outstanding))} Ã- 100M = <span class="highlight">${formatNumber(Math.round(m.cebe))} sats</span></div>
+                                    <div class="step-formula">Common Equity BTC / Shares x 100M</div>
+                                    <div class="step-calc">${formatNumber(Math.round(m.commonEquityBtc))} / ${formatNumber(parseFloat(data.shares_outstanding))} x 100M = <span class="highlight">${formatNumber(Math.round(m.cebe))} sats</span></div>
                                 </div>
                             </div>
                             <div class="formula-step">
                                 <div class="step-number">5</div>
                                 <div class="step-content">
                                     <div class="step-title">Calculate Drag</div>
-                                    <div class="step-formula">Claims BTC Ã· Total BTC</div>
-                                    <div class="step-calc">${formatNumber(Math.round(m.netClaimsBtc))} Ã· ${formatNumber(parseFloat(data.btc_holdings))} = <span class="highlight">${(m.drag * 100).toFixed(1)}%</span></div>
+                                    <div class="step-formula">Claims BTC / Total BTC</div>
+                                    <div class="step-calc">${formatNumber(Math.round(m.netClaimsBtc))} / ${formatNumber(parseFloat(data.btc_holdings))} = <span class="highlight">${(m.drag * 100).toFixed(1)}%</span></div>
                                 </div>
                             </div>
                         </div>
@@ -1785,7 +1785,7 @@
                 }
                 
                 btn.disabled = false;
-                btn.textContent = 'âŸ³ Live';
+                btn.textContent = 'Live';
             });
             
             // Live stock price button
@@ -1805,7 +1805,7 @@
                 }
                 
                 btn.disabled = false;
-                btn.textContent = 'âŸ³ Live';
+                btn.textContent = 'Live';
             });
             
             document.getElementById('modalOverlay').classList.add('active');
@@ -1855,7 +1855,7 @@
                     if (price) {
                         el.textContent = '$' + price.toFixed(2);
                     } else {
-                        el.textContent = 'â€”';
+                        el.textContent = '-';
                     }
                 });
                 
