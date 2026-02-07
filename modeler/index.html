@@ -136,8 +136,9 @@
         .mnav-btn:hover,.mnav-btn.active { border-color:var(--orange-primary); color:var(--orange-primary); background:var(--orange-glow); }
 
         /* WATERFALL */
-        .waterfall { display:flex; align-items:center; gap:4px; overflow-x:auto; padding:12px; scrollbar-width:none; }
+        .waterfall { display:flex; align-items:center; gap:4px; overflow-x:auto; padding:12px; padding-right:24px; scrollbar-width:none; }
         .waterfall::-webkit-scrollbar{display:none}
+        .waterfall::after { content:''; flex:0 0 12px; }
         .wf-step { flex:0 0 auto; text-align:center; padding:8px 12px; border-radius:8px; min-width:85px; }
         .wf-step.btc-val { background:rgba(249,115,22,0.08); border:1px solid rgba(249,115,22,0.2); }
         .wf-step.claims { background:var(--red-muted); border:1px solid rgba(239,68,68,0.2); }
@@ -149,7 +150,8 @@
         .wf-arrow { flex:0 0 auto; font-size:14px; color:var(--text-muted); }
 
         /* TABLE */
-        .table-wrap { overflow-x:auto; border-radius:10px; border:1px solid var(--border-subtle); background:var(--bg-secondary); scrollbar-width:thin; scrollbar-color:#333 transparent; }
+        .table-wrap { overflow-x:auto; border-radius:10px; border:1px solid var(--border-subtle); background:var(--bg-secondary); scrollbar-width:thin; scrollbar-color:#333 transparent; -webkit-overflow-scrolling:touch; }
+        .table-wrap table { min-width:700px; }
         table { width:100%; border-collapse:collapse; font-size:12px; white-space:nowrap; }
         thead th { padding:10px 12px; text-align:right; font-size:8px; font-weight:600; letter-spacing:1.5px; color:var(--text-muted); border-bottom:1px solid var(--border-subtle); background:rgba(255,255,255,0.02); position:sticky; top:0; }
         thead th:first-child{text-align:center}
@@ -327,7 +329,7 @@ const DEFAULTS = {
 
 const SCENARIOS = [
     {id:'wipeout',      icon:'\u{1F480}',name:'Wipeout',      btc:25000, mnav:0.5,horizon:0, group:'snapshot',  type:'static'},
-    {id:'capitulation', icon:'\u{1F43B}',name:'Capitulation', btc:50000, mnav:0.7,horizon:0, group:'snapshot',  type:'static'},
+    {id:'ath',          icon:'\u{1F451}',name:'Former ATH',   btc:126000,mnav:1.5,horizon:0, group:'snapshot',  type:'static'},
     {id:'current',      icon:'\u{1F4CD}',name:'Current',      btc:null,  mnav:1.0,horizon:0, group:'snapshot',  type:'static'},
     {id:'siege',        icon:'\u{1F3F0}',name:'Siege',        btc:50000, mnav:0.7,horizon:10,group:'projection',type:'siege'},
     {id:'saylor',       icon:'\u{1F4D0}',name:'Saylor Model', btc:null,  mnav:null,horizon:10,group:'projection',type:'saylor'},
