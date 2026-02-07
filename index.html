@@ -3,1970 +3,838 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>CEBE | Bitcoin Treasury Company Analysis</title>
-    <meta name="description" content="Track Common Equity Bitcoin Exposure (CEBE) across Bitcoin Treasury Companies. Rigorous analysis of drag, capital structure, and actual BTC ownership for common shareholders.">
-    
-    <!-- PWA Meta Tags -->
+    <title>CEBE Modeler | MSTR Share Price Analysis</title>
+    <meta name="description" content="Model Strategy (MSTR) share price through the CEBE framework. Scenario analysis, drag compression, dividend cascade modeling, and sensitivity matrix.">
     <meta name="application-name" content="CEBE">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="CEBE">
-    <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#09090b">
-    <meta name="msapplication-TileColor" content="#09090b">
-    
-    <!-- Favicon: Stacked CE/BE in orange -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%2309090b' width='32' height='32' rx='4'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f97316'/%3E%3Cstop offset='100%25' stop-color='%23fb923c'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='16' y='15' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='url(%23g)' text-anchor='middle'%3ECE%3C/text%3E%3Ctext x='16' y='28' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='url(%23g)' text-anchor='middle'%3EBE%3C/text%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <link rel="manifest" href="manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #09090b;
-            --bg-secondary: #0f0f11;
-            --bg-card: #141416;
-            --bg-elevated: #1a1a1d;
-            --orange-primary: #f97316;
-            --orange-light: #fb923c;
-            --orange-glow: rgba(249, 115, 22, 0.12);
-            --orange-border: rgba(249, 115, 22, 0.25);
-            --text-primary: #fafafa;
-            --text-secondary: #a1a1aa;
-            --text-muted: #52525b;
-            --green: #22c55e;
-            --green-muted: rgba(34, 197, 94, 0.15);
-            --red: #ef4444;
-            --red-muted: rgba(239, 68, 68, 0.15);
-            --yellow: #eab308;
-            --yellow-muted: rgba(234, 179, 8, 0.15);
-            --border-subtle: rgba(255, 255, 255, 0.06);
-        }
-        
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-        
-        .container { max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
-        
-        /* Modern Logo with Glow */
-        .header { text-align: center; margin-bottom: 60px; }
-        
-        .logo-container { position: relative; display: inline-block; }
-        
-        .logo {
-            font-size: 42px;
-            font-weight: 300;
-            letter-spacing: 24px;
-            padding-left: 24px;
-            color: var(--text-primary);
-            position: relative;
-            z-index: 1;
-        }
-        
-        .logo span {
-            background: linear-gradient(135deg, var(--orange-primary) 0%, var(--orange-light) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 600;
-        }
-        
-        .logo-whisper {
-            font-size: 13px;
-            font-weight: 400;
-            letter-spacing: 10px;
-            padding-left: 10px;
-            margin-top: 4px;
-            text-transform: lowercase;
-            background: linear-gradient(180deg, 
-                rgba(161, 161, 170, 0.6) 0%, 
-                rgba(82, 82, 91, 0.2) 100%
-            );
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .logo-glow {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 200px;
-            height: 60px;
-            background: radial-gradient(ellipse, rgba(249, 115, 22, 0.3) 0%, transparent 70%);
-            filter: blur(20px);
-            z-index: 0;
-        }
-        
-        .tagline { 
-            font-size: 14px; 
-            color: var(--text-muted); 
-            margin-top: 12px;
-            font-weight: 400;
-            letter-spacing: 0.5px;
-        }
-        
-        .last-updated { 
-            font-size: 11px; 
-            color: var(--text-muted); 
-            margin-top: 16px; 
-            font-family: 'JetBrains Mono', monospace;
-            opacity: 0.7;
-        }
-        
-        /* Loading State */
-        .loading { text-align: center; padding: 80px; color: var(--text-secondary); }
-        .loading-spinner { 
-            display: inline-block; 
-            width: 32px; 
-            height: 32px; 
-            border: 2px solid var(--border-subtle); 
-            border-top-color: var(--orange-primary); 
-            border-radius: 50%; 
-            animation: spin 0.8s linear infinite; 
-            margin-bottom: 16px; 
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        
-        /* Table Hint */
-        .table-hint {
-            text-align: center;
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 16px;
-        }
-        
-        .table-hint:hover {
-            color: var(--orange-primary);
-        }
-        
-        /* Table Container */
-        .table-container {
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: 16px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin-bottom: 40px;
-        }
-        
-        .data-table { width: 100%; border-collapse: collapse; min-width: 700px; }
-        
-        .data-table th {
-            background: var(--bg-secondary);
-            padding: 14px 24px;
-            text-align: left;
-            font-weight: 500;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--border-subtle);
-        }
-        
-        .data-table td {
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--border-subtle);
-            vertical-align: middle;
-        }
-        
-        .data-table tbody tr {
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-        
-        .data-table tbody tr:last-child td { border-bottom: none; }
-        
-        .data-table tbody tr:hover { 
-            background: var(--orange-glow);
-        }
-        
-        .data-table tbody tr:active {
-            background: rgba(249, 115, 22, 0.18);
-        }
-        
-        /* Company Cell */
-        .company-cell { display: flex; align-items: center; gap: 16px; }
-        
-        .company-info { display: flex; flex-direction: column; gap: 2px; }
-        
-        .company-ticker { 
-            font-family: 'JetBrains Mono', monospace; 
-            font-weight: 600; 
-            font-size: 15px; 
-            color: var(--orange-primary);
-            letter-spacing: 0.5px;
-        }
-        
-        /* Multi-ticker display */
-        .company-tickers {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            align-items: center;
-        }
-        
-        .ticker-badge {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 600;
-            font-size: 12px;
-            color: var(--orange-primary);
-            background: rgba(249, 115, 22, 0.1);
-            padding: 2px 6px;
-            border-radius: 4px;
-            letter-spacing: 0.3px;
-        }
-        
-        .ticker-badge.primary {
-            font-size: 14px;
-            background: rgba(249, 115, 22, 0.15);
-            padding: 3px 8px;
-        }
-        
-        .ticker-separator {
-            color: var(--text-muted);
-            font-size: 10px;
-        }
-        
-        .company-name { 
-            font-size: 13px; 
-            color: var(--text-secondary);
-            font-weight: 400;
-        }
-        
-        /* Metrics */
-        .metric-value { 
-            font-family: 'JetBrains Mono', monospace; 
-            font-weight: 500; 
-            font-size: 16px;
-            letter-spacing: -0.3px;
-        }
-        
-        .metric-label { 
-            font-size: 10px; 
-            color: var(--text-muted); 
-            margin-top: 3px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        /* Drag Badge */
-        .drag-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 64px;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 500;
-            font-size: 13px;
-        }
-        
-        .drag-low { background: var(--green-muted); color: var(--green); }
-        .drag-medium { background: var(--yellow-muted); color: var(--yellow); }
-        .drag-high { background: var(--red-muted); color: var(--red); }
-        .drag-zero { background: var(--green-muted); color: var(--green); }
-        
-        /* Source Column */
-        .source-cell {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        
-        .source-text {
-            font-size: 11px;
-            color: var(--text-muted);
-            font-family: 'JetBrains Mono', monospace;
-        }
-        
-        .click-hint {
-            font-size: 10px;
-            color: var(--orange-primary);
-            opacity: 0;
-            transition: opacity 0.15s ease;
-        }
-        
-        .data-table tbody tr:hover .click-hint {
-            opacity: 1;
-        }
-        
-        /* Trend Indicator */
-        .trend-cell {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .mini-chart {
-            width: 60px;
-            height: 24px;
-        }
-        
-        .mini-chart svg {
-            width: 100%;
-            height: 100%;
-        }
-        
-        /* Modal */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(4px);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .modal-overlay.active { display: flex; }
-        
-        .modal {
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: 20px;
-            max-width: 560px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-        
-        .modal-header {
-            padding: 24px 28px;
-            border-bottom: 1px solid var(--border-subtle);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modal-title-group { display: flex; flex-direction: column; gap: 4px; }
-        
-        .modal-title { 
-            font-size: 20px; 
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        
-        .modal-tickers {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        
-        .modal-ticker { 
-            color: var(--orange-primary); 
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
-            font-weight: 500;
-            background: rgba(249, 115, 22, 0.1);
-            padding: 2px 8px;
-            border-radius: 4px;
-        }
-        
-        .modal-close {
-            background: var(--bg-elevated);
-            border: 1px solid var(--border-subtle);
-            color: var(--text-secondary);
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            transition: all 0.15s ease;
-        }
-        
-        .modal-close:hover { 
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-        }
-        
-        .modal-body { padding: 0; }
-        
-        /* Modal Tabs */
-        .modal-tabs {
-            display: flex;
-            border-bottom: 1px solid var(--border-subtle);
-            padding: 0 28px;
-            gap: 0;
-        }
-        
-        .modal-tab {
-            padding: 14px 20px;
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--text-muted);
-            background: none;
-            border: none;
-            cursor: pointer;
-            position: relative;
-            transition: color 0.15s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .modal-tab:hover { color: var(--text-secondary); }
-        
-        .modal-tab.active { 
-            color: var(--orange-primary);
-        }
-        
-        .modal-tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: var(--orange-primary);
-        }
-        
-        .tab-content {
-            display: none;
-            padding: 24px 28px;
-        }
-        
-        .tab-content.active { display: block; }
-        
-        .modal-section { margin-bottom: 28px; }
-        .modal-section:last-child { margin-bottom: 0; }
-        
-        .section-title {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            margin-bottom: 14px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .section-title::before {
-            content: '';
-            width: 3px;
-            height: 12px;
-            background: var(--orange-primary);
-            border-radius: 2px;
-        }
-        
-        /* Metric Grid */
-        .metric-grid { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 12px; 
-        }
-        
-        .metric-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-subtle);
-            border-radius: 12px;
-            padding: 16px;
-        }
-        
-        .metric-card-value { 
-            font-family: 'JetBrains Mono', monospace; 
-            font-size: 22px; 
-            font-weight: 600; 
-            margin-bottom: 4px;
-            letter-spacing: -0.5px;
-        }
-        
-        .metric-card-label { 
-            font-size: 11px; 
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        /* Capital Structure */
-        .capital-structure { 
-            background: var(--bg-secondary); 
-            border: 1px solid var(--border-subtle);
-            border-radius: 12px; 
-            overflow: hidden;
-        }
-        
-        .capital-item { 
-            display: flex; 
-            justify-content: space-between; 
-            padding: 12px 16px; 
-            border-bottom: 1px solid var(--border-subtle);
-        }
-        
-        .capital-item:last-child { border-bottom: none; }
-        
-        .capital-label { color: var(--text-secondary); font-size: 13px; }
-        
-        .capital-value { 
-            font-family: 'JetBrains Mono', monospace; 
-            font-weight: 500;
-            font-size: 13px;
-        }
-        
-        .capital-item.total {
-            background: var(--bg-elevated);
-        }
-        
-        .capital-item.total .capital-label,
-        .capital-item.total .capital-value {
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        
-        .capital-note {
-            font-size: 11px;
-            color: var(--text-muted);
-            font-style: italic;
-            padding: 10px 16px;
-            background: var(--bg-elevated);
-            border-radius: 0 0 12px 12px;
-            border-top: 1px solid var(--border-subtle);
-        }
-        
-        /* Formula Box */
-        .formula-box {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-subtle);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        
-        .formula-step {
-            display: flex;
-            gap: 16px;
-            padding: 16px;
-            border-bottom: 1px solid var(--border-subtle);
-        }
-        
-        .formula-step:last-child { border-bottom: none; }
-        
-        .step-number {
-            width: 28px;
-            height: 28px;
-            background: var(--orange-muted);
-            color: var(--orange-primary);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 600;
-            flex-shrink: 0;
-        }
-        
-        .step-content { flex: 1; }
-        
-        .step-title {
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-        
-        .step-formula {
-            font-size: 11px;
-            color: var(--text-muted);
-            font-style: italic;
-            margin-bottom: 8px;
-        }
-        
-        .step-calc {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-        
-        .step-calc .highlight {
-            color: var(--orange-primary);
-            font-weight: 600;
-        }
-        
-        .formula-note {
-            margin-top: 16px;
-            padding: 12px 16px;
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            font-size: 11px;
-            color: var(--text-muted);
-            font-style: italic;
-        }
-        
-        /* History Section */
-        .history-section {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border-subtle);
-        }
-        
-        .history-chart {
-            height: 120px;
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            padding: 16px;
-            display: flex;
-            align-items: flex-end;
-            gap: 4px;
-        }
-        
-        .history-bar {
-            flex: 1;
-            background: var(--orange-primary);
-            border-radius: 4px 4px 0 0;
-            min-height: 8px;
-            opacity: 0.6;
-            transition: opacity 0.15s ease;
-        }
-        
-        .history-bar:hover {
-            opacity: 1;
-        }
-        
-        .history-bar.current {
-            background: var(--orange-light);
-            opacity: 1;
-        }
-        
-        /* Simulator Styles */
-        .sim-inputs {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            margin-bottom: 24px;
-        }
-        
-        .sim-input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        
-        .sim-label {
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .sim-input-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .sim-currency {
-            color: var(--text-muted);
-            font-size: 16px;
-        }
-        
-        .sim-input {
-            flex: 1;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-subtle);
-            border-radius: 8px;
-            padding: 12px 14px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 16px;
-            color: var(--text-primary);
-            outline: none;
-            transition: border-color 0.15s ease;
-        }
-        
-        .sim-input:focus {
-            border-color: var(--orange-primary);
-        }
-        
-        .sim-input::placeholder {
-            color: var(--text-muted);
-        }
-        
-        .sim-live-btn {
-            background: var(--bg-elevated);
-            border: 1px solid var(--border-subtle);
-            color: var(--orange-primary);
-            padding: 12px 14px;
-            border-radius: 8px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            white-space: nowrap;
-        }
-        
-        .sim-live-btn:hover {
-            background: var(--orange-muted);
-            border-color: var(--orange-primary);
-        }
-        
-        .sim-live-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .sim-duration-btns {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .sim-duration-btn {
-            flex: 1;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-subtle);
-            color: var(--text-secondary);
-            padding: 10px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-        
-        .sim-duration-btn:hover {
-            border-color: var(--orange-border);
-            color: var(--text-primary);
-        }
-        
-        .sim-duration-btn.active {
-            background: var(--orange-muted);
-            border-color: var(--orange-primary);
-            color: var(--orange-primary);
-        }
-        
-        .sim-duration-note {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 8px;
-            font-style: italic;
-        }
-        
-        .sim-slider {
-            width: 100%;
-            height: 6px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: var(--bg-secondary);
-            border-radius: 3px;
-            outline: none;
-            margin-top: 4px;
-        }
-        
-        .sim-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            background: var(--orange-primary);
-            border-radius: 50%;
-            cursor: pointer;
-            transition: transform 0.15s ease;
-        }
-        
-        .sim-slider::-webkit-slider-thumb:hover {
-            transform: scale(1.1);
-        }
-        
-        .sim-slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            background: var(--orange-primary);
-            border-radius: 50%;
-            cursor: pointer;
-            border: none;
-        }
-        
-        .sim-slider-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 10px;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-        
-        .sim-comparison {
-            display: flex;
-            align-items: stretch;
-            gap: 16px;
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            padding: 20px;
-        }
-        
-        .sim-col {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .sim-col.projected {
-            background: var(--orange-muted);
-            margin: -20px -20px -20px 0;
-            padding: 20px;
-            border-radius: 0 12px 12px 0;
-        }
-        
-        .sim-col-header {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            padding-bottom: 8px;
-            border-bottom: 1px solid var(--border-subtle);
-        }
-        
-        .sim-col.projected .sim-col-header {
-            color: var(--orange-primary);
-            border-color: var(--orange-border);
-        }
-        
-        .sim-arrow {
-            display: flex;
-            align-items: center;
-            color: var(--text-muted);
-            font-size: 24px;
-        }
-        
-        .sim-metric {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .sim-metric-label {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-        
-        .sim-metric-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-        
-        .sim-col.projected .sim-metric-value {
-            color: var(--orange-light);
-        }
-        
-        .sim-stock-result {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        
-        .sim-stock-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border-subtle);
-            font-size: 13px;
-        }
-        
-        .sim-stock-row:last-child {
-            border-bottom: none;
-        }
-        
-        .sim-stock-row span:first-child {
-            color: var(--text-secondary);
-        }
-        
-        .sim-stock-row span:last-child {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 500;
-        }
-        
-        .sim-stock-row.highlight-row {
-            background: var(--orange-muted);
-        }
-        
-        .sim-stock-row.highlight-row span:last-child {
-            color: var(--orange-primary);
-            font-size: 16px;
-        }
-        
-        .sim-stock-row.change-row span:last-child.positive {
-            color: var(--green);
-        }
-        
-        .sim-stock-row.change-row span:last-child.negative {
-            color: var(--red);
-        }
-        
-        .sim-stock-row.mnav-input-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .mnav-input-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .mnav-input {
-            width: 70px;
-            background: var(--bg-elevated);
-            border: 1px solid var(--border-subtle);
-            border-radius: 6px;
-            padding: 6px 8px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
-            color: var(--text-primary);
-            text-align: right;
-            outline: none;
-        }
-        
-        .mnav-input:focus {
-            border-color: var(--orange-primary);
-        }
-        
-        .mnav-input::placeholder {
-            color: var(--text-muted);
-            font-size: 11px;
-        }
-        
-        .mnav-x {
-            color: var(--text-muted);
-            font-size: 13px;
-        }
-        
-        .sim-disclaimer {
-            margin-top: 20px;
-            padding: 12px 16px;
-            background: var(--bg-secondary);
-            border-left: 3px solid var(--yellow);
-            border-radius: 0 8px 8px 0;
-            font-size: 11px;
-            color: var(--text-muted);
-            line-height: 1.5;
-        }
-        
-        @media (max-width: 500px) {
-            .sim-comparison {
-                flex-direction: column;
-            }
-            
-            .sim-arrow {
-                transform: rotate(90deg);
-                justify-content: center;
-                padding: 8px 0;
-            }
-            
-            .sim-col.projected {
-                margin: 0 -20px -20px -20px;
-                border-radius: 0 0 12px 12px;
-            }
-        }
-        
-        /* Footer */
-        .footer { 
-            text-align: center; 
-            padding: 40px 20px; 
-            border-top: 1px solid var(--border-subtle); 
-            margin-top: 40px; 
-        }
-        
-        /* BTC Price Display */
-        .btc-price-display {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-subtle);
-            border-radius: 20px;
-            padding: 8px 16px;
-            margin: 16px 0;
-        }
-        
-        .btc-label {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--orange-primary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .btc-price {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 15px;
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-        
-        .btc-price.updating {
-            animation: pulse 1s ease-in-out;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .footer-text { 
-            color: var(--text-muted); 
-            font-size: 13px; 
-        }
-        
-        .footer-link { 
-            color: var(--orange-primary); 
-            text-decoration: none;
-            transition: color 0.15s ease;
-        }
-        
-        .footer-link:hover { 
-            color: var(--orange-light);
-        }
-        
-        .footer-formula {
-            margin-top: 12px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
-            color: var(--text-muted);
-            opacity: 0.6;
-        }
-        
-        .footer-roadmap {
-            margin-top: 16px;
-            font-size: 11px;
-            color: var(--orange-primary);
-            opacity: 0.7;
-        }
-        
-        /* Meta info */
-        .modal-meta {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            color: var(--text-muted);
-            padding-top: 16px;
-            border-top: 1px solid var(--border-subtle);
-            margin-top: 20px;
-        }
-        
-        /* Responsive */
-        @media (max-width: 900px) {
-            .data-table { display: block; overflow-x: auto; }
-            .logo { font-size: 32px; letter-spacing: 16px; padding-left: 16px; }
-            .metric-grid { grid-template-columns: 1fr; }
-        }
-        
-        @media (max-width: 600px) {
-            .container { padding: 20px 12px; }
-            .data-table th, .data-table td { padding: 14px 16px; }
-            .metric-value { font-size: 14px; }
-            .modal { border-radius: 16px; }
-            .modal-body { padding: 20px; }
-            .company-tickers { gap: 4px; }
-            .ticker-badge { font-size: 10px; padding: 2px 4px; }
-            .ticker-badge.primary { font-size: 12px; }
-        }
+            --bg-primary: #09090b; --bg-secondary: #0f0f11; --bg-card: #141416; --bg-elevated: #1a1a1d;
+            --orange-primary: #f97316; --orange-light: #fb923c;
+            --orange-glow: rgba(249,115,22,0.12); --orange-border: rgba(249,115,22,0.25);
+            --text-primary: #fafafa; --text-secondary: #a1a1aa; --text-muted: #52525b;
+            --green: #22c55e; --green-muted: rgba(34,197,94,0.15);
+            --red: #ef4444; --red-muted: rgba(239,68,68,0.15);
+            --yellow: #eab308; --yellow-muted: rgba(234,179,8,0.15);
+            --blue: #38bdf8; --blue-muted: rgba(56,189,248,0.08);
+            --border-subtle: rgba(255,255,255,0.06); --mono: 'JetBrains Mono', monospace;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; background:var(--bg-primary); color:var(--text-primary); line-height:1.6; min-height:100vh; }
+        body::before { content:''; position:fixed; inset:0; pointer-events:none; background-image:linear-gradient(rgba(249,115,22,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(249,115,22,0.015) 1px,transparent 1px); background-size:48px 48px; z-index:0; }
+        .container { max-width:720px; margin:0 auto; padding:24px 16px 60px; position:relative; z-index:1; }
+
+        /* HEADER */
+        .header { text-align:center; margin-bottom:28px; }
+        .nav-back { display:inline-block; font-size:12px; color:var(--text-muted); text-decoration:none; margin-bottom:12px; letter-spacing:1px; transition:color .2s; }
+        .nav-back:hover { color:var(--orange-primary); }
+        .logo-container { position:relative; display:inline-block; margin-bottom:6px; }
+        .logo { font-size:32px; font-weight:300; letter-spacing:16px; padding-left:16px; color:var(--text-primary); position:relative; z-index:1; }
+        .logo span { background:linear-gradient(135deg,var(--orange-primary),var(--orange-light)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-weight:600; }
+        .logo-whisper { font-size:11px; font-weight:400; letter-spacing:8px; padding-left:8px; margin-top:2px; text-transform:lowercase; background:linear-gradient(180deg,rgba(161,161,170,0.6),rgba(82,82,91,0.2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .logo-glow { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:180px; height:50px; background:radial-gradient(ellipse,rgba(249,115,22,0.3),transparent 70%); filter:blur(20px); z-index:0; }
+        .logo-badge { display:inline-block; font-size:11px; font-weight:600; padding:4px 10px; border-radius:6px; background:rgba(249,115,22,0.12); border:1px solid var(--orange-border); color:var(--orange-primary); letter-spacing:1px; font-family:var(--mono); margin-top:8px; }
+        .header-sub { font-size:13px; color:var(--text-muted); letter-spacing:1px; margin-top:4px; }
+        .live-strip { display:flex; align-items:center; justify-content:center; gap:16px; margin-top:12px; font-size:11px; font-family:var(--mono); color:var(--text-muted); flex-wrap:wrap; }
+        .live-dot { width:6px; height:6px; border-radius:50%; background:var(--green); display:inline-block; animation:pulse-dot 2s ease infinite; }
+        @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.4} }
+        .live-price { color:var(--text-secondary); }
+
+        /* SCENARIOS */
+        .scenarios-section { margin-bottom:24px; }
+        .scenario-group { margin-bottom:14px; }
+        .scenario-group:last-child { margin-bottom:0; }
+        .group-label { display:flex; align-items:center; gap:10px; margin-bottom:8px; padding-left:4px; }
+        .group-label-badge { font-size:9px; font-family:var(--mono); font-weight:700; letter-spacing:1.5px; padding:3px 8px; border-radius:4px; white-space:nowrap; }
+        .group-label-badge.now { background:rgba(255,255,255,0.04); color:var(--text-muted); border:1px solid var(--border-subtle); }
+        .group-label-badge.future { background:rgba(249,115,22,0.08); color:var(--orange-primary); border:1px solid var(--orange-border); }
+        .group-label-text { font-size:9px; letter-spacing:2px; font-weight:600; color:var(--text-muted); }
+        .group-label-line { flex:1; height:1px; background:var(--border-subtle); }
+        .scenarios-row { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+        @media(max-width:500px){ .scenarios-row{grid-template-columns:repeat(2,1fr)} }
+        .scenario-card { padding:16px 12px 14px; border-radius:12px; border:1.5px solid var(--border-subtle); background:var(--bg-card); cursor:pointer; transition:all .25s ease; text-align:center; user-select:none; position:relative; }
+        .scenario-card:hover { border-color:rgba(255,255,255,0.12); background:var(--bg-elevated); transform:translateY(-2px); }
+        .scenario-card.active { border-color:var(--orange-primary); background:var(--orange-glow); box-shadow:0 0 20px rgba(249,115,22,0.1); }
+        .scenario-card.projection { border-left:3px solid rgba(249,115,22,0.3); }
+        .scenario-card.projection.active { border-left-color:var(--orange-primary); }
+        .horizon-badge { position:absolute; top:8px; right:8px; font-size:9px; font-weight:700; font-family:var(--mono); padding:2px 6px; border-radius:4px; letter-spacing:.5px; }
+        .horizon-badge.now-badge { background:rgba(255,255,255,0.04); color:#52525b; border:1px solid rgba(255,255,255,0.06); }
+        .horizon-badge.future-badge { background:rgba(249,115,22,0.1); color:var(--orange-primary); border:1px solid var(--orange-border); }
+        .scenario-icon { font-size:22px; margin-bottom:4px; }
+        .scenario-name { font-size:12px; font-weight:600; letter-spacing:.5px; margin-bottom:4px; }
+        .scenario-price { font-size:15px; font-weight:700; font-family:var(--mono); color:var(--orange-light); }
+        .scenario-mnav { font-size:10px; color:var(--text-muted); font-family:var(--mono); margin-top:4px; }
+
+        /* HERO */
+        .hero { text-align:center; padding:28px 20px; margin-bottom:20px; background:linear-gradient(180deg,rgba(249,115,22,0.04),transparent); border-radius:20px; border:1px solid rgba(249,115,22,0.1); }
+        .hero-label { font-size:10px; letter-spacing:3px; color:var(--text-muted); margin-bottom:6px; font-weight:500; }
+        .hero-price { font-size:64px; font-weight:700; font-family:var(--mono); line-height:1; margin-bottom:8px; transition:color .3s; }
+        .hero-price.positive{color:var(--green)} .hero-price.negative{color:var(--red)} .hero-price.neutral{color:var(--text-primary)}
+        .hero-change { font-size:16px; font-weight:600; font-family:var(--mono); margin-bottom:4px; }
+        .hero-change.up{color:var(--green)} .hero-change.down{color:var(--red)}
+        .hero-vs { font-size:11px; color:var(--text-muted); }
+        .hero-context { margin-top:4px; font-size:10px; color:var(--text-muted); font-family:var(--mono); letter-spacing:.5px; }
+        .hero-implied { margin-top:10px; font-size:12px; font-family:var(--mono); color:var(--text-secondary); padding:6px 14px; border-radius:20px; background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); display:inline-block; }
+        .hero-implied em { font-style:normal; color:var(--orange-primary); font-weight:600; }
+
+        /* NARRATIVE */
+        .narrative { background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:14px; padding:20px; margin-bottom:20px; }
+        .narrative-title { font-size:14px; font-weight:600; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+        .narrative-body { display:flex; flex-direction:column; gap:10px; }
+        .narr-item { display:flex; align-items:flex-start; gap:10px; padding:10px 14px; border-radius:10px; font-size:13px; line-height:1.5; }
+        .narr-item.green { background:var(--green-muted); border:1px solid rgba(34,197,94,0.2); color:#86efac; }
+        .narr-item.red { background:var(--red-muted); border:1px solid rgba(239,68,68,0.2); color:#fca5a5; }
+        .narr-item.amber { background:var(--yellow-muted); border:1px solid rgba(234,179,8,0.2); color:#fde68a; }
+        .narr-item.info { background:var(--blue-muted); border:1px solid rgba(56,189,248,0.2); color:#7dd3fc; }
+        .narr-item.neutral { background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); color:var(--text-secondary); }
+        .narr-icon { font-size:16px; flex-shrink:0; margin-top:1px; }
+        .narr-text strong { color:var(--text-primary); }
+
+        /* METRICS */
+        .metrics-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(100px,1fr)); gap:8px; margin-bottom:20px; }
+        .metric-card { background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:10px; padding:12px 10px; text-align:center; }
+        .metric-label { font-size:8px; letter-spacing:1.5px; color:var(--text-muted); margin-bottom:4px; font-weight:600; }
+        .metric-value { font-size:17px; font-weight:700; font-family:var(--mono); line-height:1.2; }
+        .metric-sub { font-size:9px; color:#3f3f46; margin-top:2px; font-family:var(--mono); }
+        .metric-value.danger{color:var(--red)} .metric-value.warn{color:var(--yellow)} .metric-value.good{color:var(--green)}
+
+        /* COLLAPSIBLE */
+        .collapse-section { margin-bottom:12px; }
+        .collapse-section summary { display:flex; align-items:center; gap:8px; padding:14px 16px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:12px; cursor:pointer; font-size:13px; font-weight:600; color:var(--text-secondary); letter-spacing:.5px; transition:all .2s; list-style:none; user-select:none; }
+        .collapse-section summary::-webkit-details-marker{display:none}
+        .collapse-section summary:hover { border-color:rgba(255,255,255,0.12); color:var(--text-primary); }
+        .collapse-section[open] summary { border-radius:12px 12px 0 0; border-bottom-color:transparent; color:var(--orange-primary); }
+        .collapse-body { padding:16px; background:var(--bg-card); border:1px solid var(--border-subtle); border-top:none; border-radius:0 0 12px 12px; }
+
+        /* CONTROLS */
+        .controls-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+        @media(max-width:500px){ .controls-grid{grid-template-columns:1fr} }
+        .control-card { background:var(--bg-secondary); border:1px solid var(--border-subtle); border-radius:10px; padding:14px; }
+        .control-card.full-width { grid-column:1/-1; }
+        .control-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+        .control-label { font-size:10px; letter-spacing:1.5px; color:var(--text-muted); font-weight:600; }
+        .control-value { font-size:18px; font-weight:700; font-family:var(--mono); color:var(--orange-light); }
+        .control-locked { font-size:9px; color:var(--text-muted); font-style:italic; margin-top:6px; }
+        input[type=range] { -webkit-appearance:none; width:100%; height:6px; border-radius:3px; background:#333; outline:none; cursor:pointer; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:var(--orange-primary); box-shadow:0 0 10px rgba(249,115,22,0.4); cursor:grab; }
+        input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%; background:var(--orange-primary); border:none; box-shadow:0 0 10px rgba(249,115,22,0.4); cursor:grab; }
+        input[type=range]:disabled { opacity:.3; cursor:not-allowed; }
+        input[type=range]:disabled::-webkit-slider-thumb { cursor:not-allowed; background:#555; box-shadow:none; }
+        .slider-labels { display:flex; justify-content:space-between; font-size:9px; color:#444; font-family:var(--mono); margin-top:4px; }
+        .toggle-row { display:flex; gap:6px; flex-wrap:wrap; }
+        .toggle-btn { padding:6px 14px; border-radius:8px; border:1.5px solid var(--border-subtle); background:transparent; color:var(--text-muted); font-size:12px; font-weight:600; font-family:var(--mono); cursor:pointer; transition:all .2s; }
+        .toggle-btn:hover { border-color:rgba(255,255,255,0.12); color:var(--text-secondary); }
+        .toggle-btn.active { border-color:var(--orange-primary); color:var(--orange-primary); background:var(--orange-glow); }
+        .mnav-presets { display:flex; gap:4px; margin-top:8px; }
+        .mnav-btn { flex:1; padding:4px 0; border-radius:6px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-muted); font-size:10px; font-family:var(--mono); cursor:pointer; transition:all .2s; }
+        .mnav-btn:hover,.mnav-btn.active { border-color:var(--orange-primary); color:var(--orange-primary); background:var(--orange-glow); }
+
+        /* WATERFALL */
+        .waterfall { display:flex; align-items:center; gap:4px; overflow-x:auto; padding:12px; padding-right:24px; scrollbar-width:none; }
+        .waterfall::-webkit-scrollbar{display:none}
+        .waterfall::after { content:''; flex:0 0 12px; }
+        .wf-step { flex:0 0 auto; text-align:center; padding:8px 12px; border-radius:8px; min-width:85px; }
+        .wf-step.btc-val { background:rgba(249,115,22,0.08); border:1px solid rgba(249,115,22,0.2); }
+        .wf-step.claims { background:var(--red-muted); border:1px solid rgba(239,68,68,0.2); }
+        .wf-step.nav { background:var(--green-muted); border:1px solid rgba(34,197,94,0.2); }
+        .wf-step.shares { background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); }
+        .wf-step.result { background:rgba(249,115,22,0.12); border:1px solid var(--orange-border); }
+        .wf-label { font-size:8px; letter-spacing:1px; color:var(--text-muted); margin-bottom:2px; }
+        .wf-value { font-size:12px; font-weight:700; font-family:var(--mono); }
+        .wf-arrow { flex:0 0 auto; font-size:14px; color:var(--text-muted); }
+
+        /* TABLE */
+        .table-wrap { overflow-x:auto; border-radius:10px; border:1px solid var(--border-subtle); background:var(--bg-secondary); scrollbar-width:thin; scrollbar-color:#333 transparent; -webkit-overflow-scrolling:touch; }
+        .table-wrap table { min-width:700px; }
+        table { width:100%; border-collapse:collapse; font-size:12px; white-space:nowrap; }
+        thead th { padding:10px 12px; text-align:right; font-size:8px; font-weight:600; letter-spacing:1.5px; color:var(--text-muted); border-bottom:1px solid var(--border-subtle); background:rgba(255,255,255,0.02); position:sticky; top:0; }
+        thead th:first-child{text-align:center}
+        tbody td { padding:8px 12px; text-align:right; font-family:var(--mono); font-size:12px; border-bottom:1px solid rgba(255,255,255,0.03); }
+        tbody td:first-child { text-align:center; font-weight:600; color:var(--text-secondary); }
+        tbody tr:hover{background:rgba(255,255,255,0.02)}
+        tbody tr.event-row{background:rgba(249,115,22,0.03)}
+        .cell-red{color:var(--red)!important} .cell-green{color:var(--green)!important} .cell-amber{color:var(--yellow)!important}
+        .cell-muted{color:var(--text-muted)!important} .cell-bold{font-weight:700!important} .cell-blue{color:var(--blue)!important}
+
+        /* MATRIX */
+        .matrix-table { width:100%; border-collapse:collapse; }
+        .matrix-table th { padding:8px 10px; font-size:9px; font-weight:600; letter-spacing:1px; color:var(--text-muted); border-bottom:1px solid var(--border-subtle); background:rgba(255,255,255,0.02); }
+        .matrix-table td { padding:8px 10px; text-align:center; font-family:var(--mono); font-size:11px; font-weight:600; border-bottom:1px solid rgba(255,255,255,0.03); }
+        .matrix-table td.row-label { text-align:right; color:var(--text-secondary); font-weight:600; background:rgba(255,255,255,0.02); }
+        .matrix-table th:first-child{text-align:right}
+        .matrix-cell-green{color:var(--green);background:rgba(34,197,94,0.06)} .matrix-cell-lightgreen{color:#86efac;background:rgba(34,197,94,0.03)}
+        .matrix-cell-red{color:var(--red);background:rgba(239,68,68,0.06)} .matrix-cell-lightred{color:#fca5a5;background:rgba(239,68,68,0.03)}
+        .matrix-cell-gold{color:#fbbf24;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2)}
+        .matrix-cell-current{outline:2px solid var(--orange-primary);outline-offset:-2px;border-radius:4px}
+
+        /* PREF STACK TABLE */
+        .pref-stack { width:100%; border-collapse:collapse; font-size:12px; }
+        .pref-stack th { padding:8px 10px; text-align:left; font-size:9px; font-weight:600; letter-spacing:1px; color:var(--text-muted); border-bottom:1px solid var(--border-subtle); }
+        .pref-stack td { padding:8px 10px; font-family:var(--mono); font-size:12px; border-bottom:1px solid rgba(255,255,255,0.03); }
+        .pref-stack td:first-child { font-weight:600; color:var(--text-secondary); }
+        .badge-cash { font-size:9px; padding:2px 6px; border-radius:4px; background:rgba(239,68,68,0.12); color:#fca5a5; font-weight:600; }
+        .badge-cum { font-size:9px; color:var(--text-muted); }
+
+        /* ASSUMPTIONS & FOOTER */
+        .assumptions { padding:14px 16px; background:rgba(255,255,255,0.02); border:1px solid var(--border-subtle); border-radius:10px; font-size:11px; color:var(--text-muted); line-height:1.6; margin-top:16px; }
+        .assumptions strong{color:var(--text-secondary)}
+        .footer { text-align:center; padding-top:24px; border-top:1px solid var(--border-subtle); font-size:11px; color:var(--text-muted); margin-top:24px; }
+        .footer a{color:var(--orange-primary);text-decoration:none} .footer a:hover{text-decoration:underline}
+        .footer-formula { font-family:var(--mono); font-size:10px; color:#333; margin-top:8px; }
+
+        /* LOADING */
+        .loading-screen { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--bg-primary); z-index:999; }
+        .loading-spinner { width:32px; height:32px; border:3px solid #222; border-top-color:var(--orange-primary); border-radius:50%; animation:spin .8s linear infinite; margin-bottom:12px; }
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .loading-text { font-size:12px; color:var(--text-muted); letter-spacing:2px; }
+
+        @media(max-width:768px){ .hero-price{font-size:48px} }
+        @media(max-width:480px){ .hero-price{font-size:40px} .control-value{font-size:16px} .logo{font-size:24px;letter-spacing:10px;padding-left:10px} }
     </style>
-    <script>
-        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-    </script>
-    <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <div class="logo-container">
-                <div class="logo-glow"></div>
-                <h1 class="logo"><span>CEBE</span></h1>
-                <p class="logo-whisper">tracker</p>
-            </div>
-            <p class="tagline">Common Equity Bitcoin Exposure</p>
-            <a href="/endgame" style="display:inline-block; margin-top:10px; padding:5px 14px; border-radius:20px; border:1px solid rgba(249,115,22,0.3); background:rgba(249,115,22,0.06); color:#f97316; font-size:11px; font-weight:600; letter-spacing:1.5px; font-family:'JetBrains Mono',monospace; text-decoration:none; transition:all 0.2s;" onmouseover="this.style.background='rgba(249,115,22,0.15)';this.style.borderColor='rgba(249,115,22,0.6)'" onmouseout="this.style.background='rgba(249,115,22,0.06)';this.style.borderColor='rgba(249,115,22,0.3)'">ENDGAME &rarr;</a><a href="/modeler" style="display:inline-block; margin-top:10px; margin-left:8px; padding:5px 14px; border-radius:20px; border:1px solid rgba(249,115,22,0.3); background:rgba(249,115,22,0.06); color:#f97316; font-size:11px; font-weight:600; letter-spacing:1.5px; font-family:'JetBrains Mono',monospace; text-decoration:none; transition:all 0.2s;" onmouseover="this.style.background='rgba(249,115,22,0.15)';this.style.borderColor='rgba(249,115,22,0.6)'" onmouseout="this.style.background='rgba(249,115,22,0.06)';this.style.borderColor='rgba(249,115,22,0.3)'">MODELER &rarr;</a>
-            <div class="btc-price-display" id="btcPriceDisplay">
-                <span class="btc-label">BTC</span>
-                <span class="btc-price" id="headerBtcPrice">-</span>
-            </div>
-            <p class="last-updated" id="lastUpdated">Loading data...</p>
-        </header>
-        
-        <p class="table-hint">Click any company to view full CEBE breakdown, simulations, and historical tracking</p>
-        
-        <div class="table-container">
-            <div class="loading" id="loadingState">
-                <div class="loading-spinner"></div>
-                <p>Loading CEBE data...</p>
-            </div>
-            <table class="data-table" id="dataTable" style="display: none;">
-                <thead>
-                    <tr>
-                        <th>Company</th>
-                        <th>Stock Price</th>
-                        <th>BTC Holdings</th>
-                        <th>CEBE</th>
-                        <th>Drag</th>
-                        <th>Common Equity</th>
-                        <th style="width: 100px;">Source</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-        </div>
-        
-        <footer class="footer">
-            <p class="footer-text">
-                CEBE Framework by <a href="https://x.com/chcbearsfan" class="footer-link" target="_blank">@chcbearsfan</a> &middot; 
-                <a href="https://x.com/chcbearsfan/status/2014767364819063207" class="footer-link" target="_blank">Read the Framework</a>
-            </p>
-            <p class="footer-text" style="margin-top:4px">Not financial advice &middot; Data updates after each filing</p>
-            <p class="footer-formula">CEBE = (Total BTC - Senior Claims in BTC) / Shares</p>
-        </footer>
-    </div>
-    
-    <div class="modal-overlay" id="modalOverlay">
-        <div class="modal" id="modal">
-            <div class="modal-header">
-                <div class="modal-title-group">
-                    <h2 class="modal-title" id="modalTitle">Company</h2>
-                    <div class="modal-tickers" id="modalTickers"></div>
-                </div>
-                <button class="modal-close" id="modalClose">&times;</button>
-            </div>
-            <div class="modal-body" id="modalBody"></div>
+<div class="loading-screen" id="loadingScreen"><div class="loading-spinner"></div><div class="loading-text">LOADING LIVE DATA</div></div>
+<div class="container" id="app" style="display:none">
+    <div class="header">
+        <a href="/" class="nav-back">&larr; cebetracker.io</a>
+        <div class="logo-container"><div class="logo-glow"></div><div class="logo"><span>CEBE</span></div><p class="logo-whisper">tracker</p></div>
+        <div class="logo-badge">MSTR MODELER</div>
+        <div class="header-sub">Pick a scenario. See what your MSTR is worth.</div>
+        <div class="live-strip" id="liveStrip">
+            <span><span class="live-dot"></span> Live Data</span>
+            <span class="live-price" id="liveBtcDisplay">BTC $&mdash;</span>
+            <span class="live-price" id="liveMstrDisplay">MSTR $&mdash;</span>
+            <span class="live-price" id="liveDataDate">&mdash;</span>
         </div>
     </div>
-    
-    <script>
-        // Google Sheets Configuration
-        const SHEET_ID = '1BNsCWGVU08PDinDcfzJccqcuj9_KrK1VZGETErzBZvg';
-        const SNAPSHOTS_GID = '771405586';
-        
-        // Finnhub API Key (for stock prices)
-        const FINNHUB_API_KEY = 'd5tuehhr01qtjet1d7k0d5tuehhr01qtjet1d7kg';
-        
-        // Live price cache
-        let liveBtcPrice = null;
-        let liveStockPrices = {};
-        
-        // Fetch live BTC price from CoinGecko (free, no key needed)
-        async function fetchBtcPrice() {
-            try {
-                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
-                const data = await response.json();
-                liveBtcPrice = data.bitcoin.usd;
-                return liveBtcPrice;
-            } catch (error) {
-                console.error('Failed to fetch BTC price:', error);
-                return null;
-            }
-        }
-        
-        // Fetch live stock price from Finnhub (with CEBE API fallback)
-        async function fetchStockPrice(symbol) {
-            if (FINNHUB_API_KEY === 'YOUR_FINNHUB_KEY_HERE') {
-                console.log(`[Finnhub] No API key configured for ${symbol}`);
-                return null;
-            }
-            
-            // Try Finnhub first
-            try {
-                console.log(`[Finnhub] Fetching price for ${symbol}...`);
-                const response = await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_API_KEY}`);
-                const data = await response.json();
-                console.log(`[Finnhub] Response for ${symbol}:`, data);
-                if (data.c && data.c > 0) {
-                    liveStockPrices[symbol] = data.c;
-                    console.log(`[Finnhub] Got price for ${symbol}: $${data.c}`);
-                    return data.c;
-                }
-                console.log(`[Finnhub] No valid price for ${symbol}, trying CEBE API...`);
-            } catch (error) {
-                console.error(`[Finnhub] Failed to fetch ${symbol}:`, error);
-            }
-            
-            // Fallback to CEBE API proxy
-            try {
-                console.log(`[CEBE API] Fetching price for ${symbol}...`);
-                const response = await fetch(`/api/stock-price?symbol=${symbol}`);
-                const data = await response.json();
-                console.log(`[CEBE API] Response:`, data);
-                if (data.price && data.price > 0) {
-                    liveStockPrices[symbol] = data.price;
-                    console.log(`[CEBE API] Got price for ${symbol}: ${data.price} ${data.currency || ''}`);
-                    return data.price;
-                }
-                console.log(`[CEBE API] No valid price for ${symbol}`);
-            } catch (error) {
-                console.error(`[CEBE API] Failed to fetch ${symbol}:`, error);
-            }
-            
-            return null;
-        }
-        
-        // Ticker symbol mapping for Finnhub/Yahoo
-        const tickerToStock = {
-            MSTR: 'MSTR',
-            MTPLF: 'MTPLF',
-            ASST: 'ASST',
-            TSWCF: 'TSWCF',
-            ALCPB: 'ALCPB.PA',
-            OBTC3: 'OBTC3.SA'
-        };
-        
-        // Company metadata with multi-ticker support
-        const companyMeta = {
-            MSTR: { 
-                name: 'Strategy', 
-                exchange: 'Nasdaq: MSTR',
-                displayTickers: ['MSTR'],
-                primaryTicker: 'MSTR'
-            },
-            MTPLF: { 
-                name: 'Metaplanet', 
-                exchange: 'TYO: 3350 / OTC: MPJPY, MTPLF / FRA: DN3', 
-                fx_note: 'JPY claims at snapshot FX',
-                displayTickers: ['3350', 'MPJPY', 'MTPLF', 'DN3'],
-                primaryTicker: '3350'
-            },
-            ASST: { 
-                name: 'Strive', 
-                exchange: 'Nasdaq: ASST',
-                displayTickers: ['ASST'],
-                primaryTicker: 'ASST'
-            },
-            TSWCF: { 
-                name: 'Smarter Web Co', 
-                exchange: 'LSE: SWC / OTC: TSWCF / FRA: 3M8', 
-                fx_note: 'GBP claims at snapshot FX',
-                displayTickers: ['SWC', 'TSWCF', '3M8'],
-                primaryTicker: 'SWC'
-            },
-            ALCPB: { 
-                name: 'Capital B', 
-                exchange: 'Euronext: ALCPB / OTC: CPTLF', 
-                fx_note: 'EUR claims at snapshot FX',
-                displayTickers: ['ALCPB', 'CPTLF'],
-                primaryTicker: 'ALCPB'
-            },
-            OBTC3: { 
-                name: 'OranjeBTC', 
-                exchange: 'B3: OBTC3', 
-                fx_note: 'BRL claims converted to USD',
-                displayTickers: ['OBTC3'],
-                primaryTicker: 'OBTC3'
-            }
-        };
-        
-        let allSnapshots = [];
-        let companiesData = {};
-        
-        // Fetch and parse Google Sheets CSV
-        async function fetchSheetData(gid) {
-            const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}`;
-            const response = await fetch(url);
-            const text = await response.text();
-            return parseCSV(text);
-        }
-        
-        function parseCSV(text) {
-            const lines = text.split('\n');
-            const headers = parseCSVLine(lines[0]);
-            const data = [];
-            
-            for (let i = 1; i < lines.length; i++) {
-                if (lines[i].trim()) {
-                    const values = parseCSVLine(lines[i]);
-                    const row = {};
-                    headers.forEach((h, idx) => {
-                        row[h.replace(/"/g, '').trim()] = values[idx]?.replace(/"/g, '').trim() || '';
-                    });
-                    data.push(row);
-                }
-            }
-            return data;
-        }
-        
-        function parseCSVLine(line) {
-            const result = [];
-            let current = '';
-            let inQuotes = false;
-            
-            for (let char of line) {
-                if (char === '"') {
-                    inQuotes = !inQuotes;
-                } else if (char === ',' && !inQuotes) {
-                    result.push(current);
-                    current = '';
-                } else {
-                    current += char;
-                }
-            }
-            result.push(current);
-            return result;
-        }
-        
-        function calculateMetrics(snapshot) {
-            const btcHoldings = parseFloat(snapshot.btc_holdings) || 0;
-            const shares = parseFloat(snapshot.shares_outstanding) || 1;
-            const debt = parseFloat(snapshot.debt_usd) || 0;
-            const preferred = parseFloat(snapshot.preferred_usd) || 0;
-            const cash = parseFloat(snapshot.cash_usd) || 0;
-            const btcPrice = liveBtcPrice || parseFloat(snapshot.btc_price) || 100000;
-            
-            const netClaimsUsd = debt + preferred - cash;
-            const netClaimsBtc = Math.max(0, netClaimsUsd / btcPrice);
-            const drag = btcHoldings > 0 ? Math.max(0, netClaimsBtc / btcHoldings) : 0;
-            const commonEquityBtc = Math.max(0, btcHoldings - netClaimsBtc);
-            const bps = (btcHoldings / shares) * 100000000;
-            const cebe = (commonEquityBtc / shares) * 100000000;
-            const commonEquityPct = Math.max(0, 1 - drag);
-            
-            return { 
-                netClaimsUsd, netClaimsBtc, drag, commonEquityBtc, 
-                bps, cebe, commonEquityPct, debt, preferred, cash, btcPrice 
-            };
-        }
-        
-        function formatNumber(num) {
-            return num.toLocaleString('en-US', { maximumFractionDigits: 0 });
-        }
-        
-        function formatCurrency(num) {
-            if (Math.abs(num) >= 1e9) return '$' + (num / 1e9).toFixed(2) + 'B';
-            if (Math.abs(num) >= 1e6) return '$' + (num / 1e6).toFixed(1) + 'M';
-            return '$' + formatNumber(num);
-        }
-        
-        function getDragClass(drag) {
-            if (drag <= 0.001) return 'drag-zero';
-            if (drag < 0.15) return 'drag-low';
-            if (drag < 0.30) return 'drag-medium';
-            return 'drag-high';
-        }
-        
-        function getCompanyHistory(ticker) {
-            return allSnapshots
-                .filter(s => s.ticker === ticker && (!s.status || s.status.toLowerCase() === 'live'))
-                .sort((a, b) => a.snapshot_date.localeCompare(b.snapshot_date));
-        }
-        
-        function getLatestSnapshots(snapshots) {
-            const latest = {};
-            const order = ['MSTR', 'MTPLF', 'ASST', 'TSWCF', 'ALCPB', 'OBTC3'];
-            
-            snapshots.forEach(s => {
-                const ticker = s.ticker;
-                if (!latest[ticker] || s.snapshot_date > latest[ticker].snapshot_date) {
-                    latest[ticker] = s;
-                }
-            });
-            
-            return order.filter(t => latest[t]).map(t => latest[t]);
-        }
-        
-        // Generate ticker display HTML
-        function renderTickerDisplay(meta) {
-            const tickers = meta.displayTickers || [meta.primaryTicker];
-            if (tickers.length === 1) {
-                return `<div class="company-ticker">${tickers[0]}</div>`;
-            }
-            
-            return `<div class="company-tickers">
-                ${tickers.map((t, i) => 
-                    `<span class="ticker-badge ${i === 0 ? 'primary' : ''}">${t}</span>`
-                ).join('')}
-            </div>`;
-        }
-        
-        function renderTable(snapshots) {
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
-            
-            let latestDate = '';
-            
-            snapshots.forEach(snapshot => {
-                const ticker = snapshot.ticker;
-                const meta = companyMeta[ticker] || { name: ticker, exchange: '', displayTickers: [ticker], primaryTicker: ticker };
-                const metrics = calculateMetrics(snapshot);
-                
-                if (snapshot.snapshot_date > latestDate) latestDate = snapshot.snapshot_date;
-                
-                // Store for modal
-                companiesData[ticker] = { ...snapshot, ...meta, metrics };
-                
-                const row = document.createElement('tr');
-                row.setAttribute('data-ticker', ticker);
-                
-                // Truncate source for display
-                const sourceShort = (snapshot.source || 'N/A').length > 20 
-                    ? (snapshot.source || 'N/A').substring(0, 18) + '...' 
-                    : (snapshot.source || 'N/A');
-                
-                row.innerHTML = `
-                    <td>
-                        <div class="company-cell">
-                            <div class="company-info">
-                                ${renderTickerDisplay(meta)}
-                                <div class="company-name">${meta.name}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="metric-value stock-price" data-symbol="${tickerToStock[ticker] || ticker}">-</div>
-                        <div class="metric-label">USD</div>
-                    </td>
-                    <td>
-                        <div class="metric-value">${formatNumber(parseFloat(snapshot.btc_holdings))}</div>
-                        <div class="metric-label">BTC</div>
-                    </td>
-                    <td>
-                        <div class="metric-value">${formatNumber(Math.round(metrics.cebe))}</div>
-                        <div class="metric-label">sats/share</div>
-                    </td>
-                    <td>
-                        <span class="drag-badge ${getDragClass(metrics.drag)}">${(metrics.drag * 100).toFixed(1)}%</span>
-                    </td>
-                    <td>
-                        <div class="metric-value">${(metrics.commonEquityPct * 100).toFixed(1)}%</div>
-                        <div class="metric-label">of BTC</div>
-                    </td>
-                    <td>
-                        <div class="source-cell">
-                            <span class="source-text" title="${snapshot.source || 'N/A'}">${sourceShort}</span>
-                            <span class="click-hint">Click for details</span>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-            
-            document.getElementById('lastUpdated').textContent = `Last updated: ${latestDate}`;
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('dataTable').style.display = 'table';
-            
-            // Add click handlers
-            document.querySelectorAll('#tableBody tr').forEach(row => {
-                row.addEventListener('click', () => {
-                    const ticker = row.getAttribute('data-ticker');
-                    openModal(ticker);
-                });
-            });
-        }
-        
-        function openModal(ticker) {
-            const data = companiesData[ticker];
-            if (!data) return;
-            
-            const m = data.metrics;
-            const history = getCompanyHistory(ticker);
-            
-            document.getElementById('modalTitle').textContent = data.name;
-            
-            // Render all tickers in modal header
-            const tickers = data.displayTickers || [ticker];
-            document.getElementById('modalTickers').innerHTML = tickers.map(t => 
-                `<span class="modal-ticker">${t}</span>`
-            ).join('');
-            
-            // Build history chart
-            let historyHTML = '<p style="color: var(--text-muted); font-size: 13px;">No historical data available yet.</p>';
-            if (history.length > 1) {
-                const cebeValues = history.map(h => calculateMetrics(h).cebe);
-                const maxCebe = Math.max(...cebeValues);
-                
-                const bars = history.map((h, i) => {
-                    const cebe = calculateMetrics(h).cebe;
-                    const height = maxCebe > 0 ? (cebe / maxCebe) * 100 : 10;
-                    const isCurrent = i === history.length - 1;
-                    return `<div class="history-bar ${isCurrent ? 'current' : ''}" style="height: ${Math.max(8, height)}%" title="${h.period}: ${formatNumber(Math.round(cebe))} sats"></div>`;
-                }).join('');
-                
-                historyHTML = `
-                    <div class="history-chart">${bars}</div>
-                    <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 8px;">
-                        <span>${history[0].period}</span>
-                        <span>${history[history.length - 1].period}</span>
-                    </div>
-                `;
-            }
-            
-            document.getElementById('modalBody').innerHTML = `
-                <div class="modal-tabs">
-                    <button class="modal-tab active" data-tab="overview">Overview</button>
-                    <button class="modal-tab" data-tab="simulate">Simulate</button>
-                    <button class="modal-tab" data-tab="calculation">Calculation</button>
-                    <button class="modal-tab" data-tab="history">History</button>
+    <div class="scenarios-section">
+        <div class="scenario-group">
+            <div class="group-label"><span class="group-label-badge now">&#9889; NOW</span><span class="group-label-text">WHAT IF BTC WERE AT THIS PRICE TODAY</span><div class="group-label-line"></div></div>
+            <div class="scenarios-row" id="snapshotBar"></div>
+        </div>
+        <div class="scenario-group">
+            <div class="group-label"><span class="group-label-badge future">&rarr; FORWARD</span><span class="group-label-text">10-YEAR PROJECTIONS &middot; CONVERTS &middot; CAPITAL PLAN</span><div class="group-label-line"></div></div>
+            <div class="scenarios-row" id="projectionBar"></div>
+        </div>
+    </div>
+    <div class="hero">
+        <div class="hero-label">MODELED MSTR SHARE PRICE</div>
+        <div class="hero-price neutral" id="heroPrice">$&mdash;</div>
+        <div class="hero-change" id="heroChange">&mdash;</div>
+        <div class="hero-vs" id="heroVs">vs current market price</div>
+        <div class="hero-context" id="heroContext"></div>
+        <div class="hero-implied" id="heroImplied" style="display:none">Market implies <em id="impliedMnavVal">&mdash;</em> mNAV</div>
+    </div>
+    <div class="narrative" id="narrativePanel"><div class="narrative-title" id="narrativeTitle">&#128269; What happens here</div><div class="narrative-body" id="narrativeBody"></div></div>
+    <div class="metrics-grid" id="metricsGrid"></div>
+    <details class="collapse-section" id="controlsSection">
+        <summary>&#9881; Adjust Inputs</summary>
+        <div class="collapse-body">
+            <div class="controls-grid">
+                <div class="control-card">
+                    <div class="control-header"><span class="control-label">BTC PRICE</span><span class="control-value" id="btcPriceDisplay">$&mdash;</span></div>
+                    <input type="range" id="btcSlider" min="20000" max="1000000" step="1000" value="100000">
+                    <div class="slider-labels"><span>$20K</span><span>$500K</span><span>$1M</span></div>
+                    <div class="control-locked" id="btcLockedMsg" style="display:none">&#128274; Controlled by scenario CAGR curve</div>
                 </div>
-                
-                <!-- Overview Tab -->
-                <div class="tab-content active" id="tab-overview">
-                    <div class="modal-section">
-                        <div class="section-title">CEBE Metrics</div>
-                        <div class="metric-grid">
-                            <div class="metric-card">
-                                <div class="metric-card-value">${formatNumber(parseFloat(data.btc_holdings))}</div>
-                                <div class="metric-card-label">BTC Holdings</div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-card-value">${formatNumber(Math.round(m.cebe))}</div>
-                                <div class="metric-card-label">CEBE (sats/share)</div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-card-value" style="color: ${m.drag < 0.15 ? 'var(--green)' : m.drag < 0.30 ? 'var(--yellow)' : 'var(--red)'}">${(m.drag * 100).toFixed(1)}%</div>
-                                <div class="metric-card-label">Drag</div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-card-value" style="color: var(--green)">${(m.commonEquityPct * 100).toFixed(1)}%</div>
-                                <div class="metric-card-label">Common Equity Owns</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="modal-section">
-                        <div class="section-title">Capital Structure</div>
-                        <div class="capital-structure">
-                            <div class="capital-item">
-                                <span class="capital-label">Debt</span>
-                                <span class="capital-value">${formatCurrency(m.debt)}</span>
-                            </div>
-                            <div class="capital-item">
-                                <span class="capital-label">Preferred Stock</span>
-                                <span class="capital-value">${formatCurrency(m.preferred)}</span>
-                            </div>
-                            <div class="capital-item">
-                                <span class="capital-label">Cash Offset</span>
-                                <span class="capital-value">-${formatCurrency(m.cash)}</span>
-                            </div>
-                            <div class="capital-item total">
-                                <span class="capital-label">Net Senior Claims</span>
-                                <span class="capital-value">${formatCurrency(m.netClaimsUsd)}</span>
-                            </div>
-                        </div>
-                        <div class="capital-note">Senior claims include convertibles and preferred equity senior to common${data.fx_note ? '. ' + data.fx_note : ''}.</div>
-                    </div>
-                    
-                    <div class="modal-meta">
-                        <span>${data.exchange}</span>
-                        <span>Source: ${data.source || 'N/A'}</span>
-                    </div>
+                <div class="control-card">
+                    <div class="control-header"><span class="control-label">mNAV MULTIPLE</span><span class="control-value" id="mnavDisplay">1.00&times;</span></div>
+                    <input type="range" id="mnavSlider" min="30" max="400" value="100">
+                    <div class="mnav-presets" id="mnavPresets"></div>
+                    <div class="control-locked" id="mnavLockedMsg" style="display:none">&#128274; Controlled by scenario mNAV curve</div>
                 </div>
-                
-                <!-- Simulate Tab -->
-                <div class="tab-content" id="tab-simulate">
-                    <div class="modal-section">
-                        <div class="section-title">Drag Compression Simulator</div>
-                        
-                        <div class="sim-inputs">
-                            <div class="sim-input-group">
-                                <label class="sim-label">BTC Price</label>
-                                <div class="sim-input-row">
-                                    <span class="sim-currency">$</span>
-                                    <input type="number" id="simBtcPrice" class="sim-input" value="${Math.round(m.btcPrice)}" min="10000" max="1000000" step="1000">
-                                    <button class="sim-live-btn" id="fetchBtcBtn" title="Fetch live price">Live</button>
-                                </div>
-                                <input type="range" id="simBtcSlider" class="sim-slider" min="25000" max="500000" step="5000" value="${Math.round(m.btcPrice)}">
-                                <div class="sim-slider-labels">
-                                    <span>$25K</span>
-                                    <span>$500K</span>
-                                </div>
-                            </div>
-                            
-                            <div class="sim-input-group">
-                                <label class="sim-label">Current Stock Price</label>
-                                <div class="sim-input-row">
-                                    <span class="sim-currency">$</span>
-                                    <input type="number" id="simStockPrice" class="sim-input" value="" placeholder="Enter price" min="0" step="0.01">
-                                    <button class="sim-live-btn" id="fetchStockBtn" title="Fetch live price" data-symbol="${tickerToStock[ticker] || ticker}">Live</button>
-                                </div>
-                            </div>
-                            
-                            <div class="sim-input-group">
-                                <label class="sim-label">Time Horizon</label>
-                                <div class="sim-duration-btns">
-                                    <button class="sim-duration-btn active" data-years="0">Now</button>
-                                    <button class="sim-duration-btn" data-years="1">1Y</button>
-                                    <button class="sim-duration-btn" data-years="3">3Y</button>
-                                    <button class="sim-duration-btn" data-years="5">5Y</button>
-                                </div>
-                                <div class="sim-duration-note" id="simDurationNote"></div>
-                            </div>
-                        </div>
-                        
-                        <div class="sim-results" id="simResults">
-                            <div class="sim-comparison">
-                                <div class="sim-col">
-                                    <div class="sim-col-header">Today</div>
-                                    <div class="sim-metric">
-                                        <span class="sim-metric-label">BTC Price</span>
-                                        <span class="sim-metric-value" id="simTodayBtc">$${formatNumber(Math.round(m.btcPrice))}</span>
-                                    </div>
-                                    <div class="sim-metric">
-                                        <span class="sim-metric-label">Drag</span>
-                                        <span class="sim-metric-value" id="simTodayDrag">${(m.drag * 100).toFixed(1)}%</span>
-                                    </div>
-                                    <div class="sim-metric">
-                                        <span class="sim-metric-label">CEBE</span>
-                                        <span class="sim-metric-value" id="simTodayCebe">${formatNumber(Math.round(m.cebe))} sats</span>
-                                    </div>
-                                    <div class="sim-metric">
-                                        <span class="sim-metric-label">You Own</span>
-                                        <span class="sim-metric-value" id="simTodayOwn">${(m.commonEquityPct * 100).toFixed(1)}%</span>
-                                    </div>
-                                </div>
-                                <div class="sim-arrow">-></div>
-                                <div class="sim-col projected">
-                                    <div class="sim-col-header" id="simProjHeader">Projected</div>
-                                    <div class="sim-metric">
-                                        <span class="sim-metric-label">BTC Price</span>
-                                        <span class="sim-metric-value" id="simProjBtc">$${formatNumber(Math.round(m.btcPrice))}</span>
-                                    </div>
-                                    <div class="sim-metric">
-                                        <span class="sim-metric-label">Drag</span>
-                                        <span class="sim-metric-value" id="simProjDrag">${(m.drag * 100).toFixed(1)}%</span>
-                                    </div>
-                                    <div class="sim-metric">
-                                        <span class="sim-metric-label">CEBE</span>
-                                        <span class="sim-metric-value" id="simProjCebe">${formatNumber(Math.round(m.cebe))} sats</span>
-                                    </div>
-                                    <div class="sim-metric">
-                                        <span class="sim-metric-label">You Own</span>
-                                        <span class="sim-metric-value" id="simProjOwn">${(m.commonEquityPct * 100).toFixed(1)}%</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="sim-stock-projection" id="simStockSection" style="display: none;">
-                                <div class="section-title" style="margin-top: 20px;">Share Price Projection</div>
-                                <div class="sim-stock-result">
-                                    <div class="sim-stock-row">
-                                        <span>Current Price</span>
-                                        <span id="simCurrentStock">$-</span>
-                                    </div>
-                                    <div class="sim-stock-row">
-                                        <span>Current mNAV</span>
-                                        <span id="simMnav">-</span>
-                                    </div>
-                                    <div class="sim-stock-row mnav-input-row">
-                                        <span>Projected mNAV</span>
-                                        <div class="mnav-input-wrapper">
-                                            <input type="number" id="simProjMnav" class="mnav-input" value="" placeholder="same" min="0.1" max="10" step="0.1">
-                                            <span class="mnav-x">x</span>
-                                        </div>
-                                    </div>
-                                    <div class="sim-stock-row highlight-row">
-                                        <span>Projected Price</span>
-                                        <span id="simProjStock">$-</span>
-                                    </div>
-                                    <div class="sim-stock-row change-row">
-                                        <span>Change</span>
-                                        <span id="simStockChange">-</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="sim-disclaimer">
-                            For educational purposes only. Assumes no changes to capital structure. Not financial advice. Actual results will vary.
-                        </div>
-                    </div>
+                <div class="control-card full-width">
+                    <div class="control-header"><span class="control-label">TIME HORIZON</span><span class="control-value" id="horizonDisplay">Now</span></div>
+                    <div class="toggle-row" id="horizonBar"></div>
                 </div>
-                
-                <!-- Calculation Tab -->
-                <div class="tab-content" id="tab-calculation">
-                    <div class="modal-section">
-                        <div class="section-title">Step-by-Step CEBE Calculation</div>
-                        <div class="formula-box">
-                            <div class="formula-step">
-                                <div class="step-number">1</div>
-                                <div class="step-content">
-                                    <div class="step-title">Calculate Net Senior Claims (USD)</div>
-                                    <div class="step-formula">Debt + Preferred - Cash</div>
-                                    <div class="step-calc">${formatCurrency(m.debt)} + ${formatCurrency(m.preferred)} - ${formatCurrency(m.cash)} = <span class="highlight">${formatCurrency(m.netClaimsUsd)}</span></div>
-                                </div>
-                            </div>
-                            <div class="formula-step">
-                                <div class="step-number">2</div>
-                                <div class="step-content">
-                                    <div class="step-title">Convert Claims to BTC</div>
-                                    <div class="step-formula">Net Claims / BTC Price</div>
-                                    <div class="step-calc">${formatCurrency(m.netClaimsUsd)} / $${formatNumber(m.btcPrice)} = <span class="highlight">${formatNumber(Math.round(m.netClaimsBtc))} BTC</span></div>
-                                </div>
-                            </div>
-                            <div class="formula-step">
-                                <div class="step-number">3</div>
-                                <div class="step-content">
-                                    <div class="step-title">Calculate Common Equity BTC</div>
-                                    <div class="step-formula">Total BTC - Claims BTC</div>
-                                    <div class="step-calc">${formatNumber(parseFloat(data.btc_holdings))} - ${formatNumber(Math.round(m.netClaimsBtc))} = <span class="highlight">${formatNumber(Math.round(m.commonEquityBtc))} BTC</span></div>
-                                </div>
-                            </div>
-                            <div class="formula-step">
-                                <div class="step-number">4</div>
-                                <div class="step-content">
-                                    <div class="step-title">Calculate CEBE (sats/share)</div>
-                                    <div class="step-formula">Common Equity BTC / Shares x 100M</div>
-                                    <div class="step-calc">${formatNumber(Math.round(m.commonEquityBtc))} / ${formatNumber(parseFloat(data.shares_outstanding))} x 100M = <span class="highlight">${formatNumber(Math.round(m.cebe))} sats</span></div>
-                                </div>
-                            </div>
-                            <div class="formula-step">
-                                <div class="step-number">5</div>
-                                <div class="step-content">
-                                    <div class="step-title">Calculate Drag</div>
-                                    <div class="step-formula">Claims BTC / Total BTC</div>
-                                    <div class="step-calc">${formatNumber(Math.round(m.netClaimsBtc))} / ${formatNumber(parseFloat(data.btc_holdings))} = <span class="highlight">${(m.drag * 100).toFixed(1)}%</span></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="formula-note">BTC price from snapshot date (${data.snapshot_date}), not live spot</div>
-                    </div>
-                </div>
-                
-                <!-- History Tab -->
-                <div class="tab-content" id="tab-history">
-                    <div class="modal-section">
-                        <div class="section-title">CEBE Over Time</div>
-                        ${historyHTML}
-                    </div>
-                </div>
-            `;
-            
-            // Add tab click handlers
-            document.querySelectorAll('.modal-tab').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
-                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                    tab.classList.add('active');
-                    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
-                });
-            });
-            
-            // Simulator interaction handlers
-            const simData = {
-                btcHoldings: parseFloat(data.btc_holdings),
-                shares: parseFloat(data.shares_outstanding),
-                netClaimsUsd: m.netClaimsUsd,
-                originalBtcPrice: m.btcPrice,
-                originalDrag: m.drag,
-                originalCebe: m.cebe,
-                originalOwn: m.commonEquityPct
-            };
-            
-            function updateSimulation() {
-                const newBtcPrice = parseFloat(document.getElementById('simBtcPrice').value) || simData.originalBtcPrice;
-                const stockPrice = parseFloat(document.getElementById('simStockPrice').value);
-                
-                // Calculate new metrics at projected BTC price
-                const newClaimsBtc = simData.netClaimsUsd / newBtcPrice;
-                const newDrag = simData.btcHoldings > 0 ? newClaimsBtc / simData.btcHoldings : 0;
-                const newCommonEquityBtc = simData.btcHoldings - newClaimsBtc;
-                const newCebe = simData.shares > 0 ? (newCommonEquityBtc / simData.shares) * 100000000 : 0;
-                const newOwn = 1 - newDrag;
-                
-                // Update projected values
-                document.getElementById('simProjBtc').textContent = '$' + formatNumber(Math.round(newBtcPrice));
-                document.getElementById('simProjDrag').textContent = (newDrag * 100).toFixed(1) + '%';
-                document.getElementById('simProjCebe').textContent = formatNumber(Math.round(newCebe)) + ' sats';
-                document.getElementById('simProjOwn').textContent = (newOwn * 100).toFixed(1) + '%';
-                
-                // Color code drag change
-                const projDragEl = document.getElementById('simProjDrag');
-                if (newDrag < simData.originalDrag) {
-                    projDragEl.style.color = 'var(--green)';
-                } else if (newDrag > simData.originalDrag) {
-                    projDragEl.style.color = 'var(--red)';
-                } else {
-                    projDragEl.style.color = '';
-                }
-                
-                // Stock price projection
-                if (stockPrice > 0) {
-                    document.getElementById('simStockSection').style.display = 'block';
-                    document.getElementById('simCurrentStock').textContent = '$' + stockPrice.toFixed(2);
-                    
-                    // Calculate current mNAV: Market Cap / BTC NAV
-                    const currentMarketCap = stockPrice * simData.shares;
-                    const currentBtcNav = simData.btcHoldings * simData.originalBtcPrice;
-                    const currentMnav = currentBtcNav > 0 ? currentMarketCap / currentBtcNav : 0;
-                    document.getElementById('simMnav').textContent = currentMnav.toFixed(2) + 'x';
-                    
-                    // Use projected mNAV if entered, otherwise use current
-                    const projMnavInput = parseFloat(document.getElementById('simProjMnav').value);
-                    const projMnav = projMnavInput > 0 ? projMnavInput : currentMnav;
-                    
-                    // Project new stock price
-                    const newBtcNav = simData.btcHoldings * newBtcPrice;
-                    const projectedMarketCap = newBtcNav * projMnav;
-                    const projectedStockPrice = projectedMarketCap / simData.shares;
-                    document.getElementById('simProjStock').textContent = '$' + projectedStockPrice.toFixed(2);
-                    
-                    // Calculate change
-                    const stockChange = ((projectedStockPrice - stockPrice) / stockPrice) * 100;
-                    const changeEl = document.getElementById('simStockChange');
-                    changeEl.textContent = (stockChange >= 0 ? '+' : '') + stockChange.toFixed(1) + '%';
-                    changeEl.className = stockChange >= 0 ? 'positive' : 'negative';
-                } else {
-                    document.getElementById('simStockSection').style.display = 'none';
+            </div>
+        </div>
+    </details>
+    <details class="collapse-section"><summary>&#128256; Value Waterfall</summary><div class="collapse-body" style="padding:0"><div class="waterfall" id="waterfall"></div></div></details>
+    <details class="collapse-section" id="projectionSection" style="display:none"><summary>&#128197; Year-by-Year Projection</summary><div class="collapse-body" style="padding:0"><div class="table-wrap"><table id="projectionTable"><thead id="projHead"></thead><tbody id="projBody"></tbody></table></div></div></details>
+    <details class="collapse-section"><summary>&#127919; Price Sensitivity Matrix</summary><div class="collapse-body" style="padding:0"><div class="table-wrap"><table class="matrix-table" id="matrixTable"></table></div></div></details>
+    <details class="collapse-section"><summary>&#9881; Capital Structure &amp; Preferred Stack</summary><div class="collapse-body" id="customizeBody"></div></details>
+    <div class="assumptions" id="assumptions"></div>
+    <div class="footer">
+        <p>CEBE Framework by <a href="https://x.com/chcbearsfan" target="_blank">&#64;chcbearsfan</a> &middot; <a href="/">cebetracker.io</a> &middot; <a href="https://x.com/chcbearsfan/status/2014767364819063207" target="_blank">Read the Framework</a></p>
+        <p style="margin-top:4px">Not financial advice &middot; Data updates after each filing</p>
+        <p class="footer-formula">Share Price = CEBE &times; BTC Price &times; mNAV</p>
+    </div>
+</div>
+</html>
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CEBE MSTR SHARE PRICE MODELER v3
+// Capital Plan Engine · Convert Bond Maturities · Siege/Saylor/Terminal
+// cebetracker.io/modeler
+// ═══════════════════════════════════════════════════════════════
+
+const SHEET_ID = '1BNsCWGVU08PDinDcfzJccqcuj9_KrK1VZGETErzBZvg';
+const SNAPSHOTS_GID = '771405586';
+const FINNHUB_API_KEY = 'd5tuehhr01qtjet1d7k0d5tuehhr01qtjet1d7kg';
+const START_YEAR = 2026;
+
+const PREF_INSTRUMENTS = [
+    { id:'strf', name:'STRF', rate:0.10,   cumulative:true,  currency:'USD', seniority:1 },
+    { id:'strc', name:'STRC', rate:0.1125, cumulative:false, currency:'USD', seniority:2 },
+    { id:'stre', name:'STRE', rate:0.10,   cumulative:true,  currency:'EUR', seniority:3 },
+    { id:'strk', name:'STRK', rate:0.08,   cumulative:true,  currency:'USD', seniority:4 },
+    { id:'strd', name:'STRD', rate:0.10,   cumulative:false, currency:'USD', seniority:5 },
+];
+
+const CONVERTS = [
+    { id:'2028',  maturity:2028, face:1010e6,  convPrice:183.19, convShares:5513000 },
+    { id:'2029',  maturity:2029, face:3000e6,  convPrice:672.40, convShares:4462000 },
+    { id:'2030A', maturity:2030, face:800e6,   convPrice:149.77, convShares:5342000 },
+    { id:'2030B', maturity:2030, face:2000e6,  convPrice:433.43, convShares:4614000 },
+    { id:'2031',  maturity:2031, face:600e6,   convPrice:232.72, convShares:2594000 },
+    { id:'2032',  maturity:2032, face:800e6,   convPrice:204.33, convShares:3915000 },
+];
+
+const SAYLOR_CAGR = [
+    {year:1,cagr:.35},{year:2,cagr:.32},{year:3,cagr:.29},{year:4,cagr:.26},{year:5,cagr:.24},
+    {year:6,cagr:.22},{year:7,cagr:.20},{year:8,cagr:.18},{year:9,cagr:.16},{year:10,cagr:.15},
+];
+const SAYLOR_MNAV = [
+    {year:0,mnav:1.0},{year:1,mnav:1.3},{year:2,mnav:1.5},{year:3,mnav:1.8},{year:4,mnav:1.6},
+    {year:5,mnav:1.5},{year:6,mnav:1.5},{year:7,mnav:1.5},{year:8,mnav:1.5},{year:9,mnav:1.5},{year:10,mnav:1.5},
+];
+const SAYLOR_DEPLOY = [
+    {year:1,totalB:14,eqPct:.50,prefRate:.105},{year:2,totalB:14,eqPct:.50,prefRate:.105},
+    {year:3,totalB:14,eqPct:.50,prefRate:.105},{year:4,totalB:10,eqPct:.45,prefRate:.100},
+    {year:5,totalB:8,eqPct:.40,prefRate:.100},{year:6,totalB:6,eqPct:.35,prefRate:.095},
+    {year:7,totalB:5,eqPct:.30,prefRate:.095},{year:8,totalB:4,eqPct:.30,prefRate:.090},
+    {year:9,totalB:3,eqPct:.30,prefRate:.090},{year:10,totalB:2,eqPct:.30,prefRate:.090},
+];
+
+function terminalBtcPath(y, start) {
+    if (y<=0) return start;
+    if (y>=10) return 1000000;
+    var t=y/10; return start+(1000000-start)*(1-Math.pow(1-t,2));
+}
+
+const DEFAULTS = {
+    btc_holdings:713502, shares_outstanding:365000000, debt_usd:8214e6,
+    preferred_usd:8400e6, cash_usd:2250e6,
+    strk_face_usd:3220e6, strf_face_usd:2640e6, strd_face_usd:1006e6,
+    strc_face_usd:748e6, stre_face_eur:775e6, eurusd_rate:1.04,
+    software_income_usd:75e6, btc_price:97000, mstr_price:340,
+};
+
+const SCENARIOS = [
+    {id:'wipeout',      icon:'\u{1F480}',name:'Wipeout',      btc:25000, mnav:0.5,horizon:0, group:'snapshot',  type:'static'},
+    {id:'current',      icon:'\u{1F4CD}',name:'Current',      btc:null,  mnav:1.0,horizon:0, group:'snapshot',  type:'static'},
+    {id:'ath',          icon:'\u{1F451}',name:'Former ATH',   btc:126000,mnav:1.5,horizon:0, group:'snapshot',  type:'static'},
+    {id:'siege',        icon:'\u{1F3F0}',name:'Siege',        btc:50000, mnav:0.7,horizon:10,group:'projection',type:'siege'},
+    {id:'saylor',       icon:'\u{1F4D0}',name:'Saylor Model', btc:null,  mnav:null,horizon:10,group:'projection',type:'saylor'},
+    {id:'terminal',     icon:'\u267E\uFE0F',name:'Terminal',  btc:1e6,   mnav:3.0,horizon:10,group:'projection',type:'terminal'},
+];
+
+const HORIZON_OPTIONS = [{label:'Now',years:0},{label:'1Y',years:1},{label:'3Y',years:3},{label:'5Y',years:5},{label:'10Y',years:10}];
+const MNAV_PRESETS = [0.5,0.75,1.0,1.5,2.0,3.0];
+const MATRIX_BTC = [25000,50000,75000,100000,150000,200000,300000,500000,1000000];
+const MATRIX_MNAVS = [0.5,0.75,1.0,1.5,2.0,3.0];
+
+// ─── STATE ───
+var sheetData=null, liveBtcPrice=null, liveMstrPrice=null;
+var btcPrice=DEFAULTS.btc_price, mnavMultiple=1.0, horizonYears=0, activeScenario='current';
+
+// ─── HELPERS ───
+var $=function(id){return document.getElementById(id)};
+var fmt=function(n){return Math.round(n).toLocaleString('en-US')};
+var fmtB=function(n){return n>=1e9?'$'+(n/1e9).toFixed(1)+'B':n>=1e6?'$'+(n/1e6).toFixed(0)+'M':'$'+fmt(n)};
+var fmtPrice=function(p){if(p>=1e6)return '$'+(p/1e6).toFixed(1)+'M';if(p>=1000)return '$'+fmt(p);if(p>=1)return '$'+p.toFixed(2);return '$0.00'};
+var fmtPct=function(p,d){return(p*100).toFixed(d!==undefined?d:1)+'%'};
+var fmtSats=function(s){return fmt(Math.round(s))};
+function getActiveType(){var s=SCENARIOS.find(function(x){return x.id===activeScenario});return s?s.type:'static'}
+function isSlidersLocked(){var t=getActiveType();return t==='siege'||t==='saylor'||t==='terminal'}
+
+// ─── CSV ───
+function parseCSVLine(l){var r=[],c='',q=false;for(var i=0;i<l.length;i++){var ch=l[i];if(ch==='"')q=!q;else if(ch===','&&!q){r.push(c);c=''}else c+=ch}r.push(c);return r}
+function parseCSV(text){var lines=text.split('\n'),headers=parseCSVLine(lines[0]);return lines.slice(1).filter(function(l){return l.trim()}).map(function(l){var vals=parseCSVLine(l),row={};headers.forEach(function(h,i){row[h.replace(/"/g,'').trim()]=vals[i]?vals[i].replace(/"/g,'').trim():''});return row})}
+
+// ─── DATA LOADING ───
+async function loadData(){
+    try{
+        var results=await Promise.all([
+            fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd').then(function(r){return r.json()}).catch(function(){return null}),
+            fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&gid='+SNAPSHOTS_GID).then(function(r){return r.text()}),
+            fetchStockPrice('MSTR'),
+        ]);
+        var btcRes=results[0],sheetText=results[1],mstrStockPrice=results[2];
+        var rows=parseCSV(sheetText),mstrRow=null;
+        rows.forEach(function(r){if(r.ticker==='MSTR'&&(!r.status||r.status.toLowerCase()==='live')){if(!mstrRow||r.snapshot_date>mstrRow.snapshot_date)mstrRow=r}});
+        if(mstrRow)sheetData=mstrRow;
+        liveBtcPrice=btcRes&&btcRes.bitcoin?btcRes.bitcoin.usd:null;
+        liveMstrPrice=mstrStockPrice;
+        btcPrice=liveBtcPrice||parseFloat(sheetData&&sheetData.btc_price?sheetData.btc_price:'')||DEFAULTS.btc_price;
+        SCENARIOS.find(function(s){return s.id==='current'}).btc=btcPrice;
+        $('loadingScreen').style.display='none';
+        $('app').style.display='block';
+        buildScenarioBar();buildHorizonBar();buildMnavPresets();syncSliders();render();
+    }catch(err){
+        console.error('Load failed:',err);
+        $('loadingScreen').innerHTML='<div style="text-align:center;color:#a1a1aa;font-size:13px"><p style="margin-bottom:12px">Failed to load data</p><p style="font-size:11px;color:#52525b">'+err.message+'</p><p style="margin-top:12px"><a href="/" style="color:#f97316">&larr; Back to cebetracker.io</a></p></div>';
+    }
+}
+async function fetchStockPrice(symbol){
+    if(!FINNHUB_API_KEY||FINNHUB_API_KEY==='YOUR_FINNHUB_KEY_HERE')return null;
+    try{var r=await fetch('https://finnhub.io/api/v1/quote?symbol='+symbol+'&token='+FINNHUB_API_KEY);var d=await r.json();if(d.c&&d.c>0)return d.c}catch(e){}return null;
+}
+function getVal(field,fallback){if(sheetData&&sheetData[field]!==undefined&&sheetData[field]!==''){var v=parseFloat(sheetData[field]);if(!isNaN(v))return v}return fallback}
+function getInputs(){
+    return{
+        btcHoldings:getVal('btc_holdings',DEFAULTS.btc_holdings),
+        shares:getVal('shares_outstanding',DEFAULTS.shares_outstanding),
+        debtUsd:getVal('debt_usd',DEFAULTS.debt_usd),
+        cashUsd:getVal('cash_usd',DEFAULTS.cash_usd),
+        strkFace:getVal('strk_face_usd',DEFAULTS.strk_face_usd),
+        strfFace:getVal('strf_face_usd',DEFAULTS.strf_face_usd),
+        strdFace:getVal('strd_face_usd',DEFAULTS.strd_face_usd),
+        strcFace:getVal('strc_face_usd',DEFAULTS.strc_face_usd),
+        streFaceEur:getVal('stre_face_eur',DEFAULTS.stre_face_eur),
+        eurusd:getVal('eurusd_rate',DEFAULTS.eurusd_rate),
+        softwareIncome:getVal('software_income_usd',DEFAULTS.software_income_usd),
+        snapshotDate:sheetData?sheetData.snapshot_date||'\u2014':'\u2014',
+    };
+}
+
+// ═══════════════════════════════════════════════════
+// CEBE MATH ENGINE
+// ═══════════════════════════════════════════════════
+function calcCEBE(btcH,shares,netCl,btcP,mn){
+    var p=btcP||btcPrice, m=mn!==undefined?mn:mnavMultiple;
+    var clBtc=p>0?Math.max(0,netCl/p):0;
+    var drag=btcH>0?Math.max(0,Math.min(1,clBtc/btcH)):0;
+    var commonBtc=Math.max(0,btcH-clBtc);
+    var cebeSats=shares>0?(commonBtc/shares)*1e8:0;
+    var bpsSats=shares>0?(btcH/shares)*1e8:0;
+    var amp=drag<.999?1/(1-drag):Infinity;
+    var breakEven=btcH>0?Math.max(0,netCl)/btcH:0;
+    var navUsd=Math.max(0,(btcH*p)-netCl);
+    var navPerShare=shares>0?navUsd/shares:0;
+    var modeledPrice=navPerShare*m;
+    return{commonBtc:commonBtc,cebeSats:cebeSats,bpsSats:bpsSats,drag:drag,amp:amp,breakEven:breakEven,navUsd:navUsd,navPerShare:navPerShare,modeledPrice:modeledPrice,btcHoldings:btcH,shares:shares,netClaimsUsd:netCl};
+}
+
+// ═══════════════════════════════════════════════════
+// PROJECTION ENGINE v3
+// ═══════════════════════════════════════════════════
+function projectYears(years){
+    var inp=getInputs(), scenarioType=getActiveType(), startBtc=liveBtcPrice||btcPrice;
+    var btcH=inp.btcHoldings, shares=inp.shares, cash=inp.cashUsd;
+    var strkF=inp.strkFace, strfF=inp.strfFace, strdF=inp.strdFace, strcF=inp.strcFace, streF_eur=inp.streFaceEur;
+    var eurusd=inp.eurusd, softIncome=inp.softwareIncome, strkConverted=false;
+    var convertDebt=CONVERTS.map(function(c){return{id:c.id,maturity:c.maturity,face:c.face,convPrice:c.convPrice,convShares:c.convShares,outstanding:true}});
+    var newPrefFace=0, newPrefDivAnnual=0;
+    var results=[], allEvents=[];
+
+    for(var y=0;y<=years;y++){
+        var calYear=START_YEAR+y, yearEvents=[];
+
+        // 1. BTC PRICE + mNAV for this year
+        var yearBtcPrice, yearMnav;
+        if(scenarioType==='siege'){yearBtcPrice=50000;yearMnav=0.7}
+        else if(scenarioType==='saylor'){
+            if(y===0){yearBtcPrice=startBtc;yearMnav=SAYLOR_MNAV[0].mnav}
+            else{var ce=SAYLOR_CAGR[Math.min(y-1,SAYLOR_CAGR.length-1)];var prevB=y===1?startBtc:results[y-1].yearBtcPrice;yearBtcPrice=prevB*(1+ce.cagr);yearMnav=SAYLOR_MNAV[Math.min(y,SAYLOR_MNAV.length-1)].mnav}
+        }else if(scenarioType==='terminal'){
+            yearBtcPrice=y===0?startBtc:terminalBtcPath(y,startBtc);yearMnav=y===0?1.0:Math.min(3.0,1.0+(3.0-1.0)*(y/10));
+        }else{yearBtcPrice=btcPrice;yearMnav=mnavMultiple}
+
+        // 2. CONVERT BOND MATURITIES
+        if(y>0){convertDebt.forEach(function(conv){
+            if(!conv.outstanding||conv.maturity!==calYear)return;
+            var curDebt=convertDebt.filter(function(c){return c.outstanding}).reduce(function(s,c){return s+c.face},0);
+            var pUsd=strkF+strfF+strdF+strcF+streF_eur*eurusd+newPrefFace;
+            var nCl=curDebt+pUsd-cash;
+            var tmp=calcCEBE(btcH,shares,nCl,yearBtcPrice,yearMnav);
+            if(tmp.modeledPrice>=conv.convPrice){
+                conv.outstanding=false; shares+=conv.convShares;
+                yearEvents.push({type:'convert',cls:'green',icon:'\u{1F504}',text:'<strong>'+conv.id+' converts converted.</strong> Stock ('+fmtPrice(tmp.modeledPrice)+') above conversion price ('+fmtPrice(conv.convPrice)+'). Removed '+fmtB(conv.face)+' debt, added '+fmt(conv.convShares)+' shares.'});
+            }else{
+                conv.outstanding=false; cash-=conv.face;
+                if(cash<0){var deficit=Math.abs(cash);var btcToSell=yearBtcPrice>0?deficit/yearBtcPrice:0;btcH=Math.max(0,btcH-btcToSell);
+                    yearEvents.push({type:'redeem',cls:'red',icon:'\u26A0\uFE0F',text:'<strong>'+conv.id+' converts matured at par.</strong> Stock ('+fmtPrice(tmp.modeledPrice)+') below conversion price ('+fmtPrice(conv.convPrice)+'). '+fmtB(conv.face)+' cash obligation. '+fmt(Math.round(btcToSell))+' BTC liquidated.'});cash=0;
+                }else{yearEvents.push({type:'redeem',cls:'amber',icon:'\u26A0\uFE0F',text:'<strong>'+conv.id+' converts redeemed at par.</strong> '+fmtB(conv.face)+' paid from cash reserves.'})}
+            }
+        })}
+
+        // 3. CAPITAL PLAN (Saylor only)
+        var newBtcAcq=0, yearDeploy=0, yearNewPref=0;
+        if(y>0&&scenarioType==='saylor'){
+            var dep=SAYLOR_DEPLOY[Math.min(y-1,SAYLOR_DEPLOY.length-1)];
+            yearDeploy=dep.totalB*1e9;
+            var eqRaise=yearDeploy*dep.eqPct, prefRaise=yearDeploy*(1-dep.eqPct);
+            var curDebt=convertDebt.filter(function(c){return c.outstanding}).reduce(function(s,c){return s+c.face},0);
+            var pUsd=strkF+strfF+strdF+strcF+streF_eur*eurusd+newPrefFace;
+            var nCl=curDebt+pUsd-cash;
+            var navNow=Math.max(0,(btcH*yearBtcPrice)-nCl);
+            var navPS=shares>0?navNow/shares:0;
+            var atmMnav=Math.max(0.5,yearMnav-0.1);
+            var atmPrice=navPS*atmMnav;
+            if(atmPrice>0){var newSh=eqRaise/atmPrice;shares+=newSh}
+            yearNewPref=prefRaise; newPrefFace+=prefRaise; newPrefDivAnnual+=prefRaise*dep.prefRate;
+            if(yearBtcPrice>0){newBtcAcq=yearDeploy/yearBtcPrice;btcH+=newBtcAcq}
+            if(yearDeploy>0)yearEvents.push({type:'deploy',cls:'info',icon:'\u{1F4E6}',text:'<strong>Deployed '+fmtB(yearDeploy)+'.</strong> Acquired '+fmt(Math.round(newBtcAcq))+' BTC. Issued '+fmtB(yearNewPref)+' new preferred at '+fmtPct(dep.prefRate,1)+'. ATM at '+atmMnav.toFixed(1)+'\u00d7.'});
+        }
+
+        // Terminal — light capital plan years 1-3
+        if(y>0&&y<=3&&scenarioType==='terminal'){
+            var tDeploy=(4-y)*2e9;
+            if(yearBtcPrice>0){newBtcAcq=tDeploy/yearBtcPrice;btcH+=newBtcAcq}
+            var tPref=tDeploy*0.5;newPrefFace+=tPref;newPrefDivAnnual+=tPref*0.10;
+            var tEq=tDeploy*0.5;
+            var curDebt2=convertDebt.filter(function(c){return c.outstanding}).reduce(function(s,c){return s+c.face},0);
+            var pUsd2=strkF+strfF+strdF+strcF+streF_eur*eurusd+newPrefFace;
+            var nCl2=curDebt2+pUsd2-cash;var navN2=Math.max(0,(btcH*yearBtcPrice)-nCl2);var navPS2=shares>0?navN2/shares:0;
+            var tAtm=Math.max(1.0,yearMnav-0.1);var tAtmP=navPS2*tAtm;
+            if(tAtmP>0)shares+=tEq/tAtmP;
+        }
+
+        // 4. STRK CONVERSION CHECK
+        if(y>0&&!strkConverted&&strkF>0){
+            var curDebt3=convertDebt.filter(function(c){return c.outstanding}).reduce(function(s,c){return s+c.face},0);
+            var pUsd3=strkF+strfF+strdF+strcF+streF_eur*eurusd+newPrefFace;
+            var nCl3=curDebt3+pUsd3-cash;var tmp3=calcCEBE(btcH,shares,nCl3,yearBtcPrice,yearMnav);
+            if(tmp3.modeledPrice>=1000){
+                var strkSh=Math.round(strkF/1000);shares+=strkSh;
+                yearEvents.push({type:'strk',cls:'green',icon:'\u26A1',text:'<strong>STRK converts at $1,000.</strong> Removed '+fmtB(strkF)+' preferred claims and '+fmtB(strkF*0.08)+'/yr dividends. Added '+fmt(strkSh)+' shares.'});
+                strkF=0;strkConverted=true;
+            }
+        }
+
+        // 5. PAY DIVIDENDS
+        var status='green',btcSold=0,strcSkipped=false,strdSkipped=false;
+        if(y>0){
+            var strfDiv=strfF*0.10, strcDiv=strcF*0.1125, streDiv=streF_eur*eurusd*0.10;
+            var strkDiv=strkF*0.08, strdDiv=strdF*0.10, npDiv=newPrefDivAnnual;
+            var totalDiv=strfDiv+strcDiv+streDiv+strkDiv+strdDiv+npDiv;
+            cash-=(totalDiv-softIncome);
+            if(cash>=0){status='green'}
+            else{cash+=strdDiv;strdSkipped=true;
+                if(cash>=0){status='amber'}
+                else{cash+=strcDiv;strcSkipped=true;
+                    if(cash>=0){status='amber'}
+                    else{var deficit=Math.abs(cash);btcSold=yearBtcPrice>0?deficit/yearBtcPrice:0;btcH=Math.max(0,btcH-btcSold);cash=0;status='red'}
                 }
             }
-            
-            // Bind input events
-            document.getElementById('simBtcPrice').addEventListener('input', (e) => {
-                document.getElementById('simBtcSlider').value = e.target.value;
-                updateSimulation();
-            });
-            
-            document.getElementById('simBtcSlider').addEventListener('input', (e) => {
-                document.getElementById('simBtcPrice').value = e.target.value;
-                updateSimulation();
-            });
-            
-            document.getElementById('simStockPrice').addEventListener('input', updateSimulation);
-            document.getElementById('simProjMnav').addEventListener('input', updateSimulation);
-            
-            // Duration button handlers
-            let selectedYears = 0;
-            document.querySelectorAll('.sim-duration-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.sim-duration-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    selectedYears = parseInt(btn.dataset.years);
-                    
-                    const noteEl = document.getElementById('simDurationNote');
-                    const headerEl = document.getElementById('simProjHeader');
-                    
-                    if (selectedYears > 0) {
-                        // Assume 15% annual BTC CAGR for projection
-                        const projectedBtc = Math.round(simData.originalBtcPrice * Math.pow(1.15, selectedYears));
-                        document.getElementById('simBtcPrice').value = projectedBtc;
-                        document.getElementById('simBtcSlider').value = Math.min(projectedBtc, 500000);
-                        noteEl.textContent = 'Assuming 15% annual BTC appreciation. Adjust slider to explore scenarios.';
-                        headerEl.textContent = 'In ' + selectedYears + ' Year' + (selectedYears > 1 ? 's' : '');
-                    } else {
-                        document.getElementById('simBtcPrice').value = Math.round(simData.originalBtcPrice);
-                        document.getElementById('simBtcSlider').value = Math.round(simData.originalBtcPrice);
-                        noteEl.textContent = '';
-                        headerEl.textContent = 'Projected';
-                    }
-                    updateSimulation();
-                });
-            });
-            
-            // Live BTC price button
-            document.getElementById('fetchBtcBtn').addEventListener('click', async (e) => {
-                const btn = e.target;
-                btn.disabled = true;
-                btn.textContent = '...';
-                
-                const price = await fetchBtcPrice();
-                if (price) {
-                    document.getElementById('simBtcPrice').value = Math.round(price);
-                    document.getElementById('simBtcSlider').value = Math.round(price);
-                    updateSimulation();
-                }
-                
-                btn.disabled = false;
-                btn.textContent = 'Live';
-            });
-            
-            // Live stock price button
-            document.getElementById('fetchStockBtn').addEventListener('click', async (e) => {
-                const btn = e.target;
-                const symbol = btn.dataset.symbol;
-                btn.disabled = true;
-                btn.textContent = '...';
-                
-                const price = await fetchStockPrice(symbol);
-                if (price) {
-                    document.getElementById('simStockPrice').value = price.toFixed(2);
-                    updateSimulation();
-                } else {
-                    document.getElementById('simStockPrice').placeholder = 'API unavailable';
-                }
-                
-                btn.disabled = false;
-                btn.textContent = 'Live';
-            });
-            
-            document.getElementById('modalOverlay').classList.add('active');
-            document.body.style.overflow = 'hidden';
         }
-        
-        function closeModal() {
-            document.getElementById('modalOverlay').classList.remove('active');
-            document.body.style.overflow = '';
-        }
-        
-        // Event Listeners
-        document.getElementById('modalOverlay').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('modalOverlay')) {
-                closeModal();
-            }
+
+        // 6. YEAR-END STATE
+        var remDebt=convertDebt.filter(function(c){return c.outstanding}).reduce(function(s,c){return s+c.face},0);
+        var prefUsd=strkF+strfF+strdF+strcF+streF_eur*eurusd+newPrefFace;
+        var netClaims=remDebt+prefUsd-cash;
+        var m=calcCEBE(btcH,shares,netClaims,yearBtcPrice,yearMnav);
+        var totDiv=strfF*0.10+strcF*0.1125+streF_eur*eurusd*0.10+strkF*0.08+strdF*0.10+newPrefDivAnnual;
+        var netDrain=totDiv-softIncome;
+        var runway=netDrain>0?(cash>0?cash/netDrain:0):Infinity;
+
+        results.push({year:y,calYear:calYear,btcH:btcH,shares:shares,cebeSats:m.cebeSats,drag:m.drag,
+            navPerShare:m.navPerShare,modeledPrice:m.modeledPrice,cash:cash,btcSold:btcSold,status:status,
+            amp:m.amp,breakEven:m.breakEven,cashRunway:runway,strcSkipped:strcSkipped,strdSkipped:strdSkipped,
+            yearBtcPrice:yearBtcPrice,yearMnav:yearMnav,newBtcAcquired:newBtcAcq,newPrefIssued:yearNewPref,
+            yearDeployment:yearDeploy,totalDivObligation:totDiv,events:yearEvents,netClaimsUsd:netClaims,
+            remainingDebt:remDebt,totalPrefFace:prefUsd});
+        yearEvents.forEach(function(e){allEvents.push({year:y,type:e.type,cls:e.cls,icon:e.icon,text:e.text})});
+    }
+    results._events=allEvents;
+    return results;
+}
+
+function quickCalc(bp,mn){
+    var inp=getInputs();var streUsd=inp.streFaceEur*inp.eurusd;
+    var prefUsd=inp.strkFace+inp.strfFace+inp.strdFace+inp.strcFace+streUsd;
+    var tDebt=CONVERTS.reduce(function(s,c){return s+c.face},0);
+    var netCl=tDebt+prefUsd-inp.cashUsd;
+    var nav=Math.max(0,(inp.btcHoldings*bp)-netCl);
+    return(inp.shares>0?nav/inp.shares:0)*mn;
+}
+
+// ═══════════════════════════════════════════════════
+// RENDERING
+// ═══════════════════════════════════════════════════
+function render(){
+    var inp=getInputs(),proj=projectYears(horizonYears);
+    var current=proj[0],final=proj[proj.length-1],marketPrice=liveMstrPrice||DEFAULTS.mstr_price;
+    renderHero(final,current,marketPrice);renderNarrative(final,current,inp,marketPrice,proj);
+    renderMetrics(final,current,inp);renderWaterfall(final,inp);renderProjectionTable(proj);
+    renderSensitivityMatrix();renderCustomize(inp);renderAssumptions(inp);updateSliderLocking();
+    $('liveBtcDisplay').textContent='BTC '+fmtPrice(liveBtcPrice||btcPrice);
+    $('liveMstrDisplay').textContent='MSTR '+fmtPrice(marketPrice);
+    $('liveDataDate').textContent=inp.snapshotDate!=='\u2014'?'Data: '+inp.snapshotDate:'';
+    updateSliderFills();
+}
+
+function renderHero(final,current,marketPrice){
+    var price=final.modeledPrice, el=$('heroPrice'), sType=getActiveType();
+    if(price<=0||!isFinite(price)){el.textContent='$0.00';el.className='hero-price negative';$('heroChange').textContent='\u2212100%';$('heroChange').className='hero-change down';$('heroVs').textContent='common equity wiped out';$('heroContext').textContent='';$('heroImplied').style.display='none';return}
+    el.textContent=fmtPrice(price);
+    var pctC=(price-marketPrice)/marketPrice, sign=pctC>=0?'+':'';
+    $('heroChange').textContent=sign+(pctC*100).toFixed(1)+'% ('+sign+'$'+Math.abs(price-marketPrice).toFixed(2)+')';
+    $('heroChange').className='hero-change '+(pctC>=0?'up':'down');
+    el.className='hero-price '+(pctC>.05?'positive':pctC<-.05?'negative':'neutral');
+    $('heroVs').textContent='vs MSTR market '+fmtPrice(marketPrice);
+    var ctx='';
+    if(horizonYears===0)ctx='instant snapshot';
+    else if(sType==='siege')ctx=horizonYears+'-year stress test \u00b7 $50K BTC flat \u00b7 converts + dividends';
+    else if(sType==='saylor')ctx=horizonYears+'-year projection \u00b7 declining CAGR \u00b7 capital plan active';
+    else if(sType==='terminal')ctx=horizonYears+'-year projection \u00b7 BTC \u2192 $1M \u00b7 all converts resolved';
+    else ctx=horizonYears>0?horizonYears+'-year projection with dividend cascade':'instant snapshot';
+    $('heroContext').textContent=ctx;
+    // Implied mNAV
+    var inp=getInputs(),streUsd=inp.streFaceEur*inp.eurusd;
+    var prefUsd=inp.strkFace+inp.strfFace+inp.strdFace+inp.strcFace+streUsd;
+    var tDebt=CONVERTS.reduce(function(s,c){return s+c.face},0);
+    var nCl=tDebt+prefUsd-inp.cashUsd;
+    var navNow=Math.max(0,(inp.btcHoldings*btcPrice)-nCl);
+    var navPsNow=inp.shares>0?navNow/inp.shares:0;
+    if(navPsNow>0&&marketPrice>0){$('impliedMnavVal').textContent=(marketPrice/navPsNow).toFixed(2)+'\u00d7';$('heroImplied').style.display='inline-block'}
+    else{$('heroImplied').style.display='none'}
+}
+
+function renderNarrative(final,current,inp,marketPrice,proj){
+    var items=[], dragPct=final.drag*100, commonPct=(1-final.drag)*100;
+    var sObj=SCENARIOS.find(function(s){return s.id===activeScenario}), sName=sObj?sObj.name:'Custom', sType=getActiveType();
+    var endBtcP=final.yearBtcPrice||btcPrice;
+    $('narrativeTitle').innerHTML='\u{1F50D} '+sName+' \u2014 '+fmtPrice(endBtcP)+' BTC';
+
+    // Drag
+    if(final.drag<.05)items.push({cls:'green',icon:'\u2705',text:'<strong>Drag nearly zero ('+dragPct.toFixed(1)+'%).</strong> Common shareholders own '+commonPct.toFixed(1)+'% of the Bitcoin.'});
+    else if(final.drag<.20)items.push({cls:'green',icon:'\u{1F4C8}',text:'<strong>Low drag ('+dragPct.toFixed(1)+'%).</strong> Common owns '+commonPct.toFixed(1)+'% of the Bitcoin. Compression well advanced.'});
+    else if(final.drag<.40)items.push({cls:'neutral',icon:'\u2696',text:'<strong>Moderate drag ('+dragPct.toFixed(1)+'%).</strong> Common owns '+commonPct.toFixed(1)+'% of the BTC. Net claims '+fmtB(final.netClaimsUsd)+'.'});
+    else if(final.drag<.70)items.push({cls:'amber',icon:'\u26A0',text:'<strong>High drag ('+dragPct.toFixed(1)+'%).</strong> Only '+commonPct.toFixed(1)+'% of Bitcoin left for common.'});
+    else items.push({cls:'red',icon:'\u{1F4A5}',text:'<strong>Critical drag ('+dragPct.toFixed(1)+'%).</strong> Senior claims consume most Bitcoin value. Common equity severely impaired.'});
+
+    // Break-even
+    if(endBtcP<=final.breakEven)items.push({cls:'red',icon:'\u{1F480}',text:'<strong>Below break-even ('+fmtPrice(final.breakEven)+').</strong> Common equity theoretically $0. No callable debt \u2014 creditors cannot force liquidation.'});
+    else if(endBtcP<=final.breakEven*1.15)items.push({cls:'red',icon:'\u26A0',text:'<strong>Near break-even.</strong> BTC only '+((endBtcP/final.breakEven-1)*100).toFixed(0)+'% above '+fmtPrice(final.breakEven)+' floor.'});
+    else if(endBtcP>final.breakEven*3)items.push({cls:'green',icon:'\u{1F6E1}',text:'<strong>Break-even safety margin: '+((endBtcP/final.breakEven-1)*100).toFixed(0)+'%.</strong> BTC must fall to '+fmtPrice(final.breakEven)+' to wipe common equity.'});
+
+    // Cash runway
+    if(current.cashRunway<3&&current.cashRunway>0)items.push({cls:'amber',icon:'\u23F0',text:'<strong>Cash runway: '+current.cashRunway.toFixed(1)+' years.</strong> After depletion: skip non-cum (STRD, STRC) then sell BTC for cumulative obligations.'});
+    else if(current.cashRunway>=3&&current.cashRunway<Infinity)items.push({cls:'neutral',icon:'\u{1F4B0}',text:'<strong>Cash runway: '+current.cashRunway.toFixed(1)+' years.</strong> Reserves cover preferred dividends before BTC needs selling.'});
+
+    // Engine events
+    if(proj._events)proj._events.forEach(function(e){items.push({cls:e.cls,icon:e.icon,text:e.text})});
+
+    // BTC liquidation summary
+    if(horizonYears>0&&final.btcH<inp.btcHoldings){var ts=inp.btcHoldings-final.btcH;items.push({cls:'red',icon:'\u{1F525}',text:'<strong>Total BTC liquidated: '+fmt(Math.round(ts))+' ('+((ts/inp.btcHoldings)*100).toFixed(1)+'%).</strong> Holdings: '+fmt(inp.btcHoldings)+' \u2192 '+fmt(Math.round(final.btcH))+'.'});}
+
+    // Saylor spread insight
+    if(sType==='saylor'&&horizonYears>=3){var sd=proj[0].drag,ed=final.drag;if(ed<sd)items.push({cls:'green',icon:'\u{1F4C8}',text:'<strong>The spread is working.</strong> Despite new preferred issuance, drag compressed '+fmtPct(sd)+' \u2192 '+fmtPct(ed)+'. BTC growth outpacing cost of capital.'});}
+
+    // Siege survival
+    if(sType==='siege'&&horizonYears>=5){if(final.btcH>0&&final.cebeSats>0)items.push({cls:'amber',icon:'\u{1F3F0}',text:'<strong>After '+horizonYears+' years at $50K BTC:</strong> Holdings reduced to '+fmt(Math.round(final.btcH))+' BTC. Drag '+fmtPct(final.drag)+'. Strategy survived \u2014 no forced liquidation. Common equity holds '+fmtPct(1-final.drag)+' of remaining BTC.'});
+    else items.push({cls:'red',icon:'\u{1F3F0}',text:'<strong>After '+horizonYears+' years at $50K BTC:</strong> Common equity wiped out.'})}
+
+    // STRK zone
+    if(final.modeledPrice>=800&&final.modeledPrice<1000&&!(proj._events||[]).some(function(e){return e.type==='strk'}))items.push({cls:'amber',icon:'\u26A1',text:'<strong>Approaching STRK conversion zone.</strong> STRK converts at $1,000/share. Modeled: '+fmtPrice(final.modeledPrice)+'.'});
+
+    $('narrativeBody').innerHTML=items.map(function(i){return'<div class="narr-item '+i.cls+'"><span class="narr-icon">'+i.icon+'</span><span class="narr-text">'+i.text+'</span></div>'}).join('');
+}
+
+function renderMetrics(final,current,inp){
+    var totDiv=final.totalDivObligation||(inp.strfFace*0.10+inp.strcFace*0.1125+inp.streFaceEur*inp.eurusd*0.10+inp.strkFace*0.08+inp.strdFace*0.10);
+    var endBtcP=final.yearBtcPrice||btcPrice;
+    var metrics=[
+        {label:'CEBE',value:fmtSats(final.cebeSats),sub:'sats/share',cls:final.cebeSats<=0?'danger':''},
+        {label:'DRAG',value:fmtPct(final.drag),sub:fmtPct(1-final.drag)+' to common',cls:final.drag>.5?'danger':final.drag>.35?'warn':''},
+        {label:'AMPLIFICATION',value:final.amp>100?'\u221e':final.amp.toFixed(2)+'\u00d7',sub:((final.amp-1)*100).toFixed(0)+'% amplified',cls:''},
+        {label:'BREAK-EVEN',value:fmtPrice(final.breakEven),sub:'BTC floor',cls:endBtcP<=final.breakEven*1.1?'danger':endBtcP<=final.breakEven*1.5?'warn':''},
+        {label:'NAV / SHARE',value:fmtPrice(final.navPerShare),sub:'\u00d7 '+(final.yearMnav||mnavMultiple).toFixed(2)+' mNAV',cls:''},
+        {label:'CASH RUNWAY',value:current.cashRunway===Infinity?'\u221e':current.cashRunway.toFixed(1)+'yr',sub:fmtB(totDiv)+'/yr div',cls:current.cashRunway<2?'danger':current.cashRunway<4?'warn':'good'},
+    ];
+    if(horizonYears>0)metrics.push({label:'BTC HELD',value:fmt(Math.round(final.btcH)),sub:(final.btcH<inp.btcHoldings?'\u2193':'\u2191')+' from '+fmt(inp.btcHoldings),cls:final.btcH<inp.btcHoldings*.9?'danger':final.btcH>inp.btcHoldings?'good':''});
+    $('metricsGrid').innerHTML=metrics.map(function(m){return'<div class="metric-card"><div class="metric-label">'+m.label+'</div><div class="metric-value '+m.cls+'">'+m.value+'</div><div class="metric-sub">'+m.sub+'</div></div>'}).join('');
+}
+
+function renderWaterfall(final,inp){
+    var endBtcP=final.yearBtcPrice||btcPrice, totalBtcVal=final.btcH*endBtcP;
+    var endMnav=final.yearMnav||mnavMultiple, nav=final.navPerShare*final.shares;
+    $('waterfall').innerHTML=
+        '<div class="wf-step btc-val"><div class="wf-label">BTC VALUE</div><div class="wf-value">'+fmtB(totalBtcVal)+'</div></div>'+
+        '<div class="wf-arrow">\u2192</div><div class="wf-step claims"><div class="wf-label">\u2212 CLAIMS</div><div class="wf-value">'+fmtB(Math.max(0,final.netClaimsUsd))+'</div></div>'+
+        '<div class="wf-arrow">\u2192</div><div class="wf-step nav"><div class="wf-label">= NAV</div><div class="wf-value">'+fmtB(nav)+'</div></div>'+
+        '<div class="wf-arrow">\u2192</div><div class="wf-step shares"><div class="wf-label">\u00f7 '+(final.shares/1e6).toFixed(0)+'M</div><div class="wf-value">SHARES</div></div>'+
+        '<div class="wf-arrow">\u2192</div><div class="wf-step shares"><div class="wf-label">NAV/SH</div><div class="wf-value">'+fmtPrice(final.navPerShare)+'</div></div>'+
+        '<div class="wf-arrow">\u2192</div><div class="wf-step shares"><div class="wf-label">\u00d7 mNAV</div><div class="wf-value">'+endMnav.toFixed(2)+'\u00d7</div></div>'+
+        '<div class="wf-arrow">\u2192</div><div class="wf-step result"><div class="wf-label">PRICE</div><div class="wf-value" style="color:var(--orange-primary)">'+fmtPrice(final.modeledPrice)+'</div></div>';
+}
+
+function renderProjectionTable(proj){
+    var sec=$('projectionSection');if(horizonYears===0){sec.style.display='none';return}sec.style.display='block';
+    var sType=getActiveType(), isF=sType==='siege'||sType==='saylor'||sType==='terminal';
+    var h='<tr><th style="text-align:center">YEAR</th>';
+    if(isF)h+='<th>BTC PRICE</th>';
+    h+='<th>BTC HELD</th>';
+    if(sType==='saylor')h+='<th>NEW BTC</th>';
+    h+='<th>SHARES</th><th>CEBE</th><th>DRAG</th><th>NAV/SH</th>';
+    if(isF)h+='<th>mNAV</th>';
+    h+='<th>PRICE</th><th>CASH</th><th>STATUS</th></tr>';
+    $('projHead').innerHTML=h;
+
+    var colCount=9+(isF?2:0)+(sType==='saylor'?1:0);
+    $('projBody').innerHTML=proj.map(function(r){
+        var inp=getInputs();
+        var sE=r.status==='green'?'\u{1F7E2}':r.status==='amber'?'\u{1F7E1}':'\u{1F534}';
+        var sL=r.status==='green'?'Healthy':r.status==='amber'?(r.strcSkipped?'Skip D+C':'Skip STRD'):'BTC sold';
+        var hasEv=r.events&&r.events.length>0;
+        var row='<tr'+(hasEv?' class="event-row"':'')+'>';
+        row+='<td>'+sE+' '+(r.year===0?'Now':r.calYear)+'</td>';
+        if(isF)row+='<td class="cell-blue">'+fmtPrice(r.yearBtcPrice)+'</td>';
+        row+='<td class="'+(r.btcH<inp.btcHoldings?'cell-red':r.btcH>inp.btcHoldings?'cell-green':'')+'">'+fmt(Math.round(r.btcH))+'</td>';
+        if(sType==='saylor')row+='<td class="'+(r.newBtcAcquired>0?'cell-green':'cell-muted')+'">'+(r.newBtcAcquired>0?'+'+fmt(Math.round(r.newBtcAcquired)):'\u2014')+'</td>';
+        row+='<td>'+(r.shares/1e6).toFixed(1)+'M</td>';
+        row+='<td class="cell-bold">'+fmtSats(r.cebeSats)+'</td>';
+        row+='<td class="'+(r.drag>.5?'cell-red':r.drag>.35?'cell-amber':'')+'">'+fmtPct(r.drag)+'</td>';
+        row+='<td>'+fmtPrice(r.navPerShare)+'</td>';
+        if(isF)row+='<td>'+r.yearMnav.toFixed(1)+'\u00d7</td>';
+        row+='<td class="cell-bold" style="color:'+(r.modeledPrice>0?'var(--text-primary)':'var(--red)')+'">'+fmtPrice(r.modeledPrice)+'</td>';
+        row+='<td class="'+(r.cash<=0?'cell-red':'')+'">'+fmtB(Math.max(0,r.cash))+'</td>';
+        row+='<td style="font-size:10px">'+sL+'</td></tr>';
+        if(r.events)r.events.forEach(function(e){
+            row+='<tr class="event-row"><td colspan="'+colCount+'" style="text-align:left;font-size:11px;padding:6px 16px;color:'+(e.cls==='red'?'var(--red)':e.cls==='green'?'var(--green)':e.cls==='info'?'var(--blue)':'var(--yellow)')+'">'+e.icon+' '+e.text+'</td></tr>';
         });
-        
-        document.getElementById('modalClose').addEventListener('click', closeModal);
-        document.getElementById('modal').addEventListener('click', (e) => e.stopPropagation());
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
-        
-        // Initialize
-        async function init() {
-            try {
-                // Fetch live BTC price FIRST
-                const price = await fetchBtcPrice();
-                if (price) {
-                    const el = document.getElementById('headerBtcPrice');
-                    el.textContent = '$' + formatNumber(Math.round(price));
-                    el.classList.add('updating');
-                    setTimeout(() => el.classList.remove('updating'), 1000);
-                }
-                
-                allSnapshots = await fetchSheetData(SNAPSHOTS_GID);
-                
-                // Filter to only show 'live' status rows
-                const liveSnapshots = allSnapshots.filter(s => !s.status || s.status.toLowerCase() === 'live');
-                
-                const latest = getLatestSnapshots(liveSnapshots);
-                renderTable(latest);
-                
-                // Fetch live stock prices for table
-                document.querySelectorAll('.stock-price').forEach(async (el) => {
-                    const symbol = el.dataset.symbol;
-                    const price = await fetchStockPrice(symbol);
-                    if (price) {
-                        el.textContent = '$' + price.toFixed(2);
-                    } else {
-                        el.textContent = '-';
-                    }
-                });
-                
-            } catch (error) {
-                console.error('Failed to load data:', error);
-                document.getElementById('loadingState').innerHTML = `
-                    <p style="color: var(--red);">Failed to load data</p>
-                    <p style="font-size: 12px; margin-top: 8px; color: var(--text-muted);">${error.message}</p>
-                    <p style="font-size: 11px; margin-top: 16px; color: var(--text-muted);">Make sure the Google Sheet is published to web</p>
-                `;
-            }
-        }
-        
-        init();
-        
-        // Register Service Worker for PWA
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('SW registered'))
-                .catch(err => console.log('SW registration failed:', err));
-        }
-    </script>
+        return row;
+    }).join('');
+}
+
+function renderSensitivityMatrix(){
+    var mp=liveMstrPrice||DEFAULTS.mstr_price;
+    var html='<thead><tr><th>BTC \u2193 mNAV \u2192</th>';
+    MATRIX_MNAVS.forEach(function(m){html+='<th>'+m.toFixed(2)+'\u00d7</th>'});
+    html+='</tr></thead><tbody>';
+    MATRIX_BTC.forEach(function(bp){
+        html+='<tr><td class="row-label">'+(bp>=1000?'$'+(bp/1000)+'K':'$'+bp)+'</td>';
+        MATRIX_MNAVS.forEach(function(mn){
+            var price=quickCalc(bp,mn), pctD=mp>0?(price-mp)/mp:0, cls='';
+            if(price>=1000)cls='matrix-cell-gold';else if(pctD>.5)cls='matrix-cell-green';else if(pctD>.1)cls='matrix-cell-lightgreen';else if(pctD<-.5)cls='matrix-cell-red';else if(pctD<-.1)cls='matrix-cell-lightred';
+            var isBtc=Math.abs(bp-btcPrice)/btcPrice<.15,isMnav=Math.abs(mn-mnavMultiple)<.05;
+            if(isBtc&&isMnav)cls+=' matrix-cell-current';
+            html+='<td class="'+cls+'">'+(price<=0?'$0':fmtPrice(price))+'</td>';
+        });html+='</tr>';
+    });html+='</tbody>';
+    $('matrixTable').innerHTML=html;
+}
+
+function renderCustomize(inp){
+    var streUsd=inp.streFaceEur*inp.eurusd;
+    var instruments=[
+        {name:'STRK',face:inp.strkFace,rate:'8.00%',cum:'Cumulative',annual:inp.strkFace*0.08},
+        {name:'STRF',face:inp.strfFace,rate:'10.00%',cum:'Cumulative',annual:inp.strfFace*0.10},
+        {name:'STRD',face:inp.strdFace,rate:'10.00%',cum:'Non-cum',annual:inp.strdFace*0.10},
+        {name:'STRC',face:inp.strcFace,rate:'11.25%',cum:'Non-cum',annual:inp.strcFace*0.1125},
+        {name:'STRE',face:streUsd,rate:'10.00%',cum:'Cumulative',annual:streUsd*0.10},
+    ];
+    var prefUsd=instruments.reduce(function(s,i){return s+i.face},0);
+    var totalAnnual=instruments.reduce(function(s,i){return s+i.annual},0);
+    var skippable=instruments.filter(function(i){return i.cum==='Non-cum'}).reduce(function(s,i){return s+i.annual},0);
+    var totalConvDebt=CONVERTS.reduce(function(s,c){return s+c.face},0);
+    $('customizeBody').innerHTML=
+        '<div style="margin-bottom:16px"><div style="font-size:11px;color:var(--text-muted);letter-spacing:1px;margin-bottom:8px;font-weight:600">PREFERRED STOCK STACK</div>'+
+        '<table class="pref-stack"><thead><tr><th>INSTRUMENT</th><th>FACE VALUE</th><th>RATE</th><th>TYPE</th><th>ANNUAL</th></tr></thead><tbody>'+
+        instruments.map(function(i){return'<tr><td>'+i.name+'</td><td>'+fmtB(i.face)+'</td><td>'+i.rate+'</td><td><span class="badge-cum">'+i.cum+'</span></td><td>'+fmtB(i.annual)+'</td></tr>'}).join('')+
+        '<tr style="border-top:2px solid var(--border-subtle)"><td style="color:var(--orange-primary)">TOTAL</td><td style="color:var(--orange-primary);font-weight:700">'+fmtB(prefUsd)+'</td><td></td><td></td><td style="color:var(--orange-primary);font-weight:700">'+fmtB(totalAnnual)+'</td></tr></tbody></table></div>'+
+        '<div style="margin-bottom:16px"><div style="font-size:11px;color:var(--text-muted);letter-spacing:1px;margin-bottom:8px;font-weight:600">CONVERTIBLE BONDS</div>'+
+        '<table class="pref-stack"><thead><tr><th>SERIES</th><th>FACE VALUE</th><th>MATURITY</th><th>CONV PRICE</th><th>CONV SHARES</th></tr></thead><tbody>'+
+        CONVERTS.map(function(c){return'<tr><td>'+c.id+'</td><td>'+fmtB(c.face)+'</td><td>'+c.maturity+'</td><td>'+fmtPrice(c.convPrice)+'</td><td>'+fmt(c.convShares)+'</td></tr>'}).join('')+
+        '<tr style="border-top:2px solid var(--border-subtle)"><td style="color:var(--orange-primary)">TOTAL</td><td style="color:var(--orange-primary);font-weight:700">'+fmtB(totalConvDebt)+'</td><td></td><td></td><td style="color:var(--orange-primary);font-weight:700">'+fmt(CONVERTS.reduce(function(s,c){return s+c.convShares},0))+'</td></tr></tbody></table></div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">'+
+        '<div class="metric-card"><div class="metric-label">ANNUAL DIV</div><div class="metric-value">'+fmtB(totalAnnual)+'</div><div class="metric-sub">/yr all cash</div></div>'+
+        '<div class="metric-card"><div class="metric-label">SKIPPABLE</div><div class="metric-value">'+fmtB(skippable)+'</div><div class="metric-sub">STRC + STRD non-cum</div></div>'+
+        '<div class="metric-card"><div class="metric-label">CONVERT DEBT</div><div class="metric-value">'+fmtB(totalConvDebt)+'</div><div class="metric-sub">zero-coupon</div></div></div>'+
+        '<div style="font-size:11px;color:var(--text-muted);line-height:1.6">'+
+        '<strong style="color:var(--text-secondary)">Distress cascade:</strong> All dividends paid in cash. If reserves depleted: skip STRD (non-cum) \u2192 skip STRC (non-cum) \u2192 sell BTC for cumulative (STRF, STRE, STRK).'+
+        '<br><br><strong style="color:var(--text-secondary)">Convert maturities:</strong> At maturity, if stock > conversion price \u2192 convert to shares. If stock < conversion price \u2192 redeem at par (cash drain / BTC liquidation).'+
+        '<br><br><strong style="color:var(--text-secondary)">Key defense:</strong> No convertible debt has early call provisions. Creditors cannot force liquidation.</div>';
+}
+
+function renderAssumptions(inp){
+    var sType=getActiveType(), t='';
+    if(sType==='saylor')t='<strong>Saylor Model:</strong> BTC follows declining CAGR (35%\u219215%) per 21 Capital framework. ~$80B deployed over 10 years (50/50 equity/preferred initially, shifting 30/70). Preferred at blended ~10.5%. ATM at mNAV minus 0.1\u00d7. Software income '+fmtB(inp.softwareIncome)+'/yr flat. Converts resolve at maturity by stock price vs conversion price. STRK converts when price exceeds $1,000.';
+    else if(sType==='siege')t='<strong>Siege:</strong> BTC $50,000 for entire horizon. No new capital raised. mNAV 0.7\u00d7. All converts mature as cash redemptions. Dividends paid until cash depleted, then non-cum skipped, then BTC sold.';
+    else if(sType==='terminal')t='<strong>Terminal:</strong> BTC reaches $1M over 10 years (accelerating curve). All converts resolve as equity conversions. STRK converts early. Light capital plan years 1-3. mNAV rises to 3.0\u00d7.';
+    else t='<strong>Assumptions:</strong> Capital structure frozen at snapshot ('+inp.snapshotDate+'). BTC price static across projection. All preferred divs paid cash. Distress cascade: skip non-cum then sell BTC. Software income ~'+fmtB(inp.softwareIncome)+'/yr.';
+    t+='<br><br><strong>Data:</strong> Holdings, shares, capital structure from Google Sheet (post-8K updates). Live BTC from CoinGecko. Live MSTR from Finnhub. '+(sheetData&&sheetData.strk_face_usd?'Preferred from live sheet.':'Using pre-Q4 estimates.')+' Convert face values approximate pending 10-K.';
+    $('assumptions').innerHTML=t;
+}
+
+// ═══════════════════════════════════════════════════
+// UI BUILDERS
+// ═══════════════════════════════════════════════════
+function buildScenarioBar(){
+    var snaps=SCENARIOS.filter(function(s){return s.group==='snapshot'});
+    var projs=SCENARIOS.filter(function(s){return s.group==='projection'});
+    function renderCard(s){
+        var isP=s.group==='projection', hLabel=s.horizon===0?'NOW':s.horizon+'Y';
+        var bClass=isP?'future-badge':'now-badge';
+        var cClass='scenario-card'+(isP?' projection':'')+(s.id===activeScenario?' active':'');
+        var pDisp;
+        if(s.type==='saylor')pDisp='CAGR';
+        else if(s.btc)pDisp=s.btc>=1e6?'$'+(s.btc/1e6)+'M':s.btc>=1000?'$'+(s.btc/1000)+'K':'$'+s.btc;
+        else pDisp=fmtPrice(btcPrice);
+        var mDisp=s.type==='saylor'?'1.0-1.8\u00d7':((s.mnav||1).toFixed(1)+'\u00d7 mNAV');
+        return'<div class="'+cClass+'" data-scenario="'+s.id+'"><span class="horizon-badge '+bClass+'">'+hLabel+'</span><div class="scenario-icon">'+s.icon+'</div><div class="scenario-name">'+s.name+'</div><div class="scenario-price">'+pDisp+'</div><div class="scenario-mnav">'+mDisp+'</div></div>';
+    }
+    $('snapshotBar').innerHTML=snaps.map(renderCard).join('');
+    $('projectionBar').innerHTML=projs.map(renderCard).join('');
+    document.querySelectorAll('.scenario-card').forEach(function(card){
+        card.addEventListener('click',function(){
+            var id=this.dataset.scenario,sc=SCENARIOS.find(function(s){return s.id===id});if(!sc)return;
+            activeScenario=id;
+            if(sc.type==='saylor'){btcPrice=liveBtcPrice||DEFAULTS.btc_price;mnavMultiple=1.0}
+            else{btcPrice=sc.btc||(liveBtcPrice||DEFAULTS.btc_price);mnavMultiple=sc.mnav||1.0}
+            horizonYears=sc.horizon;
+            syncSliders();buildScenarioBar();updateHorizonBar();updateMnavPresets();render();
+        });
+    });
+}
+
+function updateSliderLocking(){
+    var locked=isSlidersLocked();
+    $('btcSlider').disabled=locked;$('mnavSlider').disabled=locked;
+    $('btcLockedMsg').style.display=locked?'block':'none';
+    $('mnavLockedMsg').style.display=locked?'block':'none';
+}
+
+function buildHorizonBar(){
+    $('horizonBar').innerHTML=HORIZON_OPTIONS.map(function(h){return'<button class="toggle-btn '+(h.years===horizonYears?'active':'')+'" data-years="'+h.years+'">'+h.label+'</button>'}).join('');
+    document.querySelectorAll('#horizonBar .toggle-btn').forEach(function(btn){
+        btn.addEventListener('click',function(){horizonYears=parseInt(this.dataset.years);activeScenario='';updateHorizonBar();buildScenarioBar();render()});
+    });
+}
+function updateHorizonBar(){document.querySelectorAll('#horizonBar .toggle-btn').forEach(function(btn){btn.classList.toggle('active',parseInt(btn.dataset.years)===horizonYears)});$('horizonDisplay').textContent=horizonYears===0?'Now':horizonYears+'Y'}
+function buildMnavPresets(){
+    $('mnavPresets').innerHTML=MNAV_PRESETS.map(function(m){return'<button class="mnav-btn '+(Math.abs(m-mnavMultiple)<.01?'active':'')+'" data-mnav="'+m+'">'+(m%1===0?m.toFixed(0):m.toFixed(2))+'\u00d7</button>'}).join('');
+    document.querySelectorAll('.mnav-btn').forEach(function(btn){
+        btn.addEventListener('click',function(){if(isSlidersLocked())return;mnavMultiple=parseFloat(this.dataset.mnav);$('mnavSlider').value=mnavMultiple*100;$('mnavDisplay').textContent=mnavMultiple.toFixed(2)+'\u00d7';activeScenario='';updateMnavPresets();buildScenarioBar();render()});
+    });
+}
+function updateMnavPresets(){document.querySelectorAll('.mnav-btn').forEach(function(btn){btn.classList.toggle('active',Math.abs(parseFloat(btn.dataset.mnav)-mnavMultiple)<.01)})}
+function syncSliders(){$('btcSlider').value=btcPrice;$('btcPriceDisplay').textContent=fmtPrice(btcPrice);$('mnavSlider').value=mnavMultiple*100;$('mnavDisplay').textContent=mnavMultiple.toFixed(2)+'\u00d7';updateHorizonBar();updateMnavPresets()}
+function updateSliderFills(){
+    var bs=$('btcSlider'),bp=((bs.value-20000)/(1e6-20000))*100;bs.style.background=bs.disabled?'#222':'linear-gradient(90deg,var(--orange-primary) '+bp+'%,#333 '+bp+'%)';
+    var ms=$('mnavSlider'),mp=((ms.value-30)/(400-30))*100;ms.style.background=ms.disabled?'#222':'linear-gradient(90deg,var(--orange-primary) '+mp+'%,#333 '+mp+'%)';
+}
+
+$('btcSlider').addEventListener('input',function(e){if(isSlidersLocked())return;btcPrice=parseInt(e.target.value);$('btcPriceDisplay').textContent=fmtPrice(btcPrice);activeScenario='';buildScenarioBar();render()});
+$('mnavSlider').addEventListener('input',function(e){if(isSlidersLocked())return;mnavMultiple=parseInt(e.target.value)/100;$('mnavDisplay').textContent=mnavMultiple.toFixed(2)+'\u00d7';activeScenario='';updateMnavPresets();buildScenarioBar();render()});
+
+document.addEventListener('keydown',function(e){
+    if(e.target.tagName==='INPUT')return;
+    if(e.key>='1'&&e.key<='6'){var idx=parseInt(e.key)-1;if(SCENARIOS[idx]){var sc=SCENARIOS[idx];activeScenario=sc.id;
+        if(sc.type==='saylor'){btcPrice=liveBtcPrice||DEFAULTS.btc_price;mnavMultiple=1.0}else{btcPrice=sc.btc||(liveBtcPrice||DEFAULTS.btc_price);mnavMultiple=sc.mnav||1.0}
+        horizonYears=sc.horizon;syncSliders();buildScenarioBar();updateHorizonBar();updateMnavPresets();render()}}
+});
+
+loadData();
+</script>
 </body>
 </html>
