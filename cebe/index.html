@@ -1,1 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CEBE — Common Equity Bitcoin Exposure | cebetracker.io</title>
+<meta name="description" content="BPS tells you how much BTC the company holds per share. CEBE tells you how much actually belongs to common shareholders.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Mono:wght@400;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #09090b;
+  --card: #141416;
+  --card-hover: #1a1a1e;
+  --border: rgba(255,255,255,0.06);
+  --border-bright: rgba(255,255,255,0.12);
+  --text: #fafafa;
+  --muted: #a1a1aa;
+  --dim: #52525b;
+  --orange: #f97316;
+  --orange-dim: rgba(249,115,22,0.15);
+  --red: #ef4444;
+  --red-dim: rgba(239,68,68,0.12);
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,0.12);
+  --blue: #3b82f6;
+  --blue-dim: rgba(59,130,246,0.12);
+  --purple: #a78bfa;
+}
 
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mono { font-family: 'IBM Plex Mono', monospace; }
+.serif { font-family: 'DM Serif Display', serif; }
+
+/* Site Header */
+.site-header {
+  text-align: center;
+  padding: 48px 20px 32px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.site-header::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 500px;
+  height: 300px;
+  background: radial-gradient(ellipse at center top, rgba(249,115,22,0.18) 0%, rgba(249,115,22,0.06) 35%, transparent 70%);
+  pointer-events: none;
+}
+.site-logo a {
+  text-decoration: none;
+  display: block;
+  position: relative;
+}
+.logo-text {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: clamp(40px, 8vw, 72px);
+  font-weight: 600;
+  color: var(--orange);
+  letter-spacing: 12px;
+  display: block;
+  line-height: 1.1;
+  text-shadow: 0 0 40px rgba(249,115,22,0.4), 0 0 80px rgba(249,115,22,0.15), 0 4px 20px rgba(249,115,22,0.2);
+  position: relative;
+}
+.logo-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  color: var(--dim);
+  letter-spacing: 8px;
+  display: block;
+  margin-top: 4px;
+}
+.site-subtitle {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: var(--muted);
+  margin-top: 16px;
+}
+.nav-pills {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.nav-pill {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 8px 20px;
+  border: 1px solid var(--orange);
+  border-radius: 100px;
+  color: var(--orange);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.nav-pill:hover {
+  background: var(--orange);
+  color: var(--bg);
+}
+.nav-pill.btc-pill {
+  border-color: var(--border-bright);
+  color: var(--muted);
+  cursor: default;
+}
+.nav-pill.btc-pill:hover {
+  background: transparent;
+  color: var(--muted);
+}
+
+/* Layout */
+.container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+section { padding: 80px 0; border-bottom: 1px solid var(--border); }
+section:last-child { border-bottom: none; }
+
+/* Hero */
+.hero {
+  padding-top: 64px;
+  padding-bottom: 80px;
+  text-align: center;
+}
+.hero-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border: 1px solid var(--orange);
+  border-radius: 100px;
+  font-size: 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--orange);
+  margin-bottom: 32px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.hero h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(36px, 6vw, 64px);
+  font-weight: 400;
+  line-height: 1.1;
+  margin-bottom: 24px;
+  letter-spacing: -1px;
+}
+.hero h1 .highlight {
+  background: linear-gradient(135deg, var(--orange), #fb923c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero-sub {
+  font-size: 18px;
+  color: var(--muted);
+  max-width: 600px;
+  margin: 0 auto 40px;
+  line-height: 1.7;
+}
+.hero-stat-row {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+.hero-stat {
+  text-align: center;
+}
+.hero-stat .value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text);
+}
+.hero-stat .value.orange { color: var(--orange); }
+.hero-stat .value.red { color: var(--red); }
+.hero-stat .label {
+  font-size: 12px;
+  color: var(--dim);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Section Headers */
+.section-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--orange);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.section-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 400;
+  line-height: 1.15;
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
+}
+.section-desc {
+  font-size: 16px;
+  color: var(--muted);
+  max-width: 640px;
+  line-height: 1.7;
+  margin-bottom: 40px;
+}
+
+/* Cards */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 32px;
+  margin-bottom: 16px;
+  transition: border-color 0.2s;
+}
+.card:hover { border-color: var(--border-bright); }
+
+/* Comparison Grid */
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.compare-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 32px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.compare-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.compare-card.bps::before { background: var(--red); }
+.compare-card.cebe::before { background: var(--green); }
+.compare-card .metric-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 600;
+  margin: 16px 0 8px;
+}
+.compare-card.bps .metric-value { color: var(--red); }
+.compare-card.cebe .metric-value { color: var(--green); }
+.compare-card .metric-label {
+  font-size: 14px;
+  color: var(--muted);
+}
+.compare-card .metric-sub {
+  font-size: 13px;
+  color: var(--dim);
+  margin-top: 8px;
+}
+
+/* Phantom quarters table */
+.phantom-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.phantom-table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--dim);
+  border-bottom: 1px solid var(--border);
+  font-family: 'IBM Plex Mono', monospace;
+}
+.phantom-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+}
+.phantom-table tr:last-child td { border-bottom: none; }
+.phantom-table .up { color: var(--green); }
+.phantom-table .down { color: var(--red); }
+.phantom-table .lie { color: var(--red); font-weight: 600; }
+.phantom-table .truth { color: var(--green); font-weight: 600; }
+.phantom-table .q-label { color: var(--text); font-weight: 500; }
+.phantom-table .event { color: var(--muted); font-family: 'DM Sans', sans-serif; font-style: italic; }
+
+/* Waterfall */
+.waterfall-container { margin: 32px 0; }
+.waterfall-bar-group { margin-bottom: 12px; }
+.waterfall-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+.waterfall-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+.waterfall-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--muted);
+}
+.waterfall-track {
+  height: 40px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+.waterfall-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.5s ease;
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+  min-width: 2px;
+}
+.waterfall-fill.converts { background: linear-gradient(90deg, #dc2626, #ef4444); }
+.waterfall-fill.preferred { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.waterfall-fill.common { background: linear-gradient(90deg, #16a34a, #22c55e); }
+
+/* Slider */
+.slider-container { margin: 32px 0; }
+.slider-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.slider-label span {
+  font-size: 12px;
+  color: var(--dim);
+  font-family: 'IBM Plex Mono', monospace;
+}
+.price-display {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--orange);
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  background: var(--border-bright);
+  border-radius: 3px;
+  outline: none;
+  margin: 16px 0;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--orange);
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(249,115,22,0.4);
+}
+
+/* Merton Chart */
+.merton-chart {
+  position: relative;
+  height: 300px;
+  margin: 32px 0;
+}
+.merton-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* Zero Line Chart */
+.zero-chart {
+  position: relative;
+  margin: 32px 0;
+}
+
+/* Stats inline */
+.stat-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 24px 0;
+}
+.stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+}
+.stat-pill .stat-key { color: var(--muted); }
+.stat-pill .stat-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+}
+
+/* Stress Test Results */
+.stress-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin: 24px 0;
+}
+.stress-metric {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+}
+.stress-metric .sm-label {
+  font-size: 11px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.stress-metric .sm-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* Callout */
+.callout {
+  padding: 20px 24px;
+  border-radius: 10px;
+  margin: 24px 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.callout.orange { background: var(--orange-dim); border-left: 3px solid var(--orange); }
+.callout.red { background: var(--red-dim); border-left: 3px solid var(--red); }
+.callout.green { background: var(--green-dim); border-left: 3px solid var(--green); }
+.callout.blue { background: var(--blue-dim); border-left: 3px solid var(--blue); }
+
+/* Footer */
+.footer {
+  padding: 48px 0;
+  text-align: center;
+  border-top: 1px solid var(--border);
+}
+
+/* Watermark */
+.watermark {
+  position: absolute;
+  bottom: 12px;
+  right: 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: rgba(249,115,22,0.3);
+  pointer-events: none;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .compare-grid { grid-template-columns: 1fr; }
+  .hero-stat-row { gap: 24px; }
+  section { padding: 48px 0; }
+  .card { padding: 20px; }
+  .stress-results { grid-template-columns: 1fr 1fr; }
+  .phantom-table { font-size: 12px; }
+  .phantom-table th, .phantom-table td { padding: 8px; }
+  .nav-pills { gap: 8px; }
+  .nav-pill { padding: 6px 14px; font-size: 11px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Site Header -->
+<header class="site-header">
+  <div class="site-logo">
+    <a href="/">
+      <span class="logo-text">C &nbsp;E &nbsp;B &nbsp;E</span>
+      <span class="logo-sub">t r a c k e r</span>
+    </a>
+  </div>
+  <div class="site-subtitle">Common Equity Bitcoin Exposure</div>
+  <div class="nav-pills">
+    <a href="/" class="nav-pill">TRACKER →</a>
+    <a href="/endgame" class="nav-pill">ENDGAME →</a>
+    <a href="/modeler" class="nav-pill">MODELER →</a>
+    <span class="nav-pill btc-pill">BTC <span style="color:var(--text); margin-left: 4px;">$69,195</span></span>
+  </div>
+</header>
+
+<!-- Hero -->
+<header class="hero container">
+  <div class="hero-badge">The Metric That Finishes The Math</div>
+  <h1>BPS tells you what the company holds.<br><span class="highlight">CEBE tells you what you own.</span></h1>
+  <p class="hero-sub">
+    BPS was the right metric when Strategy had 38,250 BTC and zero debt. That was 2020. Today there's $16.6 billion in senior claims. BPS pretends they don't exist. CEBE doesn't.
+  </p>
+  <div class="hero-stat-row">
+    <div class="hero-stat">
+      <div class="value mono">214,632</div>
+      <div class="label">BPS (sats/share)</div>
+    </div>
+    <div class="hero-stat">
+      <div class="value mono orange">138,959</div>
+      <div class="label">CEBE (sats/share)</div>
+    </div>
+    <div class="hero-stat">
+      <div class="value mono red">35.3%</div>
+      <div class="label">Drag</div>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+<!-- ============================================ -->
+<!-- SECTION 1: THE COIN FLIP -->
+<!-- ============================================ -->
+<section id="accuracy">
+  <div class="section-num">01</div>
+  <h2 class="section-title">BPS Yield is a coin flip</h2>
+  <p class="section-desc">
+    BPS Yield, Strategy's official KPI, gets the direction of your investment right 50% of the time. It told shareholders "you gained value" in 9 quarters where they actually lost money. CEBE Yield isn't perfect. But it's honest more often.
+  </p>
+
+  <div class="compare-grid">
+    <div class="compare-card bps">
+      <div class="metric-label">BPS Yield Accuracy</div>
+      <div class="metric-value">50%</div>
+      <div class="metric-sub">11 of 22 quarters correct</div>
+    </div>
+    <div class="compare-card cebe">
+      <div class="metric-label">CEBE Yield Accuracy</div>
+      <div class="metric-value">64%</div>
+      <div class="metric-sub">14 of 22 quarters correct</div>
+    </div>
+  </div>
+
+  <div class="callout orange">
+    <strong>Why the gap?</strong> BPS measures all Bitcoin per share but ignores $16.6B in claims that sit ahead of you. When BTC falls and those claims grow in BTC terms, BPS can still show growth while your actual equity shrinks. CEBE accounts for both sides in the same unit.
+  </div>
+
+  <div class="card" style="position:relative; overflow:hidden;">
+    <h3 style="font-size: 16px; margin-bottom: 20px; color: var(--muted);">
+      Quarters where BPS said <span style="color:var(--green)">↑</span> but shareholders lost money <span style="color:var(--red)">↓</span>
+    </h3>
+    <table class="phantom-table">
+      <thead>
+        <tr>
+          <th>Quarter</th>
+          <th>BPS Yield</th>
+          <th>MSTR Return</th>
+          <th>CEBE Yield</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="q-label">Q2 2021</td><td class="up">+13.6%</td><td class="down">−2.1%</td><td class="down">−33.1%</td></tr>
+        <tr><td class="q-label">Q3 2021</td><td class="up">+7.8%</td><td class="down">−13.0%</td><td class="up">+49.8%</td></tr>
+        <tr><td class="q-label">Q4 2021</td><td class="up">+0.1%</td><td class="down">−5.9%</td><td class="up">+10.5%</td></tr>
+        <tr><td class="q-label">Q1 2022</td><td class="up">+3.5%</td><td class="down">−10.7%</td><td class="up">+4.9%</td></tr>
+        <tr><td class="q-label">Q4 2022</td><td class="up">+1.1%</td><td class="down">−33.3%</td><td class="down">−100%</td></tr>
+        <tr><td class="q-label">Q2 2024</td><td class="up">+0.1%</td><td class="down">−19.2%</td><td class="up">+4.2%</td></tr>
+        <tr><td class="q-label">Q1 2025</td><td class="up">+9.0%</td><td class="down">−0.5%</td><td class="up">+3.8%</td></tr>
+        <tr><td class="q-label">Q3 2025</td><td class="up">+0.8%</td><td class="down">−20.3%</td><td class="down">−5.5%</td></tr>
+        <tr><td class="q-label">Q4 2025</td><td class="up">+2.7%</td><td class="down">−52.8%</td><td class="down">−1.9%</td></tr>
+      </tbody>
+    </table>
+    <div class="watermark">cebetracker.io</div>
+  </div>
+
+  <div class="callout red">
+    <strong>Q4 2022.</strong> BPS Yield showed +1.1%. Shareholders lost 33.3%. CEBE showed −100%. Common equity was zero. BPS said "you grew." CEBE said "you own nothing." The market agreed with CEBE.
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- SECTION 2: THE WATERFALL -->
+<!-- ============================================ -->
+<section id="waterfall">
+  <div class="section-num">02</div>
+  <h2 class="section-title">Who gets paid first?</h2>
+  <p class="section-desc">
+    Strategy's 713,502 BTC secure $8.2B in convertible debt and $8.4B in preferred stock before common shareholders see a single sat. Drag the slider to see how much of the treasury belongs to you at any BTC price.
+  </p>
+
+  <div class="card" id="waterfall-card" style="position:relative;">
+    <div class="price-display" id="wf-price">$66,000</div>
+    
+    <input type="range" id="wf-slider" min="10000" max="250000" value="66000" step="1000">
+    <div class="slider-label">
+      <span>$10,000</span>
+      <span>$250,000</span>
+    </div>
+
+    <div class="waterfall-container" id="wf-bars"></div>
+    
+    <div class="stat-row" id="wf-stats"></div>
+    <div class="watermark">cebetracker.io</div>
+  </div>
+
+  <div class="callout blue">
+    <strong>The zero line is $23,270.</strong> Below that price, converts and preferred consume the entire treasury. Common equity = $0. Above it, every dollar of BTC appreciation flows disproportionately to common. That's the embedded leverage CEBE makes visible.
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- SECTION 3: ZERO LINE -->
+<!-- ============================================ -->
+<section id="zeroline">
+  <div class="section-num">03</div>
+  <h2 class="section-title">The price of ruin keeps climbing</h2>
+  <p class="section-desc">
+    The "zero line" is the BTC price where senior claims consume the entire treasury and common equity hits $0. This doesn't mean insolvency. Strategy's debt is no-call and can't force liquidation. But it's the price where CEBE = 0 and your equity is pure option premium.
+  </p>
+
+  <div class="card" style="position:relative;">
+    <canvas id="zero-canvas" style="width:100%; height: 340px;"></canvas>
+    <div class="watermark">cebetracker.io</div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-pill">
+      <span class="stat-key">2020 Zero Line</span>
+      <span class="stat-val" style="color:var(--green)">$9,224</span>
+    </div>
+    <div class="stat-pill">
+      <span class="stat-key">Current Zero Line</span>
+      <span class="stat-val" style="color:var(--red)">$23,270</span>
+    </div>
+    <div class="stat-pill">
+      <span class="stat-key">Increase</span>
+      <span class="stat-val" style="color:var(--orange)">2.5×</span>
+    </div>
+    <div class="stat-pill">
+      <span class="stat-key">Current Cushion</span>
+      <span class="stat-val" style="color:var(--green)">64.7%</span>
+    </div>
+  </div>
+
+  <div class="callout orange">
+    <strong>Converts heal. Preferreds don't.</strong> If MSTR recovers above $143.25, the $1.7B 2027 notes convert to equity and the zero line drops to $20,887. But the $8.4B in preferred stock never converts. Every new preferred issuance permanently raises the floor. BPS can't show you this. CEBE does.
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- SECTION 4: MERTON / TIME VALUE -->
+<!-- ============================================ -->
+<section id="merton">
+  <div class="section-num">04</div>
+  <h2 class="section-title">Your equity is a call option</h2>
+  <p class="section-desc">
+    Robert Merton proved in 1974 that equity in a leveraged firm is mathematically identical to a call option on firm assets with a strike price equal to total liabilities. CEBE is the intrinsic value of that option. The premium the market pays above CEBE, the "time value," tells you how much confidence or fear is priced in.
+  </p>
+
+  <div class="card" style="position:relative;">
+    <canvas id="merton-canvas" style="width:100%; height: 320px;"></canvas>
+    <div class="watermark">cebetracker.io</div>
+  </div>
+
+  <div class="compare-grid">
+    <div class="compare-card" style="border-top: 3px solid var(--red);">
+      <div class="metric-label" style="color:var(--muted);">Q4 2025 Time Value</div>
+      <div class="metric-value" style="color:var(--red); font-size: clamp(28px,4vw,48px);">7.9%</div>
+      <div class="metric-sub">Maximum pessimism. Market priced<br>MSTR at near-exactly its CEBE value.</div>
+    </div>
+    <div class="compare-card" style="border-top: 3px solid var(--green);">
+      <div class="metric-label" style="color:var(--muted);">22-Quarter Average</div>
+      <div class="metric-value" style="color:var(--green); font-size: clamp(28px,4vw,48px);">55%</div>
+      <div class="metric-sub">Normal time value premium<br>for the option on 713,502 BTC.</div>
+    </div>
+  </div>
+
+  <div class="callout green">
+    <strong>7.9% time value means the market priced zero premium</strong> for Strategy's ability to accumulate BTC, its no-call debt structure, or its infinite duration. Every prior time value collapse was followed by a recovery.
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- SECTION 5: PHANTOM DILUTION -->
+<!-- ============================================ -->
+<section id="dilution">
+  <div class="section-num">05</div>
+  <h2 class="section-title">The purchases bears call "dilutive"<br>aren't always dilutive</h2>
+  <p class="section-desc">
+    When Strategy issues shares to buy BTC, BPS and CEBE set different bars for accretion. BPS demands new shares bring in more sats than existing BPS. CEBE only requires they exceed existing CEBE, a lower bar by exactly the phantom dollar ($49.94/share). The gap creates a <strong>split zone</strong> where purchases are BPS-dilutive but CEBE-accretive.
+  </p>
+
+  <div class="card" style="position:relative;">
+    <h3 style="font-size: 14px; color: var(--muted); margin-bottom: 24px; font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: 1px;">
+      The Split Zone
+    </h3>
+    
+    <div style="margin-bottom: 24px;">
+      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 8px;">
+        <span style="font-size:12px; color:var(--dim); font-family:'IBM Plex Mono',monospace;">BTC PRICE</span>
+        <span class="mono" style="font-size:24px; color:var(--orange);" id="sz-btc-price">$66,000</span>
+      </div>
+      <input type="range" id="sz-slider" min="30000" max="200000" value="66000" step="1000">
+      <div class="slider-label"><span>$30,000</span><span>$200,000</span></div>
+    </div>
+
+    <!-- Zone Visualization -->
+    <div style="margin: 32px 0;">
+      <div style="position:relative; height: 80px; background: rgba(255,255,255,0.02); border-radius: 8px; overflow: hidden;" id="sz-zone-track">
+        <div id="sz-red" style="position:absolute; left:0; top:0; height:100%; background: rgba(239,68,68,0.15); border-right: 2px solid var(--red);"></div>
+        <div id="sz-split" style="position:absolute; top:0; height:100%; background: rgba(249,115,22,0.12); border-right: 2px solid var(--green);"></div>
+        <div id="sz-green" style="position:absolute; top:0; right:0; height:100%; background: rgba(34,197,94,0.08);"></div>
+        
+        <div id="sz-mstr-marker" style="position:absolute; top:-4px; bottom:-4px; width: 3px; background: var(--text); border-radius: 2px; z-index:10;">
+          <div style="position:absolute; top:-22px; left:50%; transform:translateX(-50%); white-space:nowrap; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text);" id="sz-mstr-label">MSTR $132</div>
+        </div>
+        
+        <div style="position:absolute; top:50%; transform:translateY(-50%); display:flex; width:100%; justify-content:space-between; padding: 0 12px; pointer-events:none;">
+          <span id="sz-label-red" style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:var(--red); font-weight:600;">BOTH DILUTIVE</span>
+          <span id="sz-label-split" style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:var(--orange); font-weight:600; text-align:center;">SPLIT ZONE</span>
+          <span id="sz-label-green" style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:var(--green); font-weight:600; text-align:right;">BOTH ACCRETIVE</span>
+        </div>
+      </div>
+
+      <div style="position:relative; height:36px; margin-top: 4px;">
+        <div id="sz-cebe-thresh" style="position:absolute; text-align:center; transform:translateX(-50%);">
+          <div style="width:1px; height:8px; background:var(--red); margin: 0 auto;"></div>
+          <span style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:var(--muted);" id="sz-cebe-val">CEBE $92</span>
+        </div>
+        <div id="sz-bps-thresh" style="position:absolute; text-align:center; transform:translateX(-50%);">
+          <div style="width:1px; height:8px; background:var(--green); margin: 0 auto;"></div>
+          <span style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:var(--muted);" id="sz-bps-val">BPS $142</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="sz-verdict" style="text-align:center; padding: 16px; border-radius: 8px; margin: 24px 0;"></div>
+
+    <div class="stat-row" id="sz-stats"></div>
+    
+    <div class="watermark">cebetracker.io</div>
+  </div>
+
+  <div class="card" style="position:relative; overflow-x:auto;">
+    <h3 style="font-size: 14px; color: var(--muted); margin-bottom: 20px; font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: 1px;">
+      Recent Purchases: BPS vs CEBE Verdict
+    </h3>
+    <table class="phantom-table">
+      <thead>
+        <tr>
+          <th>Week</th>
+          <th>BTC</th>
+          <th>Sats/New Share</th>
+          <th>BPS Says</th>
+          <th>CEBE Says</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="q-label">Dec 8-14 '25</td>
+          <td>10,645</td>
+          <td>197,130</td>
+          <td class="lie">✗ Dilutive</td>
+          <td class="truth">✓ Accretive</td>
+        </tr>
+        <tr>
+          <td class="q-label">Jan 5-11 '26</td>
+          <td>13,627</td>
+          <td>189,264</td>
+          <td class="lie">✗ Dilutive</td>
+          <td class="truth">✓ Accretive</td>
+        </tr>
+        <tr>
+          <td class="q-label">Jan 12-19 '26</td>
+          <td>22,305</td>
+          <td>214,471</td>
+          <td class="lie">✗ Dilutive</td>
+          <td class="truth">✓ Accretive</td>
+        </tr>
+        <tr>
+          <td class="q-label">Jan 20-25 '26</td>
+          <td>2,932</td>
+          <td>186,752</td>
+          <td class="lie">✗ Dilutive</td>
+          <td class="truth">✓ Accretive</td>
+        </tr>
+        <tr>
+          <td class="q-label">Jan 27-Feb 1 '26</td>
+          <td>855</td>
+          <td>150,000</td>
+          <td class="lie">✗ Dilutive</td>
+          <td class="down">✗ Dilutive</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top: 16px; font-size: 13px; color: var(--muted);">
+      <span style="color:var(--orange); font-family:'IBM Plex Mono',monospace; font-weight:600;">4 of 5</span> recent purchases that BPS called "dilutive" were actually CEBE-accretive. Wrong benchmark.
+    </div>
+    <div class="watermark">cebetracker.io</div>
+  </div>
+
+  <div class="callout orange">
+    <strong>Phantom dilution is the mirror image of phantom growth.</strong> BPS misreads the upside (9 quarters where it said "up" while shareholders lost money) and misreads the downside (4 purchases it called "dilutive" that actually grew common equity). Same root cause: ignoring senior claims.
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- SECTION 6: MODEL IT YOURSELF -->
+<!-- ============================================ -->
+<section id="model">
+  <div class="section-num">06</div>
+  <h2 class="section-title">Know what you own</h2>
+  <p class="section-desc">
+    Drag the slider. Watch the numbers. Every metric updates in real time.
+  </p>
+
+  <div class="card" id="stress-card" style="position:relative;">
+    <div class="price-display" id="st-price">$66,000</div>
+    
+    <input type="range" id="st-slider" min="10000" max="500000" value="66000" step="1000">
+    <div class="slider-label">
+      <span>$10,000</span>
+      <span>$500,000</span>
+    </div>
+
+    <div class="stress-results" id="st-results"></div>
+
+    <div style="margin-top: 24px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
+        <span style="font-size: 12px; color: var(--dim); font-family: 'IBM Plex Mono', monospace;">TREASURY ALLOCATION</span>
+        <span style="font-size: 12px; font-family: 'IBM Plex Mono', monospace;" id="st-common-pct"></span>
+      </div>
+      <div class="waterfall-track">
+        <div style="display:flex; height:100%; width: 100%;">
+          <div id="st-bar-conv" class="waterfall-fill converts" style="width:0%"></div>
+          <div id="st-bar-pref" class="waterfall-fill preferred" style="width:0%"></div>
+          <div id="st-bar-comm" class="waterfall-fill common" style="width:0%"></div>
+        </div>
+      </div>
+      <div style="display:flex; gap:16px; margin-top: 8px;">
+        <span style="font-size:11px; color:var(--red);">■ Converts</span>
+        <span style="font-size:11px; color:#fbbf24;">■ Preferred</span>
+        <span style="font-size:11px; color:var(--green);">■ Common</span>
+      </div>
+    </div>
+
+    <div class="watermark">cebetracker.io</div>
+  </div>
+
+  <div class="callout green">
+    <strong>You believe in the strategy. CEBE helps you understand exactly what you own.</strong> Model it. Know your risk. Hold with conviction, not hope.
+  </div>
+</section>
+
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <p style="font-size: 14px; color: var(--muted);">
+      CEBE Framework by <a href="https://twitter.com/chcbearsfan" target="_blank" style="color:var(--orange); text-decoration:none;">@chcbearsfan</a>
+      · <a href="/" style="color:var(--orange); text-decoration:none;">cebetracker.io</a>
+      · <a href="/cebe" style="color:var(--orange); text-decoration:none;">Read the Framework</a>
+    </p>
+    <p style="font-size: 12px; color: var(--dim); margin-top: 12px;">
+      Not financial advice · Data updates after each filing
+    </p>
+    <p style="font-size: 13px; color: var(--dim); margin-top: 12px; font-family: 'IBM Plex Mono', monospace;">
+      CEBE = (Total BTC - Senior Claims in BTC) / Shares
+    </p>
+  </div>
+</footer>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const TOTAL_BTC = 713502;
+const CONV_M = 8214;
+const PREF_M = 8389;
+const SHARES_K = 332431;
+const TOTAL_CLAIMS_M = CONV_M + PREF_M;
+const SHARES = SHARES_K * 1000;
+const BPS_SATS = TOTAL_BTC / SHARES * 1e8; // 214,632
+
+const quarterData = [
+  {q:"Q3'20",p:10784,zl:0,tv:71.4,cebe_d:4.30,mstr:15.06,drag:0},
+  {q:"Q4'20",p:29001,zl:9224,tv:62.6,cebe_d:14.54,mstr:38.86,drag:31.8},
+  {q:"Q1'21",p:58918,zl:18615,tv:46.6,cebe_d:36.25,mstr:67.88,drag:31.6},
+  {q:"Q2'21",p:35040,zl:20935,tv:78.3,cebe_d:14.41,mstr:66.45,drag:59.7},
+  {q:"Q3'21",p:43790,zl:19291,tv:53.3,cebe_d:26.99,mstr:57.84,drag:44.1},
+  {q:"Q4'21",p:46306,zl:17686,tv:42.1,cebe_d:31.54,mstr:54.45,drag:38.2},
+  {q:"Q1'22",p:45538,zl:17025,tv:33.1,cebe_d:32.53,mstr:48.63,drag:37.4},
+  {q:"Q2'22",p:19784,zl:16962,tv:80.4,cebe_d:3.22,mstr:16.43,drag:85.7},
+  {q:"Q3'22",p:19423,zl:16923,tv:86.6,cebe_d:2.84,mstr:21.23,drag:87.1},
+  {q:"Q4'22",p:16547,zl:16604,tv:100.0,cebe_d:0,mstr:14.16,drag:100},
+  {q:"Q1'23",p:28478,zl:16604,tv:51.8,cebe_d:14.10,mstr:29.23,drag:58.3},
+  {q:"Q2'23",p:30408,zl:14398,tv:45.2,cebe_d:18.76,mstr:34.24,drag:47.3},
+  {q:"Q3'23",p:27219,zl:13902,tv:54.8,cebe_d:14.84,mstr:32.83,drag:51.1},
+  {q:"Q4'23",p:42265,zl:11631,tv:45.6,cebe_d:34.35,mstr:63.16,drag:27.5},
+  {q:"Q1'24",p:71289,zl:10269,tv:57.6,cebe_d:72.23,mstr:170.46,drag:14.4},
+  {q:"Q2'24",p:62678,zl:6843,tv:52.0,cebe_d:66.14,mstr:137.75,drag:10.9},
+  {q:"Q3'24",p:63327,zl:12941,tv:61.7,cebe_d:64.51,mstr:168.60,drag:20.4},
+  {q:"Q4'24",p:93429,zl:16233,tv:51.5,cebe_d:140.54,mstr:289.62,drag:17.4},
+  {q:"Q1'25",p:82445,zl:17612,tv:55.4,cebe_d:128.67,mstr:288.27,drag:21.4},
+  {q:"Q2'25",p:107752,zl:18307,tv:54.0,cebe_d:185.98,mstr:404.23,drag:17.0},
+  {q:"Q3'25",p:96000,zl:21302,tv:51.4,cebe_d:156.50,mstr:322.21,drag:22.2},
+  {q:"Q4'25",p:87515,zl:22506,tv:7.9,cebe_d:139.90,mstr:151.95,drag:25.7},
+  {q:"Q1'26",p:66000,zl:23270,tv:30.6,cebe_d:91.71,mstr:132.12,drag:35.3},
+];
+
+// ============================================================
+// WATERFALL SECTION
+// ============================================================
+function updateWaterfall(price) {
+  const treasury = TOTAL_BTC * price;
+  const convClaim = Math.min(CONV_M * 1e6, treasury);
+  const rem1 = Math.max(0, treasury - convClaim);
+  const prefClaim = Math.min(PREF_M * 1e6, rem1);
+  const common = Math.max(0, rem1 - prefClaim);
+  
+  const convPct = convClaim / treasury * 100;
+  const prefPct = prefClaim / treasury * 100;
+  const comPct = common / treasury * 100;
+  
+  const fmt = (v) => {
+    if (v >= 1e9) return '$' + (v/1e9).toFixed(1) + 'B';
+    if (v >= 1e6) return '$' + (v/1e6).toFixed(0) + 'M';
+    return '$' + v.toFixed(0);
+  };
+
+  document.getElementById('wf-price').textContent = '$' + price.toLocaleString();
+  
+  const barsHtml = `
+    <div class="waterfall-bar-group">
+      <div class="waterfall-label-row">
+        <span class="waterfall-label" style="color:#ef4444">Convertible Debt</span>
+        <span class="waterfall-value">${fmt(convClaim)} / ${fmt(CONV_M*1e6)}</span>
+      </div>
+      <div class="waterfall-track">
+        <div class="waterfall-fill converts" style="width:${Math.min(100, convClaim/(CONV_M*1e6)*100)}%">
+          ${convClaim >= CONV_M*1e6 ? 'FULLY COVERED' : (convClaim/(CONV_M*1e6)*100).toFixed(0) + '%'}
+        </div>
+      </div>
+    </div>
+    <div class="waterfall-bar-group">
+      <div class="waterfall-label-row">
+        <span class="waterfall-label" style="color:#fbbf24">Preferred Stock</span>
+        <span class="waterfall-value">${fmt(prefClaim)} / ${fmt(PREF_M*1e6)}</span>
+      </div>
+      <div class="waterfall-track">
+        <div class="waterfall-fill preferred" style="width:${PREF_M > 0 ? Math.min(100, prefClaim/(PREF_M*1e6)*100) : 0}%">
+          ${prefClaim >= PREF_M*1e6 ? 'FULLY COVERED' : prefClaim > 0 ? (prefClaim/(PREF_M*1e6)*100).toFixed(0) + '%' : ''}
+        </div>
+      </div>
+    </div>
+    <div class="waterfall-bar-group">
+      <div class="waterfall-label-row">
+        <span class="waterfall-label" style="color:#22c55e">Common Equity</span>
+        <span class="waterfall-value">${fmt(common)} (${comPct.toFixed(1)}%)</span>
+      </div>
+      <div class="waterfall-track">
+        <div class="waterfall-fill common" style="width:${comPct}%">
+          ${comPct > 10 ? comPct.toFixed(0) + '% YOURS' : ''}
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('wf-bars').innerHTML = barsHtml;
+  
+  const claimsBtc = TOTAL_CLAIMS_M * 1e6 / price;
+  const cebeSats = Math.max(0, (TOTAL_BTC - claimsBtc)) / SHARES * 1e8;
+  const drag = (BPS_SATS - cebeSats) / BPS_SATS * 100;
+  const zeroLine = TOTAL_CLAIMS_M * 1e6 / TOTAL_BTC;
+  const cushion = (price - zeroLine) / price * 100;
+  
+  document.getElementById('wf-stats').innerHTML = `
+    <div class="stat-pill"><span class="stat-key">CEBE</span><span class="stat-val" style="color:var(--orange)">${cebeSats.toLocaleString(undefined,{maximumFractionDigits:0})} sats</span></div>
+    <div class="stat-pill"><span class="stat-key">Drag</span><span class="stat-val" style="color:${drag > 50 ? 'var(--red)' : 'var(--orange)'}">${drag.toFixed(1)}%</span></div>
+    <div class="stat-pill"><span class="stat-key">Cushion</span><span class="stat-val" style="color:${cushion > 40 ? 'var(--green)' : cushion > 0 ? 'var(--orange)' : 'var(--red)'}">${cushion > 0 ? cushion.toFixed(0)+'%' : 'UNDERWATER'}</span></div>
+  `;
+}
+
+document.getElementById('wf-slider').addEventListener('input', (e) => {
+  updateWaterfall(parseInt(e.target.value));
+});
+
+// ============================================================
+// MERTON TIME VALUE CHART
+// ============================================================
+function drawMertonChart() {
+  const canvas = document.getElementById('merton-canvas');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const W = rect.width, H = rect.height;
+  
+  const padL = 50, padR = 20, padT = 20, padB = 50;
+  const chartW = W - padL - padR;
+  const chartH = H - padT - padB;
+  
+  const n = quarterData.length;
+  
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.lineWidth = 1;
+  for (let pct = 0; pct <= 100; pct += 25) {
+    const y = padT + chartH - (pct / 100 * chartH);
+    ctx.beginPath();
+    ctx.moveTo(padL, y);
+    ctx.lineTo(padL + chartW, y);
+    ctx.stroke();
+    
+    ctx.fillStyle = '#52525b';
+    ctx.font = '11px IBM Plex Mono, monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(pct + '%', padL - 8, y + 4);
+  }
+  
+  // X labels
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#52525b';
+  const labelEvery = W < 500 ? 4 : 2;
+  for (let i = 0; i < n; i += labelEvery) {
+    const x = padL + (i / (n - 1)) * chartW;
+    ctx.fillText(quarterData[i].q, x, H - 8);
+  }
+  
+  // Time Value area fill
+  ctx.beginPath();
+  ctx.moveTo(padL, padT + chartH);
+  for (let i = 0; i < n; i++) {
+    const x = padL + (i / (n - 1)) * chartW;
+    const y = padT + chartH - (quarterData[i].tv / 100 * chartH);
+    if (i === 0) ctx.lineTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.lineTo(padL + chartW, padT + chartH);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0, padT, 0, padT + chartH);
+  grad.addColorStop(0, 'rgba(249,115,22,0.2)');
+  grad.addColorStop(1, 'rgba(249,115,22,0.02)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+  
+  // Time Value line
+  ctx.beginPath();
+  ctx.strokeStyle = '#f97316';
+  ctx.lineWidth = 2.5;
+  for (let i = 0; i < n; i++) {
+    const x = padL + (i / (n - 1)) * chartW;
+    const y = padT + chartH - (quarterData[i].tv / 100 * chartH);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  
+  // Dots
+  for (let i = 0; i < n; i++) {
+    const x = padL + (i / (n - 1)) * chartW;
+    const y = padT + chartH - (quarterData[i].tv / 100 * chartH);
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = '#f97316';
+    ctx.fill();
+  }
+  
+  // Q4 2025 callout
+  const q4idx = 21;
+  const q4x = padL + (q4idx / (n - 1)) * chartW;
+  const q4y = padT + chartH - (quarterData[q4idx].tv / 100 * chartH);
+  
+  ctx.beginPath();
+  ctx.arc(q4x, q4y, 8, 0, Math.PI * 2);
+  ctx.strokeStyle = '#ef4444';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  
+  ctx.fillStyle = '#ef4444';
+  ctx.font = 'bold 12px IBM Plex Mono, monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('7.9%', q4x, q4y - 16);
+  ctx.font = '10px IBM Plex Mono, monospace';
+  ctx.fillText('Q4\'25', q4x, q4y - 28);
+  
+  // Legend
+  ctx.fillStyle = '#a1a1aa';
+  ctx.font = '12px DM Sans, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('Time Value = (MSTR Price − CEBE$) / MSTR Price', padL, padT + 12);
+}
+
+// ============================================================
+// ZERO LINE CHART
+// ============================================================
+function drawZeroLineChart() {
+  const canvas = document.getElementById('zero-canvas');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const W = rect.width, H = rect.height;
+  
+  const padL = 55, padR = 20, padT = 30, padB = 50;
+  const chartW = W - padL - padR;
+  const chartH = H - padT - padB;
+  
+  const n = quarterData.length;
+  const maxPrice = 120000;
+  
+  const toX = (i) => padL + (i / (n - 1)) * chartW;
+  const toY = (val) => padT + chartH - (val / maxPrice * chartH);
+  
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.lineWidth = 1;
+  for (let p = 0; p <= maxPrice; p += 20000) {
+    const y = toY(p);
+    ctx.beginPath();
+    ctx.moveTo(padL, y);
+    ctx.lineTo(padL + chartW, y);
+    ctx.stroke();
+    ctx.fillStyle = '#52525b';
+    ctx.font = '11px IBM Plex Mono, monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText('$' + (p/1000) + 'K', padL - 8, y + 4);
+  }
+  
+  // X labels
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#52525b';
+  const labelEvery = W < 500 ? 4 : 2;
+  for (let i = 0; i < n; i += labelEvery) {
+    ctx.fillText(quarterData[i].q, toX(i), H - 8);
+  }
+  
+  // Danger zone fill (below zero line)
+  ctx.beginPath();
+  ctx.moveTo(toX(1), toY(0));
+  for (let i = 1; i < n; i++) {
+    if (quarterData[i].zl > 0) {
+      ctx.lineTo(toX(i), toY(quarterData[i].zl));
+    }
+  }
+  ctx.lineTo(toX(n-1), toY(0));
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(239,68,68,0.08)';
+  ctx.fill();
+  
+  // BTC price line
+  ctx.beginPath();
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 4]);
+  for (let i = 0; i < n; i++) {
+    const x = toX(i), y = toY(Math.min(quarterData[i].p, maxPrice));
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.setLineDash([]);
+  
+  // Zero line
+  ctx.beginPath();
+  ctx.strokeStyle = '#ef4444';
+  ctx.lineWidth = 2.5;
+  let started = false;
+  for (let i = 0; i < n; i++) {
+    if (quarterData[i].zl > 0) {
+      const x = toX(i), y = toY(quarterData[i].zl);
+      if (!started) { ctx.moveTo(x, y); started = true; }
+      else ctx.lineTo(x, y);
+    }
+  }
+  ctx.stroke();
+  
+  // Dots on zero line
+  for (let i = 0; i < n; i++) {
+    if (quarterData[i].zl > 0) {
+      ctx.beginPath();
+      ctx.arc(toX(i), toY(quarterData[i].zl), 3, 0, Math.PI * 2);
+      ctx.fillStyle = '#ef4444';
+      ctx.fill();
+    }
+  }
+  
+  // Cushion arrow for current
+  const lastI = n - 1;
+  const zlY = toY(quarterData[lastI].zl);
+  const btcY = toY(quarterData[lastI].p);
+  const arrowX = toX(lastI) + 10;
+  
+  // Labels
+  ctx.font = '11px IBM Plex Mono, monospace';
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#ef4444';
+  ctx.fillText('Zero Line', padL + 4, toY(quarterData[lastI].zl) - 8);
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.fillText('BTC Price', padL + 4, toY(Math.min(quarterData[lastI].p, maxPrice)) - 8);
+  
+  // Legend
+  ctx.fillStyle = '#a1a1aa';
+  ctx.font = '12px DM Sans, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('Below the red line, common equity = $0', padL, padT + 12);
+}
+
+// ============================================================
+// STRESS TEST
+// ============================================================
+function updateStressTest(price) {
+  const claimsBtc = TOTAL_CLAIMS_M * 1e6 / price;
+  const cebeBtc = Math.max(0, TOTAL_BTC - claimsBtc);
+  const cebeSats = cebeBtc / SHARES * 1e8;
+  const drag = (BPS_SATS - cebeSats) / BPS_SATS * 100;
+  const bpsDollar = BPS_SATS * price / 1e8;
+  const cebeDollar = cebeSats * price / 1e8;
+  const phantomDollar = bpsDollar - cebeDollar;
+  const amp = drag < 100 ? 1 / (1 - drag/100) : Infinity;
+  const zeroLine = TOTAL_CLAIMS_M * 1e6 / TOTAL_BTC;
+  const cushion = Math.max(0, (price - zeroLine) / price * 100);
+  const purity = cebeSats / BPS_SATS * 100;
+  
+  document.getElementById('st-price').textContent = '$' + price.toLocaleString();
+  
+  const metrics = [
+    {label: 'BPS', val: BPS_SATS.toLocaleString(undefined,{maximumFractionDigits:0}) + ' sats', color: 'var(--text)'},
+    {label: 'CEBE', val: cebeSats > 0 ? cebeSats.toLocaleString(undefined,{maximumFractionDigits:0}) + ' sats' : '0', color: cebeSats > 0 ? 'var(--orange)' : 'var(--red)'},
+    {label: 'Drag', val: drag.toFixed(1) + '%', color: drag > 80 ? 'var(--red)' : drag > 40 ? 'var(--orange)' : 'var(--green)'},
+    {label: 'BPS $/sh', val: '$' + bpsDollar.toFixed(2), color: 'var(--text)'},
+    {label: 'CEBE $/sh', val: cebeDollar > 0 ? '$' + cebeDollar.toFixed(2) : '$0', color: cebeDollar > 0 ? 'var(--orange)' : 'var(--red)'},
+    {label: 'Phantom $/sh', val: '$' + phantomDollar.toFixed(2), color: 'var(--muted)'},
+    {label: 'Amplification', val: amp < 100 ? amp.toFixed(2) + 'x' : '∞', color: amp > 3 ? 'var(--red)' : 'var(--orange)'},
+    {label: 'Cushion', val: cushion > 0 ? cushion.toFixed(0) + '%' : 'NONE', color: cushion > 40 ? 'var(--green)' : cushion > 0 ? 'var(--orange)' : 'var(--red)'},
+    {label: 'Purity', val: (purity > 0 ? purity.toFixed(1) : '0') + '%', color: purity > 70 ? 'var(--green)' : purity > 40 ? 'var(--orange)' : 'var(--red)'},
+  ];
+  
+  document.getElementById('st-results').innerHTML = metrics.map(m => `
+    <div class="stress-metric">
+      <div class="sm-label">${m.label}</div>
+      <div class="sm-value" style="color:${m.color}">${m.val}</div>
+    </div>
+  `).join('');
+  
+  // Mini waterfall
+  const treasury = TOTAL_BTC * price;
+  const convTake = Math.min(CONV_M * 1e6, treasury);
+  const rem = Math.max(0, treasury - convTake);
+  const prefTake = Math.min(PREF_M * 1e6, rem);
+  const commTake = Math.max(0, rem - prefTake);
+  
+  document.getElementById('st-bar-conv').style.width = (convTake/treasury*100) + '%';
+  document.getElementById('st-bar-pref').style.width = (prefTake/treasury*100) + '%';
+  document.getElementById('st-bar-comm').style.width = (commTake/treasury*100) + '%';
+  
+  const comPct = commTake/treasury*100;
+  document.getElementById('st-common-pct').innerHTML = `<span style="color:${comPct > 50 ? 'var(--green)' : comPct > 0 ? 'var(--orange)' : 'var(--red)'}">${comPct.toFixed(1)}% to common</span>`;
+}
+
+document.getElementById('st-slider').addEventListener('input', (e) => {
+  updateStressTest(parseInt(e.target.value));
+});
+
+// ============================================================
+// SPLIT ZONE
+// ============================================================
+function updateSplitZone(btcPrice) {
+  const claimsBtc = TOTAL_CLAIMS_M * 1e6 / btcPrice;
+  const cebeBtc = Math.max(0, TOTAL_BTC - claimsBtc);
+  const cebeSats = cebeBtc / SHARES * 1e8;
+  
+  const bpsDollar = BPS_SATS * btcPrice / 1e8;
+  const cebeDollar = cebeSats * btcPrice / 1e8;
+  const mstrPrice = 132; // current
+  
+  document.getElementById('sz-btc-price').textContent = '$' + btcPrice.toLocaleString();
+  
+  // Zone visualization — scale from $0 to max(bpsDollar * 1.5, 300)
+  const maxScale = Math.max(bpsDollar * 1.4, 250);
+  const cebePos = cebeDollar / maxScale * 100;
+  const bpsPos = bpsDollar / maxScale * 100;
+  const mstrPos = Math.min(Math.max(mstrPrice / maxScale * 100, 2), 98);
+  
+  document.getElementById('sz-red').style.width = cebePos + '%';
+  document.getElementById('sz-split').style.left = cebePos + '%';
+  document.getElementById('sz-split').style.width = (bpsPos - cebePos) + '%';
+  document.getElementById('sz-green').style.left = bpsPos + '%';
+  document.getElementById('sz-green').style.width = (100 - bpsPos) + '%';
+  
+  document.getElementById('sz-mstr-marker').style.left = mstrPos + '%';
+  document.getElementById('sz-mstr-label').textContent = 'MSTR $' + mstrPrice;
+  
+  document.getElementById('sz-cebe-thresh').style.left = cebePos + '%';
+  document.getElementById('sz-cebe-val').textContent = 'CEBE $' + cebeDollar.toFixed(0);
+  document.getElementById('sz-bps-thresh').style.left = bpsPos + '%';
+  document.getElementById('sz-bps-val').textContent = 'BPS $' + bpsDollar.toFixed(0);
+  
+  // Verdict
+  let verdictHtml, verdictBg;
+  if (mstrPrice < cebeDollar) {
+    verdictHtml = '<span style="color:var(--red); font-family:IBM Plex Mono,monospace; font-weight:600; font-size:16px;">✗ BOTH DILUTIVE</span><br><span style="font-size:13px; color:var(--muted);">MSTR ($' + mstrPrice + ') is below CEBE$/share ($' + cebeDollar.toFixed(0) + '). Purchases dilute both metrics.</span>';
+    verdictBg = 'var(--red-dim)';
+  } else if (mstrPrice < bpsDollar) {
+    verdictHtml = '<span style="color:var(--orange); font-family:IBM Plex Mono,monospace; font-weight:600; font-size:16px;">⚡ PHANTOM DILUTION — SPLIT ZONE</span><br><span style="font-size:13px; color:var(--muted);">MSTR ($' + mstrPrice + ') is above CEBE ($' + cebeDollar.toFixed(0) + ') but below BPS ($' + bpsDollar.toFixed(0) + '). BPS says dilutive. CEBE says accretive.</span>';
+    verdictBg = 'var(--orange-dim)';
+  } else {
+    verdictHtml = '<span style="color:var(--green); font-family:IBM Plex Mono,monospace; font-weight:600; font-size:16px;">✓ BOTH ACCRETIVE</span><br><span style="font-size:13px; color:var(--muted);">MSTR ($' + mstrPrice + ') is above BPS$/share ($' + bpsDollar.toFixed(0) + '). Purchases accrete both metrics.</span>';
+    verdictBg = 'var(--green-dim)';
+  }
+  document.getElementById('sz-verdict').innerHTML = verdictHtml;
+  document.getElementById('sz-verdict').style.background = verdictBg;
+  
+  // Stats
+  const drag = (BPS_SATS - cebeSats) / BPS_SATS * 100;
+  const splitWidth = bpsDollar - cebeDollar;
+  document.getElementById('sz-stats').innerHTML = `
+    <div class="stat-pill"><span class="stat-key">BPS Threshold</span><span class="stat-val">$${bpsDollar.toFixed(2)}</span></div>
+    <div class="stat-pill"><span class="stat-key">CEBE Threshold</span><span class="stat-val" style="color:var(--orange)">$${cebeDollar.toFixed(2)}</span></div>
+    <div class="stat-pill"><span class="stat-key">Split Zone Width</span><span class="stat-val">$${splitWidth.toFixed(2)}</span></div>
+    <div class="stat-pill"><span class="stat-key">Drag</span><span class="stat-val">${drag.toFixed(1)}%</span></div>
+  `;
+}
+
+document.getElementById('sz-slider').addEventListener('input', (e) => {
+  updateSplitZone(parseInt(e.target.value));
+});
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  updateWaterfall(66000);
+  updateStressTest(66000);
+  updateSplitZone(66000);
+  
+  // Draw charts after a frame to ensure layout
+  requestAnimationFrame(() => {
+    drawMertonChart();
+    drawZeroLineChart();
+  });
+}
+
+// Redraw on resize
+let resizeTimeout;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    drawMertonChart();
+    drawZeroLineChart();
+  }, 200);
+});
+
+init();
+</script>
+</body>
+</html>
