@@ -299,9 +299,16 @@ const CONVERTS = [
     { id:'2032',  maturity:2032, face:800e6,   convPrice:204.33, convShares:3915000 },
 ];
 
+// Saylor Base Case: 29% avg CAGR, declining from ~45% to ~21% (Bitcoin 2024 Keynote, Nashville)
+// His 21-year model starts at ~55% ARR decelerating to ~20%. Our 10-year window picks up 2 years in.
 const SAYLOR_CAGR = [
-    {year:1,cagr:.35},{year:2,cagr:.32},{year:3,cagr:.29},{year:4,cagr:.26},{year:5,cagr:.24},
-    {year:6,cagr:.22},{year:7,cagr:.20},{year:8,cagr:.18},{year:9,cagr:.16},{year:10,cagr:.15},
+    {year:1,cagr:.45},{year:2,cagr:.42},{year:3,cagr:.38},{year:4,cagr:.35},{year:5,cagr:.32},
+    {year:6,cagr:.29},{year:7,cagr:.27},{year:8,cagr:.25},{year:9,cagr:.23},{year:10,cagr:.21},
+];
+// Saylor Bull Case: 37% avg CAGR, declining from ~55% to ~27%
+const SINGULARITY_CAGR = [
+    {year:1,cagr:.55},{year:2,cagr:.52},{year:3,cagr:.48},{year:4,cagr:.44},{year:5,cagr:.40},
+    {year:6,cagr:.37},{year:7,cagr:.34},{year:8,cagr:.31},{year:9,cagr:.29},{year:10,cagr:.27},
 ];
 const SAYLOR_MNAV = [
     {year:0,mnav:1.0},{year:1,mnav:1.3},{year:2,mnav:1.5},{year:3,mnav:1.8},{year:4,mnav:1.6},
@@ -314,12 +321,6 @@ const SAYLOR_DEPLOY = [
     {year:7,totalB:5,eqPct:.30,prefRate:.095},{year:8,totalB:4,eqPct:.30,prefRate:.090},
     {year:9,totalB:3,eqPct:.30,prefRate:.090},{year:10,totalB:2,eqPct:.30,prefRate:.090},
 ];
-
-function singularityBtcPath(y, start) {
-    if (y<=0) return start;
-    if (y>=10) return 1000000;
-    var t=y/10; return start+(1000000-start)*(1-Math.pow(1-t,2));
-}
 
 const DEFAULTS = {
     btc_holdings:713502, shares_outstanding:365000000, debt_usd:8214e6,
@@ -335,12 +336,12 @@ const SCENARIOS = [
     {id:'ath',          icon:'\u{1F451}',name:'Former ATH',   btc:126000,mnav:1.5,horizon:0, group:'snapshot',  type:'static'},
     {id:'siege',        icon:'\u{1F3F0}',name:'Siege',        btc:50000, mnav:0.7,horizon:10,group:'projection',type:'siege'},
     {id:'saylor',       icon:'\u{1F4D0}',name:'Saylor Model', btc:null,  mnav:null,horizon:10,group:'projection',type:'saylor'},
-    {id:'singularity',   icon:'\u{1F300}',name:'Singularity',  btc:1e6,   mnav:3.0,horizon:10,group:'projection',type:'singularity'},
+    {id:'singularity',   icon:'\u{1F300}',name:'Singularity',  btc:null,  mnav:null,horizon:10,group:'projection',type:'singularity'},
 ];
 
 const SINGULARITY_MNAV = [
-    {year:0,mnav:1.0},{year:1,mnav:1.3},{year:2,mnav:1.6},{year:3,mnav:1.8},{year:4,mnav:2.0},
-    {year:5,mnav:2.2},{year:6,mnav:2.4},{year:7,mnav:2.5},{year:8,mnav:2.7},{year:9,mnav:2.8},{year:10,mnav:3.0},
+    {year:0,mnav:1.0},{year:1,mnav:1.5},{year:2,mnav:1.8},{year:3,mnav:2.0},{year:4,mnav:2.2},
+    {year:5,mnav:2.5},{year:6,mnav:2.5},{year:7,mnav:2.8},{year:8,mnav:3.0},{year:9,mnav:3.0},{year:10,mnav:3.0},
 ];
 
 const HORIZON_OPTIONS = [{label:'Now',years:0},{label:'1Y',years:1},{label:'3Y',years:3},{label:'5Y',years:5},{label:'10Y',years:10}];
@@ -452,7 +453,8 @@ function projectYears(years){
             if(y===0){yearBtcPrice=startBtc;yearMnav=SAYLOR_MNAV[0].mnav}
             else{var ce=SAYLOR_CAGR[Math.min(y-1,SAYLOR_CAGR.length-1)];var prevB=y===1?startBtc:results[y-1].yearBtcPrice;yearBtcPrice=prevB*(1+ce.cagr);yearMnav=SAYLOR_MNAV[Math.min(y,SAYLOR_MNAV.length-1)].mnav}
         }else if(scenarioType==='singularity'){
-            yearBtcPrice=y===0?startBtc:singularityBtcPath(y,startBtc);yearMnav=SINGULARITY_MNAV[Math.min(y,SINGULARITY_MNAV.length-1)].mnav;
+            if(y===0){yearBtcPrice=startBtc;yearMnav=SINGULARITY_MNAV[0].mnav}
+            else{var ce=SINGULARITY_CAGR[Math.min(y-1,SINGULARITY_CAGR.length-1)];var prevB=y===1?startBtc:results[y-1].yearBtcPrice;yearBtcPrice=prevB*(1+ce.cagr);yearMnav=SINGULARITY_MNAV[Math.min(y,SINGULARITY_MNAV.length-1)].mnav}
         }else{yearBtcPrice=btcPrice;yearMnav=mnavMultiple}
 
         // 2. CONVERT BOND MATURITIES
@@ -599,8 +601,8 @@ function renderHero(final,current,marketPrice){
     var ctx='';
     if(horizonYears===0)ctx='instant snapshot';
     else if(sType==='siege')ctx=horizonYears+'-year stress test \u00b7 $50K BTC flat \u00b7 converts + dividends';
-    else if(sType==='saylor')ctx=horizonYears+'-year projection \u00b7 declining CAGR \u00b7 capital plan active';
-    else if(sType==='singularity')ctx=horizonYears+'-year projection \u00b7 $80B capital plan \u00b7 BTC \u2192 $1M';
+    else if(sType==='saylor')ctx=horizonYears+'-year projection \u00b7 Saylor base case (29% avg CAGR) \u00b7 capital plan active';
+    else if(sType==='singularity')ctx=horizonYears+'-year projection \u00b7 $80B capital plan \u00b7 Saylor bull case (37% avg CAGR)';
     else ctx=horizonYears>0?horizonYears+'-year projection with dividend cascade':'instant snapshot';
     $('heroContext').textContent=ctx;
     // Implied mNAV
@@ -774,9 +776,9 @@ function renderCustomize(inp){
 
 function renderAssumptions(inp){
     var sType=getActiveType(), t='';
-    if(sType==='saylor')t='<strong>Saylor Model:</strong> BTC follows declining CAGR (35%\u219215%) per 21 Capital framework. ~$80B deployed over 10 years (50/50 equity/preferred initially, shifting 30/70). Preferred at blended ~10.5%. ATM at mNAV minus 0.1\u00d7. Software income '+fmtB(inp.softwareIncome)+'/yr flat. Converts refinanced at maturity if below conversion price (capital market access assumed). STRK converts when price exceeds $1,000.';
+    if(sType==='saylor')t='<strong>Saylor Model (Base Case):</strong> BTC follows Saylor\u2019s 29% avg CAGR, declining 45%\u219221% over 10 years (sourced from Bitcoin 2024 Keynote, Nashville \u2014 \u201C55% ARR decelerates toward 20%\u201D). ~$80B deployed via 42/42 Plan (50/50 equity/preferred initially, shifting 30/70). Preferred at blended ~10.5%. ATM at mNAV minus 0.1\u00d7. Software income '+fmtB(inp.softwareIncome)+'/yr flat. Converts refinanced at maturity if below conversion price (capital market access assumed). STRK converts when price exceeds $1,000.';
     else if(sType==='siege')t='<strong>Siege:</strong> BTC $50,000 for entire horizon. No new capital raised. mNAV 0.7\u00d7. All converts mature as cash redemptions. Dividends paid until cash depleted, then non-cum skipped, then BTC sold.';
-    else if(sType==='singularity')t='<strong>Singularity:</strong> BTC reaches $1M over 10 years (accelerating curve) AND Strategy executes full ~$80B capital plan. Converts refinanced at maturity when below conversion price (capital market access assumed). mNAV rises to 3.0\u00d7 as market prices in both BTC appreciation and stack growth. STRK converts when price exceeds $1,000.';
+    else if(sType==='singularity')t='<strong>Singularity (Bull Case):</strong> BTC follows Saylor\u2019s 37% avg CAGR, declining 55%\u219227% over 10 years (Bitcoin 2024 Keynote \u2014 \u201C$49M bull case, 22% of global wealth\u201D). Strategy executes full ~$80B capital plan. Converts refinanced at maturity when below conversion price (capital market access assumed). mNAV rises to 3.0\u00d7 as market prices in both BTC appreciation and stack growth. STRK converts when price exceeds $1,000.';
     else t='<strong>Assumptions:</strong> Capital structure frozen at snapshot ('+inp.snapshotDate+'). BTC price static across projection. All preferred divs paid cash. Distress cascade: skip non-cum then sell BTC. Software income ~'+fmtB(inp.softwareIncome)+'/yr.';
     t+='<br><br><strong>Data:</strong> Holdings, shares, capital structure from Google Sheet (post-8K updates). Live BTC from CoinGecko. Live MSTR from Finnhub. '+(sheetData&&sheetData.strk_face_usd?'Preferred from live sheet.':'Using pre-Q4 estimates.')+' Convert face values approximate pending 10-K.';
     $('assumptions').innerHTML=t;
@@ -793,8 +795,8 @@ function buildScenarioBar(){
         var bClass=isP?'future-badge':'now-badge';
         var cClass='scenario-card'+(isP?' projection':'')+(s.id===activeScenario?' active':'');
         var pDisp;
-        if(s.type==='saylor')pDisp='CAGR';
-        else if(s.type==='singularity')pDisp='$1M BTC';
+        if(s.type==='saylor')pDisp='Base CAGR';
+        else if(s.type==='singularity')pDisp='Bull CAGR';
         else if(s.btc)pDisp=s.btc>=1e6?'$'+(s.btc/1e6)+'M':s.btc>=1000?'$'+(s.btc/1000)+'K':'$'+s.btc;
         else pDisp=fmtPrice(btcPrice);
         var mDisp=s.type==='saylor'?'1.0-1.8\u00d7':(s.type==='singularity'?'1.0-3.0\u00d7':((s.mnav||1).toFixed(1)+'\u00d7 mNAV'));
