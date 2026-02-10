@@ -9,9 +9,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CEBE — Common Equity Bitcoin Exposure | cebetracker.io</title>
 <meta name="description" content="BPS tells you how much BTC the company holds per share. CEBE tells you how much actually belongs to common shareholders.">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
-<link rel="apple-touch-icon" href="/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Mono:wght@400;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -468,6 +465,158 @@ input[type="range"]::-webkit-slider-thumb {
 .callout.green { background: var(--green-dim); border-left: 3px solid var(--green); }
 .callout.blue { background: var(--blue-dim); border-left: 3px solid var(--blue); }
 
+/* Era Divergence */
+.era-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 32px;
+  margin-bottom: 24px;
+  position: relative;
+}
+.era-header {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 8px;
+}
+.era-subtitle {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 32px;
+  line-height: 1.3;
+}
+.era-subtitle .era-down { color: var(--red); }
+.era-subtitle .era-up { color: var(--green); }
+.divergence {
+  display: grid;
+  grid-template-columns: 1fr 48px 1fr;
+  gap: 0;
+  align-items: stretch;
+}
+.era-col {
+  padding: 24px;
+  border-radius: 10px;
+}
+.era-col.pre {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+}
+.era-col.post {
+  background: rgba(249,115,22,0.03);
+  border: 1px solid rgba(249,115,22,0.15);
+}
+.era-col-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 4px;
+}
+.era-col-period {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 20px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.era-metric-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.era-metric-row:last-of-type { margin-bottom: 0; }
+.era-metric-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  width: 50px;
+}
+.era-bar-track {
+  flex: 1;
+  height: 28px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 6px;
+  margin: 0 12px;
+  overflow: hidden;
+}
+.era-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+}
+.era-bar-fill.bps-bar {
+  background: linear-gradient(90deg, rgba(239,68,68,0.15), rgba(239,68,68,0.35));
+  border: 1px solid rgba(239,68,68,0.3);
+}
+.era-bar-fill.cebe-bar {
+  background: linear-gradient(90deg, rgba(34,197,94,0.15), rgba(34,197,94,0.35));
+  border: 1px solid rgba(34,197,94,0.3);
+}
+.era-pct {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 15px;
+  font-weight: 600;
+  min-width: 48px;
+  text-align: right;
+}
+.era-pct.red { color: var(--red); }
+.era-pct.green { color: var(--green); }
+.arrow-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 0;
+}
+.gap-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.gap-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+.gap-badge.small {
+  background: rgba(255,255,255,0.04);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+.gap-badge.big {
+  background: var(--orange-dim);
+  color: var(--orange);
+  border: 1px solid rgba(249,115,22,0.3);
+}
+.era-verdict {
+  text-align: center;
+  padding: 20px;
+  background: rgba(249,115,22,0.04);
+  border: 1px solid rgba(249,115,22,0.15);
+  border-radius: 10px;
+  margin-bottom: 24px;
+}
+.era-verdict p {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.era-verdict strong { color: var(--text); }
+.pref-era-row { background: rgba(249,115,22,0.03); }
+.pref-era-row td:first-child::after {
+  content: ' ⚡';
+  font-size: 10px;
+}
+
 /* Footer */
 .footer {
   padding: 48px 0;
@@ -497,6 +646,11 @@ input[type="range"]::-webkit-slider-thumb {
   .phantom-table th, .phantom-table td { padding: 8px; }
   .nav-pills { gap: 8px; }
   .nav-pill { padding: 6px 14px; font-size: 11px; }
+  .divergence { grid-template-columns: 1fr; gap: 16px; }
+  .arrow-col { flex-direction: row; padding: 8px 0; }
+  .arrow-col svg { transform: rotate(90deg); }
+  .era-col { padding: 16px; }
+  .era-subtitle { font-size: 17px; }
 }
 </style>
 </head>
@@ -549,9 +703,9 @@ input[type="range"]::-webkit-slider-thumb {
 <!-- ============================================ -->
 <section id="accuracy">
   <div class="section-num">01</div>
-  <h2 class="section-title">BPS Yield is a coin flip</h2>
+  <h2 class="section-title">BPS Yield is a coin flip. And it's getting worse.</h2>
   <p class="section-desc">
-    BPS Yield, Strategy's official KPI, gets the direction of your investment right 50% of the time. It told shareholders "you gained value" in 9 quarters where they actually lost money. CEBE Yield isn't perfect. But it's honest more often.
+    BPS Yield — Strategy's official KPI — gets the direction of your investment right 50% of the time. CEBE Yield hits 68%. And it's getting worse: as preferred stock entered the capital structure, BPS got less accurate while CEBE got more accurate.
   </p>
 
   <div class="compare-grid">
@@ -562,19 +716,91 @@ input[type="range"]::-webkit-slider-thumb {
     </div>
     <div class="compare-card cebe">
       <div class="metric-label">CEBE Yield Accuracy</div>
-      <div class="metric-value">64%</div>
-      <div class="metric-sub">14 of 22 quarters correct</div>
+      <div class="metric-value">68%</div>
+      <div class="metric-sub">15 of 22 quarters correct</div>
     </div>
   </div>
 
+  <div class="era-section">
+    <div class="era-header">The Trend</div>
+    <div class="era-subtitle">
+      BPS accuracy fell from 53% to <span class="era-down">40%</span>. CEBE rose from 65% to <span class="era-up">80%</span>.
+    </div>
+
+    <div class="divergence">
+      <!-- Pre-pref era -->
+      <div class="era-col pre">
+        <div class="era-col-label">Pre-Preferred Era</div>
+        <div class="era-col-period">Q3 2020 – Q4 2024 · 17 quarters</div>
+        <div class="era-metric-row">
+          <span class="era-metric-name">BPS</span>
+          <div class="era-bar-track">
+            <div class="era-bar-fill bps-bar" style="width: 53%"></div>
+          </div>
+          <span class="era-pct red">53%</span>
+        </div>
+        <div class="era-metric-row">
+          <span class="era-metric-name">CEBE</span>
+          <div class="era-bar-track">
+            <div class="era-bar-fill cebe-bar" style="width: 65%"></div>
+          </div>
+          <span class="era-pct green">65%</span>
+        </div>
+        <div class="gap-row">
+          <span class="gap-badge small">+12pp gap</span>
+        </div>
+      </div>
+
+      <!-- Center arrows -->
+      <div class="arrow-col">
+        <svg width="24" height="80" viewBox="0 0 24 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="8" y1="8" x2="8" y2="56" stroke="#ef4444" stroke-width="2" stroke-dasharray="4 3" opacity="0.6"/>
+          <polygon points="4,56 8,66 12,56" fill="#ef4444" opacity="0.6"/>
+          <line x1="16" y1="72" x2="16" y2="24" stroke="#22c55e" stroke-width="2" stroke-dasharray="4 3" opacity="0.6"/>
+          <polygon points="12,24 16,14 20,24" fill="#22c55e" opacity="0.6"/>
+        </svg>
+      </div>
+
+      <!-- Pref era -->
+      <div class="era-col post">
+        <div class="era-col-label">Preferred Era</div>
+        <div class="era-col-period">Q1 2025 – Q1 2026 · 5 quarters</div>
+        <div class="era-metric-row">
+          <span class="era-metric-name">BPS</span>
+          <div class="era-bar-track">
+            <div class="era-bar-fill bps-bar" style="width: 40%"></div>
+          </div>
+          <span class="era-pct red">40%</span>
+        </div>
+        <div class="era-metric-row">
+          <span class="era-metric-name">CEBE</span>
+          <div class="era-bar-track">
+            <div class="era-bar-fill cebe-bar" style="width: 80%"></div>
+          </div>
+          <span class="era-pct green">80%</span>
+        </div>
+        <div class="gap-row">
+          <span class="gap-badge big">+40pp gap</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="watermark">cebetracker.io</div>
+  </div>
+
+  <div class="era-verdict">
+    <p>As preferred stock scaled from $0 to $8.4B, the CEBE advantage over BPS widened from <strong>+12 percentage points</strong> to <strong>+40 percentage points</strong>. BPS breaks when the capital structure gets complicated. CEBE doesn't.</p>
+  </div>
+
   <div class="callout orange">
-    <strong>Why the gap?</strong> BPS measures all Bitcoin per share but ignores $16.6B in claims that sit ahead of you. When BTC falls and those claims grow in BTC terms, BPS can still show growth while your actual equity shrinks. CEBE accounts for both sides in the same unit.
+    <strong>Why the gap?</strong> BPS measures all Bitcoin per share but ignores $16.6B in claims that sit ahead of you. When BTC falls and those claims grow in BTC terms, BPS can still show growth while your actual equity shrinks. CEBE accounts for both sides in the same unit. The more senior claims there are, the more BPS and reality diverge — and the more CEBE matters.
   </div>
 
   <div class="card" style="position:relative; overflow:hidden;">
-    <h3 style="font-size: 16px; margin-bottom: 20px; color: var(--muted);">
+    <h3 style="font-size: 16px; margin-bottom: 4px; color: var(--muted);">
       Quarters where BPS said <span style="color:var(--green)">↑</span> but shareholders lost money <span style="color:var(--red)">↓</span>
     </h3>
+    <p style="font-size: 13px; color: var(--dim); margin-bottom: 20px;">9 phantom growth quarters. BPS was wrong on all of them.</p>
     <table class="phantom-table">
       <thead>
         <tr>
@@ -591,11 +817,14 @@ input[type="range"]::-webkit-slider-thumb {
         <tr><td class="q-label">Q1 2022</td><td class="up">+3.5%</td><td class="down">−10.7%</td><td class="up">+4.9%</td></tr>
         <tr><td class="q-label">Q4 2022</td><td class="up">+1.1%</td><td class="down">−33.3%</td><td class="down">−100%</td></tr>
         <tr><td class="q-label">Q2 2024</td><td class="up">+0.1%</td><td class="down">−19.2%</td><td class="up">+4.2%</td></tr>
-        <tr><td class="q-label">Q1 2025</td><td class="up">+9.0%</td><td class="down">−0.5%</td><td class="up">+3.8%</td></tr>
-        <tr><td class="q-label">Q3 2025</td><td class="up">+0.8%</td><td class="down">−20.3%</td><td class="down">−5.5%</td></tr>
-        <tr><td class="q-label">Q4 2025</td><td class="up">+2.7%</td><td class="down">−52.8%</td><td class="down">−1.9%</td></tr>
+        <tr class="pref-era-row"><td class="q-label">Q1 2025</td><td class="up">+9.0%</td><td class="down">−0.5%</td><td class="up">+3.8%</td></tr>
+        <tr class="pref-era-row"><td class="q-label">Q3 2025</td><td class="up">+0.8%</td><td class="down">−20.3%</td><td class="down">−5.5%</td></tr>
+        <tr class="pref-era-row"><td class="q-label">Q4 2025</td><td class="up">+2.7%</td><td class="down">−52.8%</td><td class="down">−1.9%</td></tr>
       </tbody>
     </table>
+    <div style="margin-top: 12px; font-size: 12px; color: var(--dim); font-family: 'IBM Plex Mono', monospace;">
+      <span style="color:var(--orange);">⚡</span> = preferred era quarter. Phantom growth frequency doubled from 18% to 40% once prefs entered.
+    </div>
     <div class="watermark">cebetracker.io</div>
   </div>
 
@@ -630,7 +859,7 @@ input[type="range"]::-webkit-slider-thumb {
   </div>
 
   <div class="callout blue">
-    <strong>The zero line is $23,270.</strong> Below that price, converts and preferred consume the entire treasury. Common equity = $0. Above it, every dollar of BTC appreciation flows disproportionately to common. That's the embedded leverage CEBE makes visible.
+    <strong>The zero line is $23,270.</strong> Below that price, converts and preferred consume the entire treasury. Common equity = $0. Above it, every dollar of BTC appreciation flows disproportionately to common. That's the embedded leverage. BPS hides it. CEBE shows it.
   </div>
 </section>
 
@@ -680,7 +909,7 @@ input[type="range"]::-webkit-slider-thumb {
   <div class="section-num">04</div>
   <h2 class="section-title">Your equity is a call option</h2>
   <p class="section-desc">
-    Robert Merton proved in 1974 that equity in a leveraged firm is mathematically identical to a call option on firm assets with a strike price equal to total liabilities. CEBE is the intrinsic value of that option. The premium the market pays above CEBE, the "time value," tells you how much confidence or fear is priced in.
+    Robert Merton proved in 1974 that equity in a leveraged firm is mathematically identical to a call option on firm assets with a strike price equal to total liabilities. CEBE is the intrinsic value of that option. The gap between MSTR's market price and CEBE — the "time value" — tells you how much premium the market puts on Saylor's execution.
   </p>
 
   <div class="card" style="position:relative;">
@@ -692,7 +921,7 @@ input[type="range"]::-webkit-slider-thumb {
     <div class="compare-card" style="border-top: 3px solid var(--red);">
       <div class="metric-label" style="color:var(--muted);">Q4 2025 Time Value</div>
       <div class="metric-value" style="color:var(--red); font-size: clamp(28px,4vw,48px);">7.9%</div>
-      <div class="metric-sub">Maximum pessimism. Market priced<br>MSTR at near-exactly its CEBE value.</div>
+      <div class="metric-sub">Maximum pessimism. Market priced<br>MSTR barely above its CEBE value.</div>
     </div>
     <div class="compare-card" style="border-top: 3px solid var(--green);">
       <div class="metric-label" style="color:var(--muted);">22-Quarter Average</div>
@@ -702,7 +931,7 @@ input[type="range"]::-webkit-slider-thumb {
   </div>
 
   <div class="callout green">
-    <strong>7.9% time value means the market priced zero premium</strong> for Strategy's ability to accumulate BTC, its no-call debt structure, or its infinite duration. Every prior time value collapse was followed by a recovery.
+    <strong>7.9% time value means the market priced zero premium</strong> for Strategy's ability to accumulate BTC, its no-call debt structure, or the lack of any maturity wall. Every prior time value collapse was followed by a recovery.
   </div>
 </section>
 
@@ -826,7 +1055,7 @@ input[type="range"]::-webkit-slider-thumb {
   </div>
 
   <div class="callout orange">
-    <strong>Phantom dilution is the mirror image of phantom growth.</strong> BPS misreads the upside (9 quarters where it said "up" while shareholders lost money) and misreads the downside (4 purchases it called "dilutive" that actually grew common equity). Same root cause: ignoring senior claims.
+    <strong>Phantom dilution is phantom growth in reverse.</strong> BPS misreads the upside (9 quarters where it said "up" while shareholders lost money) and misreads the downside (4 purchases it called "dilutive" that actually grew common equity). Same root cause: ignoring senior claims.
   </div>
 </section>
 
@@ -874,7 +1103,7 @@ input[type="range"]::-webkit-slider-thumb {
   </div>
 
   <div class="callout green">
-    <strong>You believe in the strategy. CEBE helps you understand exactly what you own.</strong> Model it. Know your risk. Hold with conviction, not hope.
+    <strong>If you hold the stock, you should know the math.</strong> That's what CEBE is for.
   </div>
 </section>
 
@@ -1383,5 +1612,11 @@ window.addEventListener('resize', () => {
 
 init();
 </script>
+
+<!-- Vercel Analytics -->
+<script defer src="/_vercel/insights/script.js"></script>
+<!-- Vercel Speed Insights -->
+<script defer src="/_vercel/speed-insights/script.js"></script>
+
 </body>
 </html>
