@@ -1,1 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>CEBE Modeler | MSTR Share Price Analysis</title>
+    <meta name="description" content="Model Strategy (MSTR) share price through the CEBE framework. Scenario analysis, drag compression, dividend cascade modeling, and sensitivity matrix.">
+    <meta name="application-name" content="CEBE">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#09090b">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%2309090b' width='32' height='32' rx='4'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f97316'/%3E%3Cstop offset='100%25' stop-color='%23fb923c'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='16' y='15' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='url(%23g)' text-anchor='middle'%3ECE%3C/text%3E%3Ctext x='16' y='28' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='url(%23g)' text-anchor='middle'%3EBE%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #09090b; --bg-secondary: #0f0f11; --bg-card: #141416; --bg-elevated: #1a1a1d;
+            --orange-primary: #f97316; --orange-light: #fb923c;
+            --orange-glow: rgba(249,115,22,0.12); --orange-border: rgba(249,115,22,0.25);
+            --text-primary: #fafafa; --text-secondary: #a1a1aa; --text-muted: #52525b;
+            --green: #22c55e; --green-muted: rgba(34,197,94,0.15);
+            --red: #ef4444; --red-muted: rgba(239,68,68,0.15);
+            --yellow: #eab308; --yellow-muted: rgba(234,179,8,0.15);
+            --blue: #38bdf8; --blue-muted: rgba(56,189,248,0.08);
+            --border-subtle: rgba(255,255,255,0.06); --mono: 'JetBrains Mono', monospace;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; background:var(--bg-primary); color:var(--text-primary); line-height:1.6; min-height:100vh; }
+        body::before { content:''; position:fixed; inset:0; pointer-events:none; background-image:linear-gradient(rgba(249,115,22,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(249,115,22,0.015) 1px,transparent 1px); background-size:48px 48px; z-index:0; }
+        .container { max-width:720px; margin:0 auto; padding:24px 16px 60px; position:relative; z-index:1; }
 
+        /* HEADER */
+        .header { text-align:center; margin-bottom:28px; }
+        .nav-back { display:inline-block; font-size:12px; color:var(--text-muted); text-decoration:none; margin-bottom:12px; letter-spacing:1px; transition:color .2s; }
+        .nav-back:hover { color:var(--orange-primary); }
+        .logo-container { position:relative; display:inline-block; margin-bottom:6px; }
+        .logo { font-size:32px; font-weight:300; letter-spacing:16px; padding-left:16px; color:var(--text-primary); position:relative; z-index:1; }
+        .logo span { background:linear-gradient(135deg,var(--orange-primary),var(--orange-light)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-weight:600; }
+        .logo-whisper { font-size:11px; font-weight:400; letter-spacing:8px; padding-left:8px; margin-top:2px; text-transform:lowercase; background:linear-gradient(180deg,rgba(161,161,170,0.6),rgba(82,82,91,0.2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .logo-glow { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:180px; height:50px; background:radial-gradient(ellipse,rgba(249,115,22,0.3),transparent 70%); filter:blur(20px); z-index:0; }
+        .logo-badge { display:inline-block; font-size:11px; font-weight:600; padding:4px 10px; border-radius:6px; background:rgba(249,115,22,0.12); border:1px solid var(--orange-border); color:var(--orange-primary); letter-spacing:1px; font-family:var(--mono); margin-top:8px; }
+        .header-sub { font-size:13px; color:var(--text-muted); letter-spacing:1px; margin-top:4px; }
+        .live-strip { display:flex; align-items:center; justify-content:center; gap:16px; margin-top:12px; font-size:11px; font-family:var(--mono); color:var(--text-muted); flex-wrap:wrap; }
+        .live-dot { width:6px; height:6px; border-radius:50%; background:var(--green); display:inline-block; animation:pulse-dot 2s ease infinite; }
+        @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.4} }
+        .live-price { color:var(--text-secondary); }
+
+        /* SCENARIOS */
+        .scenarios-section { margin-bottom:24px; }
+        .scenario-group { margin-bottom:14px; }
+        .scenario-group:last-child { margin-bottom:0; }
+        .group-label { display:flex; align-items:center; gap:10px; margin-bottom:8px; padding-left:4px; }
+        .group-label-badge { font-size:9px; font-family:var(--mono); font-weight:700; letter-spacing:1.5px; padding:3px 8px; border-radius:4px; white-space:nowrap; }
+        .group-label-badge.now { background:rgba(255,255,255,0.04); color:var(--text-muted); border:1px solid var(--border-subtle); }
+        .group-label-badge.future { background:rgba(249,115,22,0.08); color:var(--orange-primary); border:1px solid var(--orange-border); }
+        .group-label-text { font-size:9px; letter-spacing:2px; font-weight:600; color:var(--text-muted); }
+        .group-label-line { flex:1; height:1px; background:var(--border-subtle); }
+        .scenarios-row { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+        @media(max-width:500px){ .scenarios-row{grid-template-columns:repeat(2,1fr)} }
+        .scenario-card { padding:16px 12px 14px; border-radius:12px; border:1.5px solid var(--border-subtle); background:var(--bg-card); cursor:pointer; transition:all .25s ease; text-align:center; user-select:none; position:relative; }
+        .scenario-card:hover { border-color:rgba(255,255,255,0.12); background:var(--bg-elevated); transform:translateY(-2px); }
+        .scenario-card.active { border-color:var(--orange-primary); background:var(--orange-glow); box-shadow:0 0 20px rgba(249,115,22,0.1); }
+        .scenario-card.projection { border-left:3px solid rgba(249,115,22,0.3); }
+        .scenario-card.projection.active { border-left-color:var(--orange-primary); }
+        .horizon-badge { position:absolute; top:8px; right:8px; font-size:9px; font-weight:700; font-family:var(--mono); padding:2px 6px; border-radius:4px; letter-spacing:.5px; }
+        .horizon-badge.now-badge { background:rgba(255,255,255,0.04); color:#52525b; border:1px solid rgba(255,255,255,0.06); }
+        .horizon-badge.future-badge { background:rgba(249,115,22,0.1); color:var(--orange-primary); border:1px solid var(--orange-border); }
+        .scenario-icon { font-size:22px; margin-bottom:4px; }
+        .scenario-name { font-size:12px; font-weight:600; letter-spacing:.5px; margin-bottom:4px; }
+        .scenario-price { font-size:15px; font-weight:700; font-family:var(--mono); color:var(--orange-light); }
+        .scenario-mnav { font-size:10px; color:var(--text-muted); font-family:var(--mono); margin-top:4px; }
+
+        /* HERO */
+        .hero { text-align:center; padding:28px 20px; margin-bottom:20px; background:linear-gradient(180deg,rgba(249,115,22,0.04),transparent); border-radius:20px; border:1px solid rgba(249,115,22,0.1); }
+        .hero-label { font-size:10px; letter-spacing:3px; color:var(--text-muted); margin-bottom:6px; font-weight:500; }
+        .hero-price { font-size:64px; font-weight:700; font-family:var(--mono); line-height:1; margin-bottom:8px; transition:color .3s; }
+        .hero-price.positive{color:var(--green)} .hero-price.negative{color:var(--red)} .hero-price.neutral{color:var(--text-primary)}
+        .hero-change { font-size:16px; font-weight:600; font-family:var(--mono); margin-bottom:4px; }
+        .hero-change.up{color:var(--green)} .hero-change.down{color:var(--red)}
+        .hero-vs { font-size:11px; color:var(--text-muted); }
+        .hero-context { margin-top:4px; font-size:10px; color:var(--text-muted); font-family:var(--mono); letter-spacing:.5px; }
+        .hero-implied { margin-top:10px; font-size:12px; font-family:var(--mono); color:var(--text-secondary); padding:6px 14px; border-radius:20px; background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); display:inline-block; }
+        .hero-implied em { font-style:normal; color:var(--orange-primary); font-weight:600; }
+
+        /* NARRATIVE */
+        .narrative { background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:14px; padding:20px; margin-bottom:20px; }
+        .narrative-title { font-size:14px; font-weight:600; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+        .narrative-body { display:flex; flex-direction:column; gap:10px; }
+        .narr-item { display:flex; align-items:flex-start; gap:10px; padding:10px 14px; border-radius:10px; font-size:13px; line-height:1.5; }
+        .narr-item.green { background:var(--green-muted); border:1px solid rgba(34,197,94,0.2); color:#86efac; }
+        .narr-item.red { background:var(--red-muted); border:1px solid rgba(239,68,68,0.2); color:#fca5a5; }
+        .narr-item.amber { background:var(--yellow-muted); border:1px solid rgba(234,179,8,0.2); color:#fde68a; }
+        .narr-item.info { background:var(--blue-muted); border:1px solid rgba(56,189,248,0.2); color:#7dd3fc; }
+        .narr-item.neutral { background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); color:var(--text-secondary); }
+        .narr-icon { font-size:16px; flex-shrink:0; margin-top:1px; }
+        .narr-text strong { color:var(--text-primary); }
+
+        /* METRICS */
+        .metrics-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(100px,1fr)); gap:8px; margin-bottom:20px; }
+        .metric-card { background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:10px; padding:12px 10px; text-align:center; }
+        .metric-label { font-size:8px; letter-spacing:1.5px; color:var(--text-muted); margin-bottom:4px; font-weight:600; }
+        .metric-value { font-size:17px; font-weight:700; font-family:var(--mono); line-height:1.2; }
+        .metric-sub { font-size:9px; color:#3f3f46; margin-top:2px; font-family:var(--mono); }
+        .metric-value.danger{color:var(--red)} .metric-value.warn{color:var(--yellow)} .metric-value.good{color:var(--green)}
+
+        /* COLLAPSIBLE */
+        .collapse-section { margin-bottom:12px; }
+        .collapse-section summary { display:flex; align-items:center; gap:8px; padding:14px 16px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:12px; cursor:pointer; font-size:13px; font-weight:600; color:var(--text-secondary); letter-spacing:.5px; transition:all .2s; list-style:none; user-select:none; }
+        .collapse-section summary::-webkit-details-marker{display:none}
+        .collapse-section summary:hover { border-color:rgba(255,255,255,0.12); color:var(--text-primary); }
+        .collapse-section[open] summary { border-radius:12px 12px 0 0; border-bottom-color:transparent; color:var(--orange-primary); }
+        .collapse-body { padding:16px; background:var(--bg-card); border:1px solid var(--border-subtle); border-top:none; border-radius:0 0 12px 12px; }
+
+        /* CONTROLS */
+        .controls-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+        @media(max-width:500px){ .controls-grid{grid-template-columns:1fr} }
+        .control-card { background:var(--bg-secondary); border:1px solid var(--border-subtle); border-radius:10px; padding:14px; }
+        .control-card.full-width { grid-column:1/-1; }
+        .control-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+        .control-label { font-size:10px; letter-spacing:1.5px; color:var(--text-muted); font-weight:600; }
+        .control-value { font-size:18px; font-weight:700; font-family:var(--mono); color:var(--orange-light); }
+        .control-locked { font-size:9px; color:var(--text-muted); font-style:italic; margin-top:6px; }
+        input[type=range] { -webkit-appearance:none; width:100%; height:6px; border-radius:3px; background:#333; outline:none; cursor:pointer; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:var(--orange-primary); box-shadow:0 0 10px rgba(249,115,22,0.4); cursor:grab; }
+        input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%; background:var(--orange-primary); border:none; box-shadow:0 0 10px rgba(249,115,22,0.4); cursor:grab; }
+        input[type=range]:disabled { opacity:.3; cursor:not-allowed; }
+        input[type=range]:disabled::-webkit-slider-thumb { cursor:not-allowed; background:#555; box-shadow:none; }
+        .slider-labels { display:flex; justify-content:space-between; font-size:9px; color:#444; font-family:var(--mono); margin-top:4px; }
+        .toggle-row { display:flex; gap:6px; flex-wrap:wrap; }
+        .toggle-btn { padding:6px 14px; border-radius:8px; border:1.5px solid var(--border-subtle); background:transparent; color:var(--text-muted); font-size:12px; font-weight:600; font-family:var(--mono); cursor:pointer; transition:all .2s; }
+        .toggle-btn:hover { border-color:rgba(255,255,255,0.12); color:var(--text-secondary); }
+        .toggle-btn.active { border-color:var(--orange-primary); color:var(--orange-primary); background:var(--orange-glow); }
+        .mnav-presets { display:flex; gap:4px; margin-top:8px; }
+        .mnav-btn { flex:1; padding:4px 0; border-radius:6px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-muted); font-size:10px; font-family:var(--mono); cursor:pointer; transition:all .2s; }
+        .mnav-btn:hover,.mnav-btn.active { border-color:var(--orange-primary); color:var(--orange-primary); background:var(--orange-glow); }
+
+        /* WATERFALL */
+        .waterfall { display:flex; align-items:center; gap:4px; overflow-x:auto; padding:12px; padding-right:24px; scrollbar-width:none; }
+        .waterfall::-webkit-scrollbar{display:none}
+        .waterfall::after { content:''; flex:0 0 12px; }
+        .wf-step { flex:0 0 auto; text-align:center; padding:8px 12px; border-radius:8px; min-width:85px; }
+        .wf-step.btc-val { background:rgba(249,115,22,0.08); border:1px solid rgba(249,115,22,0.2); }
+        .wf-step.claims { background:var(--red-muted); border:1px solid rgba(239,68,68,0.2); }
+        .wf-step.nav { background:var(--green-muted); border:1px solid rgba(34,197,94,0.2); }
+        .wf-step.shares { background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); }
+        .wf-step.result { background:rgba(249,115,22,0.12); border:1px solid var(--orange-border); }
+        .wf-label { font-size:8px; letter-spacing:1px; color:var(--text-muted); margin-bottom:2px; }
+        .wf-value { font-size:12px; font-weight:700; font-family:var(--mono); }
+        .wf-arrow { flex:0 0 auto; font-size:14px; color:var(--text-muted); }
+
+        /* TABLE */
+        .table-wrap { overflow-x:auto; border-radius:10px; border:1px solid var(--border-subtle); background:var(--bg-secondary); scrollbar-width:thin; scrollbar-color:#333 transparent; -webkit-overflow-scrolling:touch; }
+        .table-wrap table { min-width:700px; }
+        table { width:100%; border-collapse:collapse; font-size:12px; white-space:nowrap; }
+        thead th { padding:10px 12px; text-align:right; font-size:8px; font-weight:600; letter-spacing:1.5px; color:var(--text-muted); border-bottom:1px solid var(--border-subtle); background:rgba(255,255,255,0.02); position:sticky; top:0; }
+        thead th:first-child{text-align:center}
+        tbody td { padding:8px 12px; text-align:right; font-family:var(--mono); font-size:12px; border-bottom:1px solid rgba(255,255,255,0.03); }
+        tbody td:first-child { text-align:center; font-weight:600; color:var(--text-secondary); }
+        tbody tr:hover{background:rgba(255,255,255,0.02)}
+        tbody tr.event-row{background:rgba(249,115,22,0.03)}
+        .cell-red{color:var(--red)!important} .cell-green{color:var(--green)!important} .cell-amber{color:var(--yellow)!important}
+        .cell-muted{color:var(--text-muted)!important} .cell-bold{font-weight:700!important} .cell-blue{color:var(--blue)!important}
+
+        /* MATRIX */
+        .matrix-table { width:100%; border-collapse:collapse; }
+        .matrix-table th { padding:8px 10px; font-size:9px; font-weight:600; letter-spacing:1px; color:var(--text-muted); border-bottom:1px solid var(--border-subtle); background:rgba(255,255,255,0.02); }
+        .matrix-table td { padding:8px 10px; text-align:center; font-family:var(--mono); font-size:11px; font-weight:600; border-bottom:1px solid rgba(255,255,255,0.03); }
+        .matrix-table td.row-label { text-align:right; color:var(--text-secondary); font-weight:600; background:rgba(255,255,255,0.02); }
+        .matrix-table th:first-child{text-align:right}
+        .matrix-cell-green{color:var(--green);background:rgba(34,197,94,0.06)} .matrix-cell-lightgreen{color:#86efac;background:rgba(34,197,94,0.03)}
+        .matrix-cell-red{color:var(--red);background:rgba(239,68,68,0.06)} .matrix-cell-lightred{color:#fca5a5;background:rgba(239,68,68,0.03)}
+        .matrix-cell-gold{color:#fbbf24;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2)}
+        .matrix-cell-current{outline:2px solid var(--orange-primary);outline-offset:-2px;border-radius:4px}
+
+        /* PREF STACK TABLE */
+        .pref-stack { width:100%; border-collapse:collapse; font-size:12px; }
+        .pref-stack th { padding:8px 10px; text-align:left; font-size:9px; font-weight:600; letter-spacing:1px; color:var(--text-muted); border-bottom:1px solid var(--border-subtle); }
+        .pref-stack td { padding:8px 10px; font-family:var(--mono); font-size:12px; border-bottom:1px solid rgba(255,255,255,0.03); }
+        .pref-stack td:first-child { font-weight:600; color:var(--text-secondary); }
+        .badge-cash { font-size:9px; padding:2px 6px; border-radius:4px; background:rgba(239,68,68,0.12); color:#fca5a5; font-weight:600; }
+        .badge-cum { font-size:9px; color:var(--text-muted); }
+
+        /* ASSUMPTIONS & FOOTER */
+        .assumptions { padding:14px 16px; background:rgba(255,255,255,0.02); border:1px solid var(--border-subtle); border-radius:10px; font-size:11px; color:var(--text-muted); line-height:1.6; margin-top:16px; }
+        .assumptions strong{color:var(--text-secondary)}
+        .footer { text-align:center; padding-top:24px; border-top:1px solid var(--border-subtle); font-size:11px; color:var(--text-muted); margin-top:24px; }
+        .footer a{color:var(--orange-primary);text-decoration:none} .footer a:hover{text-decoration:underline}
+        .footer-formula { font-family:var(--mono); font-size:10px; color:#333; margin-top:8px; }
+
+        /* LOADING */
+        .loading-screen { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--bg-primary); z-index:999; }
+        .loading-spinner { width:32px; height:32px; border:3px solid #222; border-top-color:var(--orange-primary); border-radius:50%; animation:spin .8s linear infinite; margin-bottom:12px; }
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .loading-text { font-size:12px; color:var(--text-muted); letter-spacing:2px; }
+
+        @media(max-width:768px){ .hero-price{font-size:48px} }
+        @media(max-width:480px){ .hero-price{font-size:40px} .control-value{font-size:16px} .logo{font-size:24px;letter-spacing:10px;padding-left:10px} }
+    </style>
+    <script defer src="/_vercel/insights/script.js"></script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
+</head>
+<body>
+<div class="loading-screen" id="loadingScreen"><div class="loading-spinner"></div><div class="loading-text">LOADING LIVE DATA</div></div>
+<div class="container" id="app" style="display:none">
+    <div class="header">
+        <a href="/modeler" class="nav-back">&larr; modelers</a>
+        <div class="logo-container"><div class="logo-glow"></div><div class="logo"><span>CEBE</span></div><p class="logo-whisper">tracker</p></div>
+        <div class="logo-badge">MSTR MODELER</div>
+        <div class="header-sub">Pick a scenario. See what your MSTR is worth.</div>
+        <div class="live-strip" id="liveStrip">
+            <span><span class="live-dot"></span> Live Data</span>
+            <span class="live-price" id="liveBtcDisplay">BTC $&mdash;</span>
+            <span class="live-price" id="liveMstrDisplay">MSTR $&mdash;</span>
+            <span class="live-price" id="liveDataDate">&mdash;</span>
+        </div>
+    </div>
+    <div class="scenarios-section">
+        <div class="scenario-group">
+            <div class="group-label"><span class="group-label-badge now">&#9889; NOW</span><span class="group-label-text">WHAT IF BTC WERE AT THIS PRICE TODAY</span><div class="group-label-line"></div></div>
+            <div class="scenarios-row" id="snapshotBar"></div>
+        </div>
+        <div class="scenario-group">
+            <div class="group-label"><span class="group-label-badge future">&rarr; FORWARD</span><span class="group-label-text">10-YEAR PROJECTIONS &middot; CONVERTS &middot; CAPITAL PLAN</span><div class="group-label-line"></div></div>
+            <div class="scenarios-row" id="projectionBar"></div>
+        </div>
+    </div>
+    <div class="hero">
+        <div class="hero-label">MODELED MSTR SHARE PRICE</div>
+        <div class="hero-price neutral" id="heroPrice">$&mdash;</div>
+        <div class="hero-change" id="heroChange">&mdash;</div>
+        <div class="hero-vs" id="heroVs">vs current market price</div>
+        <div class="hero-context" id="heroContext"></div>
+        <div class="hero-implied" id="heroImplied" style="display:none">Market implies <em id="impliedMnavVal">&mdash;</em> mNAV</div>
+    </div>
+    <div class="narrative" id="narrativePanel"><div class="narrative-title" id="narrativeTitle">&#128269; What happens here</div><div class="narrative-body" id="narrativeBody"></div></div>
+    <div class="metrics-grid" id="metricsGrid"></div>
+    <details class="collapse-section" id="controlsSection">
+        <summary>&#9881; Adjust Inputs</summary>
+        <div class="collapse-body">
+            <div class="controls-grid">
+                <div class="control-card">
+                    <div class="control-header"><span class="control-label">BTC PRICE</span><span class="control-value" id="btcPriceDisplay">$&mdash;</span></div>
+                    <input type="range" id="btcSlider" min="20000" max="1000000" step="1000" value="100000">
+                    <div class="slider-labels"><span>$20K</span><span>$500K</span><span>$1M</span></div>
+                    <div class="control-locked" id="btcLockedMsg" style="display:none">&#128274; Controlled by scenario CAGR curve</div>
+                </div>
+                <div class="control-card">
+                    <div class="control-header"><span class="control-label">mNAV MULTIPLE</span><span class="control-value" id="mnavDisplay">1.00&times;</span></div>
+                    <input type="range" id="mnavSlider" min="30" max="400" value="100">
+                    <div class="mnav-presets" id="mnavPresets"></div>
+                    <div class="control-locked" id="mnavLockedMsg" style="display:none">&#128274; Controlled by scenario mNAV curve</div>
+                </div>
+                <div class="control-card full-width">
+                    <div class="control-header"><span class="control-label">TIME HORIZON</span><span class="control-value" id="horizonDisplay">Now</span></div>
+                    <div class="toggle-row" id="horizonBar"></div>
+                </div>
+            </div>
+        </div>
+    </details>
+    <details class="collapse-section"><summary>&#128256; Value Waterfall</summary><div class="collapse-body" style="padding:0"><div class="waterfall" id="waterfall"></div></div></details>
+    <details class="collapse-section" id="projectionSection" style="display:none"><summary>&#128197; Year-by-Year Projection</summary><div class="collapse-body" style="padding:0"><div class="table-wrap"><table id="projectionTable"><thead id="projHead"></thead><tbody id="projBody"></tbody></table></div></div></details>
+    <details class="collapse-section"><summary>&#127919; Price Sensitivity Matrix</summary><div class="collapse-body" style="padding:0"><div class="table-wrap"><table class="matrix-table" id="matrixTable"></table></div></div></details>
+    <details class="collapse-section"><summary>&#9881; Capital Structure &amp; Preferred Stack</summary><div class="collapse-body" id="customizeBody"></div></details>
+    <div class="assumptions" id="assumptions"></div>
+    <div class="footer">
+        <p>CEBE Framework by <a href="https://x.com/chcbearsfan" target="_blank">&#64;chcbearsfan</a> &middot; <a href="/">cebetracker.io</a> &middot; <a href="https://x.com/chcbearsfan/status/2014767364819063207" target="_blank">Read the Framework</a></p>
+        <p style="margin-top:4px">Not financial advice &middot; Data updates after each filing</p>
+        <p class="footer-formula">Share Price = CEBE &times; BTC Price &times; mNAV</p>
+    </div>
+</div>
+</html>
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CEBE MSTR SHARE PRICE MODELER v3
+// Capital Plan Engine · Convert Bond Maturities · Siege/Saylor/Singularity
+// cebetracker.io/modeler
+// ═══════════════════════════════════════════════════════════════
+
+const SHEET_ID = '1BNsCWGVU08PDinDcfzJccqcuj9_KrK1VZGETErzBZvg';
+const SNAPSHOTS_GID = '771405586';
+const FINNHUB_API_KEY = 'd5tuehhr01qtjet1d7k0d5tuehhr01qtjet1d7kg';
+const START_YEAR = 2026;
+
+const PREF_INSTRUMENTS = [
+    { id:'strf', name:'STRF', rate:0.10,   cumulative:true,  currency:'USD', seniority:1 },
+    { id:'strc', name:'STRC', rate:0.1125, cumulative:false, currency:'USD', seniority:2 },
+    { id:'stre', name:'STRE', rate:0.10,   cumulative:true,  currency:'EUR', seniority:3 },
+    { id:'strk', name:'STRK', rate:0.08,   cumulative:true,  currency:'USD', seniority:4 },
+    { id:'strd', name:'STRD', rate:0.10,   cumulative:false, currency:'USD', seniority:5 },
+];
+
+const CONVERTS = [
+    { id:'2028',  maturity:2028, face:1010e6,  convPrice:183.19, convShares:5513000 },
+    { id:'2029',  maturity:2029, face:3000e6,  convPrice:672.40, convShares:4462000 },
+    { id:'2030A', maturity:2030, face:800e6,   convPrice:149.77, convShares:5342000 },
+    { id:'2030B', maturity:2030, face:2000e6,  convPrice:433.43, convShares:4614000 },
+    { id:'2031',  maturity:2031, face:600e6,   convPrice:232.72, convShares:2594000 },
+    { id:'2032',  maturity:2032, face:800e6,   convPrice:204.33, convShares:3915000 },
+];
+
+// Saylor Base Case: 29% avg CAGR, declining from ~45% to ~21% (Bitcoin 2024 Keynote, Nashville)
+// His 21-year model starts at ~55% ARR decelerating to ~20%. Our 10-year window picks up 2 years in.
+const SAYLOR_CAGR = [
+    {year:1,cagr:.45},{year:2,cagr:.42},{year:3,cagr:.38},{year:4,cagr:.35},{year:5,cagr:.32},
+    {year:6,cagr:.29},{year:7,cagr:.27},{year:8,cagr:.25},{year:9,cagr:.23},{year:10,cagr:.21},
+];
+// Saylor Bull Case: 37% avg CAGR, declining from ~55% to ~27%
+const SINGULARITY_CAGR = [
+    {year:1,cagr:.55},{year:2,cagr:.52},{year:3,cagr:.48},{year:4,cagr:.44},{year:5,cagr:.40},
+    {year:6,cagr:.37},{year:7,cagr:.34},{year:8,cagr:.31},{year:9,cagr:.29},{year:10,cagr:.27},
+];
+const SAYLOR_MNAV = [
+    {year:0,mnav:1.0},{year:1,mnav:1.3},{year:2,mnav:1.5},{year:3,mnav:1.8},{year:4,mnav:1.6},
+    {year:5,mnav:1.5},{year:6,mnav:1.5},{year:7,mnav:1.5},{year:8,mnav:1.5},{year:9,mnav:1.5},{year:10,mnav:1.5},
+];
+const SAYLOR_DEPLOY = [
+    {year:1,totalB:14,eqPct:.50,prefRate:.105},{year:2,totalB:14,eqPct:.50,prefRate:.105},
+    {year:3,totalB:14,eqPct:.50,prefRate:.105},{year:4,totalB:10,eqPct:.45,prefRate:.100},
+    {year:5,totalB:8,eqPct:.40,prefRate:.100},{year:6,totalB:6,eqPct:.35,prefRate:.095},
+    {year:7,totalB:5,eqPct:.30,prefRate:.095},{year:8,totalB:4,eqPct:.30,prefRate:.090},
+    {year:9,totalB:3,eqPct:.30,prefRate:.090},{year:10,totalB:2,eqPct:.30,prefRate:.090},
+];
+
+const DEFAULTS = {
+    btc_holdings:713502, shares_outstanding:365000000, debt_usd:8214e6,
+    preferred_usd:8400e6, cash_usd:2250e6,
+    strk_face_usd:3220e6, strf_face_usd:2640e6, strd_face_usd:1006e6,
+    strc_face_usd:748e6, stre_face_eur:775e6, eurusd_rate:1.04,
+    software_income_usd:75e6, btc_price:97000, mstr_price:340,
+};
+
+const SCENARIOS = [
+    {id:'wipeout',      icon:'\u{1F480}',name:'Wipeout',      btc:25000, mnav:0.5,horizon:0, group:'snapshot',  type:'static'},
+    {id:'current',      icon:'\u{1F4CD}',name:'Current',      btc:null,  mnav:1.0,horizon:0, group:'snapshot',  type:'static'},
+    {id:'ath',          icon:'\u{1F451}',name:'Former ATH',   btc:126000,mnav:1.5,horizon:0, group:'snapshot',  type:'static'},
+    {id:'siege',        icon:'\u{1F3F0}',name:'Siege',        btc:50000, mnav:0.7,horizon:10,group:'projection',type:'siege'},
+    {id:'saylor',       icon:'\u{1F4D0}',name:'Saylor Model', btc:null,  mnav:null,horizon:10,group:'projection',type:'saylor'},
+    {id:'singularity',   icon:'\u{1F300}',name:'Singularity',  btc:null,  mnav:null,horizon:10,group:'projection',type:'singularity'},
+];
+
+const SINGULARITY_MNAV = [
+    {year:0,mnav:1.0},{year:1,mnav:1.5},{year:2,mnav:1.8},{year:3,mnav:2.0},{year:4,mnav:2.2},
+    {year:5,mnav:2.5},{year:6,mnav:2.5},{year:7,mnav:2.8},{year:8,mnav:3.0},{year:9,mnav:3.0},{year:10,mnav:3.0},
+];
+
+const HORIZON_OPTIONS = [{label:'Now',years:0},{label:'1Y',years:1},{label:'3Y',years:3},{label:'5Y',years:5},{label:'10Y',years:10}];
+const MNAV_PRESETS = [0.5,0.75,1.0,1.5,2.0,3.0];
+const MATRIX_BTC = [25000,50000,75000,100000,150000,200000,300000,500000,1000000];
+const MATRIX_MNAVS = [0.5,0.75,1.0,1.5,2.0,3.0];
+
+// ─── STATE ───
+var sheetData=null, liveBtcPrice=null, liveMstrPrice=null;
+var btcPrice=DEFAULTS.btc_price, mnavMultiple=1.0, horizonYears=0, activeScenario='current';
+
+// ─── HELPERS ───
+var $=function(id){return document.getElementById(id)};
+var fmt=function(n){return Math.round(n).toLocaleString('en-US')};
+var fmtB=function(n){return n>=1e9?'$'+(n/1e9).toFixed(1)+'B':n>=1e6?'$'+(n/1e6).toFixed(0)+'M':'$'+fmt(n)};
+var fmtPrice=function(p){if(p>=1e6)return '$'+(p/1e6).toFixed(1)+'M';if(p>=1000)return '$'+fmt(p);if(p>=1)return '$'+p.toFixed(2);return '$0.00'};
+var fmtPct=function(p,d){return(p*100).toFixed(d!==undefined?d:1)+'%'};
+var fmtSats=function(s){return fmt(Math.round(s))};
+function getActiveType(){var s=SCENARIOS.find(function(x){return x.id===activeScenario});return s?s.type:'static'}
+function isSlidersLocked(){var t=getActiveType();return t==='siege'||t==='saylor'||t==='singularity'}
+
+// ─── CSV ───
+function parseCSVLine(l){var r=[],c='',q=false;for(var i=0;i<l.length;i++){var ch=l[i];if(ch==='"')q=!q;else if(ch===','&&!q){r.push(c);c=''}else c+=ch}r.push(c);return r}
+function parseCSV(text){var lines=text.split('\n'),headers=parseCSVLine(lines[0]);return lines.slice(1).filter(function(l){return l.trim()}).map(function(l){var vals=parseCSVLine(l),row={};headers.forEach(function(h,i){row[h.replace(/"/g,'').trim()]=vals[i]?vals[i].replace(/"/g,'').trim():''});return row})}
+
+// ─── DATA LOADING ───
+async function loadData(){
+    try{
+        var results=await Promise.all([
+            fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd').then(function(r){return r.json()}).catch(function(){return null}),
+            fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&gid='+SNAPSHOTS_GID).then(function(r){return r.text()}),
+            fetchStockPrice('MSTR'),
+        ]);
+        var btcRes=results[0],sheetText=results[1],mstrStockPrice=results[2];
+        var rows=parseCSV(sheetText),mstrRow=null;
+        rows.forEach(function(r){if(r.ticker==='MSTR'&&(!r.status||r.status.toLowerCase()==='live')){if(!mstrRow||r.snapshot_date>mstrRow.snapshot_date)mstrRow=r}});
+        if(mstrRow)sheetData=mstrRow;
+        liveBtcPrice=btcRes&&btcRes.bitcoin?btcRes.bitcoin.usd:null;
+        liveMstrPrice=mstrStockPrice;
+        btcPrice=liveBtcPrice||parseFloat(sheetData&&sheetData.btc_price?sheetData.btc_price:'')||DEFAULTS.btc_price;
+        SCENARIOS.find(function(s){return s.id==='current'}).btc=btcPrice;
+        $('loadingScreen').style.display='none';
+        $('app').style.display='block';
+        buildScenarioBar();buildHorizonBar();buildMnavPresets();syncSliders();render();
+    }catch(err){
+        console.error('Load failed:',err);
+        $('loadingScreen').innerHTML='<div style="text-align:center;color:#a1a1aa;font-size:13px"><p style="margin-bottom:12px">Failed to load data</p><p style="font-size:11px;color:#52525b">'+err.message+'</p><p style="margin-top:12px"><a href="/" style="color:#f97316">&larr; Back to cebetracker.io</a></p></div>';
+    }
+}
+async function fetchStockPrice(symbol){
+    if(!FINNHUB_API_KEY||FINNHUB_API_KEY==='YOUR_FINNHUB_KEY_HERE')return null;
+    try{var r=await fetch('https://finnhub.io/api/v1/quote?symbol='+symbol+'&token='+FINNHUB_API_KEY);var d=await r.json();if(d.c&&d.c>0)return d.c}catch(e){}return null;
+}
+function getVal(field,fallback){if(sheetData&&sheetData[field]!==undefined&&sheetData[field]!==''){var v=parseFloat(sheetData[field]);if(!isNaN(v))return v}return fallback}
+function getInputs(){
+    return{
+        btcHoldings:getVal('btc_holdings',DEFAULTS.btc_holdings),
+        shares:getVal('shares_outstanding',DEFAULTS.shares_outstanding),
+        debtUsd:getVal('debt_usd',DEFAULTS.debt_usd),
+        cashUsd:getVal('cash_usd',DEFAULTS.cash_usd),
+        strkFace:getVal('strk_face_usd',DEFAULTS.strk_face_usd),
+        strfFace:getVal('strf_face_usd',DEFAULTS.strf_face_usd),
+        strdFace:getVal('strd_face_usd',DEFAULTS.strd_face_usd),
+        strcFace:getVal('strc_face_usd',DEFAULTS.strc_face_usd),
+        streFaceEur:getVal('stre_face_eur',DEFAULTS.stre_face_eur),
+        eurusd:getVal('eurusd_rate',DEFAULTS.eurusd_rate),
+        softwareIncome:getVal('software_income_usd',DEFAULTS.software_income_usd),
+        snapshotDate:sheetData?sheetData.snapshot_date||'\u2014':'\u2014',
+    };
+}
+
+// ═══════════════════════════════════════════════════
+// CEBE MATH ENGINE
+// ═══════════════════════════════════════════════════
+function calcCEBE(btcH,shares,netCl,btcP,mn){
+    var p=btcP||btcPrice, m=mn!==undefined?mn:mnavMultiple;
+    var clBtc=p>0?Math.max(0,netCl/p):0;
+    var drag=btcH>0?Math.max(0,Math.min(1,clBtc/btcH)):0;
+    var commonBtc=Math.max(0,btcH-clBtc);
+    var cebeSats=shares>0?(commonBtc/shares)*1e8:0;
+    var bpsSats=shares>0?(btcH/shares)*1e8:0;
+    var amp=drag<.999?1/(1-drag):Infinity;
+    var breakEven=btcH>0?Math.max(0,netCl)/btcH:0;
+    var navUsd=Math.max(0,(btcH*p)-netCl);
+    var navPerShare=shares>0?navUsd/shares:0;
+    var modeledPrice=navPerShare*m;
+    return{commonBtc:commonBtc,cebeSats:cebeSats,bpsSats:bpsSats,drag:drag,amp:amp,breakEven:breakEven,navUsd:navUsd,navPerShare:navPerShare,modeledPrice:modeledPrice,btcHoldings:btcH,shares:shares,netClaimsUsd:netCl};
+}
+
+// ═══════════════════════════════════════════════════
+// PROJECTION ENGINE v3
+// ═══════════════════════════════════════════════════
+function projectYears(years){
+    var inp=getInputs(), scenarioType=getActiveType(), startBtc=liveBtcPrice||btcPrice;
+    var btcH=inp.btcHoldings, shares=inp.shares, cash=inp.cashUsd;
+    var strkF=inp.strkFace, strfF=inp.strfFace, strdF=inp.strdFace, strcF=inp.strcFace, streF_eur=inp.streFaceEur;
+    var eurusd=inp.eurusd, softIncome=inp.softwareIncome, strkConverted=false;
+    var convertDebt=CONVERTS.map(function(c){return{id:c.id,maturity:c.maturity,face:c.face,convPrice:c.convPrice,convShares:c.convShares,outstanding:true}});
+    var newPrefFace=0, newPrefDivAnnual=0;
+    var results=[], allEvents=[];
+
+    for(var y=0;y<=years;y++){
+        var calYear=START_YEAR+y, yearEvents=[];
+
+        // 1. BTC PRICE + mNAV for this year
+        var yearBtcPrice, yearMnav;
+        if(scenarioType==='siege'){yearBtcPrice=50000;yearMnav=0.7}
+        else if(scenarioType==='saylor'){
+            if(y===0){yearBtcPrice=startBtc;yearMnav=SAYLOR_MNAV[0].mnav}
+            else{var ce=SAYLOR_CAGR[Math.min(y-1,SAYLOR_CAGR.length-1)];var prevB=y===1?startBtc:results[y-1].yearBtcPrice;yearBtcPrice=prevB*(1+ce.cagr);yearMnav=SAYLOR_MNAV[Math.min(y,SAYLOR_MNAV.length-1)].mnav}
+        }else if(scenarioType==='singularity'){
+            if(y===0){yearBtcPrice=startBtc;yearMnav=SINGULARITY_MNAV[0].mnav}
+            else{var ce=SINGULARITY_CAGR[Math.min(y-1,SINGULARITY_CAGR.length-1)];var prevB=y===1?startBtc:results[y-1].yearBtcPrice;yearBtcPrice=prevB*(1+ce.cagr);yearMnav=SINGULARITY_MNAV[Math.min(y,SINGULARITY_MNAV.length-1)].mnav}
+        }else{yearBtcPrice=btcPrice;yearMnav=mnavMultiple}
+
+        // 2. CONVERT BOND MATURITIES
+        if(y>0){convertDebt.forEach(function(conv){
+            if(!conv.outstanding||conv.maturity!==calYear)return;
+            var curDebt=convertDebt.filter(function(c){return c.outstanding}).reduce(function(s,c){return s+c.face},0);
+            var pUsd=strkF+strfF+strdF+strcF+streF_eur*eurusd+newPrefFace;
+            var nCl=curDebt+pUsd-cash;
+            var tmp=calcCEBE(btcH,shares,nCl,yearBtcPrice,yearMnav);
+            if(tmp.modeledPrice>=conv.convPrice){
+                conv.outstanding=false; shares+=conv.convShares;
+                yearEvents.push({type:'convert',cls:'green',icon:'\u{1F504}',text:'<strong>'+conv.id+' converts converted.</strong> Stock ('+fmtPrice(tmp.modeledPrice)+') above conversion price ('+fmtPrice(conv.convPrice)+'). Removed '+fmtB(conv.face)+' debt, added '+fmt(conv.convShares)+' shares.'});
+            }else if(scenarioType==='saylor'||scenarioType==='singularity'){
+                // Refinance — Strategy has capital market access, rolls the debt
+                yearEvents.push({type:'refinance',cls:'info',icon:'\u{1F504}',text:'<strong>'+conv.id+' converts refinanced.</strong> Stock ('+fmtPrice(tmp.modeledPrice)+') below conversion price ('+fmtPrice(conv.convPrice)+'). '+fmtB(conv.face)+' rolled into new convertible debt.'});
+            }else{
+                conv.outstanding=false; cash-=conv.face;
+                if(cash<0){var deficit=Math.abs(cash);var btcToSell=yearBtcPrice>0?deficit/yearBtcPrice:0;btcH=Math.max(0,btcH-btcToSell);
+                    yearEvents.push({type:'redeem',cls:'red',icon:'\u26A0\uFE0F',text:'<strong>'+conv.id+' converts matured at par.</strong> Stock ('+fmtPrice(tmp.modeledPrice)+') below conversion price ('+fmtPrice(conv.convPrice)+'). '+fmtB(conv.face)+' cash obligation. '+fmt(Math.round(btcToSell))+' BTC liquidated.'});cash=0;
+                }else{yearEvents.push({type:'redeem',cls:'amber',icon:'\u26A0\uFE0F',text:'<strong>'+conv.id+' converts redeemed at par.</strong> '+fmtB(conv.face)+' paid from cash reserves.'})}
+            }
+        })}
+
+        // 3. CAPITAL PLAN (Saylor only)
+        var newBtcAcq=0, yearDeploy=0, yearNewPref=0;
+        if(y>0&&scenarioType==='saylor'){
+            var dep=SAYLOR_DEPLOY[Math.min(y-1,SAYLOR_DEPLOY.length-1)];
+            yearDeploy=dep.totalB*1e9;
+            var eqRaise=yearDeploy*dep.eqPct, prefRaise=yearDeploy*(1-dep.eqPct);
+            var curDebt=convertDebt.filter(function(c){return c.outstanding}).reduce(function(s,c){return s+c.face},0);
+            var pUsd=strkF+strfF+strdF+strcF+streF_eur*eurusd+newPrefFace;
+            var nCl=curDebt+pUsd-cash;
+            var navNow=Math.max(0,(btcH*yearBtcPrice)-nCl);
+            var navPS=shares>0?navNow/shares:0;
+            var atmMnav=Math.max(0.5,yearMnav-0.1);
+            var atmPrice=navPS*atmMnav;
+            if(atmPrice>0){var newSh=eqRaise/atmPrice;shares+=newSh}
+            yearNewPref=prefRaise; newPrefFace+=prefRaise; newPrefDivAnnual+=prefRaise*dep.prefRate;
+            if(yearBtcPrice>0){newBtcAcq=yearDeploy/yearBtcPrice;btcH+=newBtcAcq}
+            if(yearDeploy>0)yearEvents.push({type:'deploy',cls:'info',icon:'\u{1F4E6}',text:'<strong>Deployed '+fmtB(yearDeploy)+'.</strong> Acquired '+fmt(Math.round(newBtcAcq))+' BTC. Issued '+fmtB(yearNewPref)+' new preferred at '+fmtPct(dep.prefRate,1)+'. ATM at '+atmMnav.toFixed(1)+'\u00d7.'});
+        }
+
+        // Singularity — full Saylor capital plan + BTC → $1M curve
+        if(y>0&&scenarioType==='singularity'){
+            var dep=SAYLOR_DEPLOY[Math.min(y-1,SAYLOR_DEPLOY.length-1)];
+            yearDeploy=dep.totalB*1e9;
+            var eqRaise=yearDeploy*dep.eqPct, prefRaise=yearDeploy*(1-dep.eqPct);
+            var curDebt=convertDebt.filter(function(c){return c.outstanding}).reduce(function(s,c){return s+c.face},0);
+            var pUsd=strkF+strfF+strdF+strcF+streF_eur*eurusd+newPrefFace;
+            var nCl=curDebt+pUsd-cash;
+            var navNow=Math.max(0,(btcH*yearBtcPrice)-nCl);
+            var navPS=shares>0?navNow/shares:0;
+            var atmMnav=Math.max(0.5,yearMnav-0.1);
+            var atmPrice=navPS*atmMnav;
+            if(atmPrice>0){var newSh=eqRaise/atmPrice;shares+=newSh}
+            yearNewPref=prefRaise; newPrefFace+=prefRaise; newPrefDivAnnual+=prefRaise*dep.prefRate;
+            if(yearBtcPrice>0){newBtcAcq=yearDeploy/yearBtcPrice;btcH+=newBtcAcq}
+            if(yearDeploy>0)yearEvents.push({type:'deploy',cls:'info',icon:'\u{1F4E6}',text:'<strong>Deployed '+fmtB(yearDeploy)+'.</strong> Acquired '+fmt(Math.round(newBtcAcq))+' BTC. Issued '+fmtB(yearNewPref)+' new preferred at '+fmtPct(dep.prefRate,1)+'. ATM at '+atmMnav.toFixed(1)+'\u00d7.'});
+        }
+
+        // 4. STRK CONVERSION CHECK
+        if(y>0&&!strkConverted&&strkF>0){
+            var curDebt3=convertDebt.filter(function(c){return c.outstanding}).reduce(function(s,c){return s+c.face},0);
+            var pUsd3=strkF+strfF+strdF+strcF+streF_eur*eurusd+newPrefFace;
+            var nCl3=curDebt3+pUsd3-cash;var tmp3=calcCEBE(btcH,shares,nCl3,yearBtcPrice,yearMnav);
+            if(tmp3.modeledPrice>=1000){
+                var strkSh=Math.round(strkF/1000);shares+=strkSh;
+                yearEvents.push({type:'strk',cls:'green',icon:'\u26A1',text:'<strong>STRK converts at $1,000.</strong> Removed '+fmtB(strkF)+' preferred claims and '+fmtB(strkF*0.08)+'/yr dividends. Added '+fmt(strkSh)+' shares.'});
+                strkF=0;strkConverted=true;
+            }
+        }
+
+        // 5. PAY DIVIDENDS
+        var status='green',btcSold=0,strcSkipped=false,strdSkipped=false;
+        if(y>0){
+            var strfDiv=strfF*0.10, strcDiv=strcF*0.1125, streDiv=streF_eur*eurusd*0.10;
+            var strkDiv=strkF*0.08, strdDiv=strdF*0.10, npDiv=newPrefDivAnnual;
+            var totalDiv=strfDiv+strcDiv+streDiv+strkDiv+strdDiv+npDiv;
+            cash-=(totalDiv-softIncome);
+            if(cash>=0){status='green'}
+            else{cash+=strdDiv;strdSkipped=true;
+                if(cash>=0){status='amber'}
+                else{cash+=strcDiv;strcSkipped=true;
+                    if(cash>=0){status='amber'}
+                    else{var deficit=Math.abs(cash);btcSold=yearBtcPrice>0?deficit/yearBtcPrice:0;btcH=Math.max(0,btcH-btcSold);cash=0;status='red'}
+                }
+            }
+        }
+
+        // 6. YEAR-END STATE
+        var remDebt=convertDebt.filter(function(c){return c.outstanding}).reduce(function(s,c){return s+c.face},0);
+        var prefUsd=strkF+strfF+strdF+strcF+streF_eur*eurusd+newPrefFace;
+        var netClaims=remDebt+prefUsd-cash;
+        var m=calcCEBE(btcH,shares,netClaims,yearBtcPrice,yearMnav);
+        var totDiv=strfF*0.10+strcF*0.1125+streF_eur*eurusd*0.10+strkF*0.08+strdF*0.10+newPrefDivAnnual;
+        var netDrain=totDiv-softIncome;
+        var runway=netDrain>0?(cash>0?cash/netDrain:0):Infinity;
+
+        results.push({year:y,calYear:calYear,btcH:btcH,shares:shares,cebeSats:m.cebeSats,drag:m.drag,
+            navPerShare:m.navPerShare,modeledPrice:m.modeledPrice,cash:cash,btcSold:btcSold,status:status,
+            amp:m.amp,breakEven:m.breakEven,cashRunway:runway,strcSkipped:strcSkipped,strdSkipped:strdSkipped,
+            yearBtcPrice:yearBtcPrice,yearMnav:yearMnav,newBtcAcquired:newBtcAcq,newPrefIssued:yearNewPref,
+            yearDeployment:yearDeploy,totalDivObligation:totDiv,events:yearEvents,netClaimsUsd:netClaims,
+            remainingDebt:remDebt,totalPrefFace:prefUsd});
+        yearEvents.forEach(function(e){allEvents.push({year:y,type:e.type,cls:e.cls,icon:e.icon,text:e.text})});
+    }
+    results._events=allEvents;
+    return results;
+}
+
+function quickCalc(bp,mn){
+    var inp=getInputs();var streUsd=inp.streFaceEur*inp.eurusd;
+    var prefUsd=inp.strkFace+inp.strfFace+inp.strdFace+inp.strcFace+streUsd;
+    var tDebt=CONVERTS.reduce(function(s,c){return s+c.face},0);
+    var netCl=tDebt+prefUsd-inp.cashUsd;
+    var nav=Math.max(0,(inp.btcHoldings*bp)-netCl);
+    return(inp.shares>0?nav/inp.shares:0)*mn;
+}
+
+// ═══════════════════════════════════════════════════
+// RENDERING
+// ═══════════════════════════════════════════════════
+function render(){
+    var inp=getInputs(),proj=projectYears(horizonYears);
+    var current=proj[0],final=proj[proj.length-1],marketPrice=liveMstrPrice||DEFAULTS.mstr_price;
+    renderHero(final,current,marketPrice);renderNarrative(final,current,inp,marketPrice,proj);
+    renderMetrics(final,current,inp);renderWaterfall(final,inp);renderProjectionTable(proj);
+    renderSensitivityMatrix();renderCustomize(inp);renderAssumptions(inp);updateSliderLocking();
+    $('liveBtcDisplay').textContent='BTC '+fmtPrice(liveBtcPrice||btcPrice);
+    $('liveMstrDisplay').textContent='MSTR '+fmtPrice(marketPrice);
+    $('liveDataDate').textContent=inp.snapshotDate!=='\u2014'?'Data: '+inp.snapshotDate:'';
+    updateSliderFills();
+}
+
+function renderHero(final,current,marketPrice){
+    var price=final.modeledPrice, el=$('heroPrice'), sType=getActiveType();
+    if(price<=0||!isFinite(price)){el.textContent='$0.00';el.className='hero-price negative';$('heroChange').textContent='\u2212100%';$('heroChange').className='hero-change down';$('heroVs').textContent='common equity wiped out';$('heroContext').textContent='';$('heroImplied').style.display='none';return}
+    el.textContent=fmtPrice(price);
+    var pctC=(price-marketPrice)/marketPrice, sign=pctC>=0?'+':'';
+    $('heroChange').textContent=sign+(pctC*100).toFixed(1)+'% ('+sign+'$'+Math.abs(price-marketPrice).toFixed(2)+')';
+    $('heroChange').className='hero-change '+(pctC>=0?'up':'down');
+    el.className='hero-price '+(pctC>.05?'positive':pctC<-.05?'negative':'neutral');
+    $('heroVs').textContent='vs MSTR market '+fmtPrice(marketPrice);
+    var ctx='';
+    if(horizonYears===0)ctx='instant snapshot';
+    else if(sType==='siege')ctx=horizonYears+'-year stress test \u00b7 $50K BTC flat \u00b7 converts + dividends';
+    else if(sType==='saylor')ctx=horizonYears+'-year projection \u00b7 Saylor base case (29% avg CAGR) \u00b7 capital plan active';
+    else if(sType==='singularity')ctx=horizonYears+'-year projection \u00b7 $80B capital plan \u00b7 Saylor bull case (37% avg CAGR)';
+    else ctx=horizonYears>0?horizonYears+'-year projection with dividend cascade':'instant snapshot';
+    $('heroContext').textContent=ctx;
+    // Implied mNAV
+    var inp=getInputs(),streUsd=inp.streFaceEur*inp.eurusd;
+    var prefUsd=inp.strkFace+inp.strfFace+inp.strdFace+inp.strcFace+streUsd;
+    var tDebt=CONVERTS.reduce(function(s,c){return s+c.face},0);
+    var nCl=tDebt+prefUsd-inp.cashUsd;
+    var navNow=Math.max(0,(inp.btcHoldings*btcPrice)-nCl);
+    var navPsNow=inp.shares>0?navNow/inp.shares:0;
+    if(navPsNow>0&&marketPrice>0){$('impliedMnavVal').textContent=(marketPrice/navPsNow).toFixed(2)+'\u00d7';$('heroImplied').style.display='inline-block'}
+    else{$('heroImplied').style.display='none'}
+}
+
+function renderNarrative(final,current,inp,marketPrice,proj){
+    var items=[], dragPct=final.drag*100, commonPct=(1-final.drag)*100;
+    var sObj=SCENARIOS.find(function(s){return s.id===activeScenario}), sName=sObj?sObj.name:'Custom', sType=getActiveType();
+    var endBtcP=final.yearBtcPrice||btcPrice;
+    $('narrativeTitle').innerHTML='\u{1F50D} '+sName+' \u2014 '+fmtPrice(endBtcP)+' BTC';
+
+    // Drag
+    if(final.drag<.05)items.push({cls:'green',icon:'\u2705',text:'<strong>Drag nearly zero ('+dragPct.toFixed(1)+'%).</strong> Common shareholders own '+commonPct.toFixed(1)+'% of the Bitcoin.'});
+    else if(final.drag<.20)items.push({cls:'green',icon:'\u{1F4C8}',text:'<strong>Low drag ('+dragPct.toFixed(1)+'%).</strong> Common owns '+commonPct.toFixed(1)+'% of the Bitcoin. Compression well advanced.'});
+    else if(final.drag<.40)items.push({cls:'neutral',icon:'\u2696',text:'<strong>Moderate drag ('+dragPct.toFixed(1)+'%).</strong> Common owns '+commonPct.toFixed(1)+'% of the BTC. Net claims '+fmtB(final.netClaimsUsd)+'.'});
+    else if(final.drag<.70)items.push({cls:'amber',icon:'\u26A0',text:'<strong>High drag ('+dragPct.toFixed(1)+'%).</strong> Only '+commonPct.toFixed(1)+'% of Bitcoin left for common.'});
+    else items.push({cls:'red',icon:'\u{1F4A5}',text:'<strong>Critical drag ('+dragPct.toFixed(1)+'%).</strong> Senior claims consume most Bitcoin value. Common equity severely impaired.'});
+
+    // Break-even
+    if(endBtcP<=final.breakEven)items.push({cls:'red',icon:'\u{1F480}',text:'<strong>Below break-even ('+fmtPrice(final.breakEven)+').</strong> Common equity theoretically $0. No callable debt \u2014 creditors cannot force liquidation.'});
+    else if(endBtcP<=final.breakEven*1.15)items.push({cls:'red',icon:'\u26A0',text:'<strong>Near break-even.</strong> BTC only '+((endBtcP/final.breakEven-1)*100).toFixed(0)+'% above '+fmtPrice(final.breakEven)+' floor.'});
+    else if(endBtcP>final.breakEven*3)items.push({cls:'green',icon:'\u{1F6E1}',text:'<strong>Break-even safety margin: '+((endBtcP/final.breakEven-1)*100).toFixed(0)+'%.</strong> BTC must fall to '+fmtPrice(final.breakEven)+' to wipe common equity.'});
+
+    // Cash runway
+    if(current.cashRunway<3&&current.cashRunway>0)items.push({cls:'amber',icon:'\u23F0',text:'<strong>Cash runway: '+current.cashRunway.toFixed(1)+' years.</strong> After depletion: skip non-cum (STRD, STRC) then sell BTC for cumulative obligations.'});
+    else if(current.cashRunway>=3&&current.cashRunway<Infinity)items.push({cls:'neutral',icon:'\u{1F4B0}',text:'<strong>Cash runway: '+current.cashRunway.toFixed(1)+' years.</strong> Reserves cover preferred dividends before BTC needs selling.'});
+
+    // Engine events
+    if(proj._events)proj._events.forEach(function(e){items.push({cls:e.cls,icon:e.icon,text:e.text})});
+
+    // BTC liquidation summary
+    if(horizonYears>0&&final.btcH<inp.btcHoldings){var ts=inp.btcHoldings-final.btcH;items.push({cls:'red',icon:'\u{1F525}',text:'<strong>Total BTC liquidated: '+fmt(Math.round(ts))+' ('+((ts/inp.btcHoldings)*100).toFixed(1)+'%).</strong> Holdings: '+fmt(inp.btcHoldings)+' \u2192 '+fmt(Math.round(final.btcH))+'.'});}
+
+    // Saylor spread insight
+    if((sType==='saylor'||sType==='singularity')&&horizonYears>=3){var sd=proj[0].drag,ed=final.drag;if(ed<sd)items.push({cls:'green',icon:'\u{1F4C8}',text:'<strong>The spread is working.</strong> Despite new preferred issuance, drag compressed '+fmtPct(sd)+' \u2192 '+fmtPct(ed)+'. BTC growth outpacing cost of capital.'});}
+
+    // Siege survival
+    if(sType==='siege'&&horizonYears>=5){if(final.btcH>0&&final.cebeSats>0)items.push({cls:'amber',icon:'\u{1F3F0}',text:'<strong>After '+horizonYears+' years at $50K BTC:</strong> Holdings reduced to '+fmt(Math.round(final.btcH))+' BTC. Drag '+fmtPct(final.drag)+'. Strategy survived \u2014 no forced liquidation. Common equity holds '+fmtPct(1-final.drag)+' of remaining BTC.'});
+    else items.push({cls:'red',icon:'\u{1F3F0}',text:'<strong>After '+horizonYears+' years at $50K BTC:</strong> Common equity wiped out.'})}
+
+    // STRK zone
+    if(final.modeledPrice>=800&&final.modeledPrice<1000&&!(proj._events||[]).some(function(e){return e.type==='strk'}))items.push({cls:'amber',icon:'\u26A1',text:'<strong>Approaching STRK conversion zone.</strong> STRK converts at $1,000/share. Modeled: '+fmtPrice(final.modeledPrice)+'.'});
+
+    $('narrativeBody').innerHTML=items.map(function(i){return'<div class="narr-item '+i.cls+'"><span class="narr-icon">'+i.icon+'</span><span class="narr-text">'+i.text+'</span></div>'}).join('');
+}
+
+function renderMetrics(final,current,inp){
+    var totDiv=final.totalDivObligation||(inp.strfFace*0.10+inp.strcFace*0.1125+inp.streFaceEur*inp.eurusd*0.10+inp.strkFace*0.08+inp.strdFace*0.10);
+    var endBtcP=final.yearBtcPrice||btcPrice;
+    var metrics=[
+        {label:'CEBE',value:fmtSats(final.cebeSats),sub:'sats/share',cls:final.cebeSats<=0?'danger':''},
+        {label:'DRAG',value:fmtPct(final.drag),sub:fmtPct(1-final.drag)+' to common',cls:final.drag>.5?'danger':final.drag>.35?'warn':''},
+        {label:'AMPLIFICATION',value:final.amp>100?'\u221e':final.amp.toFixed(2)+'\u00d7',sub:((final.amp-1)*100).toFixed(0)+'% amplified',cls:''},
+        {label:'BREAK-EVEN',value:fmtPrice(final.breakEven),sub:'BTC floor',cls:endBtcP<=final.breakEven*1.1?'danger':endBtcP<=final.breakEven*1.5?'warn':''},
+        {label:'NAV / SHARE',value:fmtPrice(final.navPerShare),sub:'\u00d7 '+(final.yearMnav||mnavMultiple).toFixed(2)+' mNAV',cls:''},
+        {label:'CASH RUNWAY',value:current.cashRunway===Infinity?'\u221e':current.cashRunway.toFixed(1)+'yr',sub:fmtB(totDiv)+'/yr div',cls:current.cashRunway<2?'danger':current.cashRunway<4?'warn':'good'},
+    ];
+    if(horizonYears>0)metrics.push({label:'BTC HELD',value:fmt(Math.round(final.btcH)),sub:(final.btcH<inp.btcHoldings?'\u2193':'\u2191')+' from '+fmt(inp.btcHoldings),cls:final.btcH<inp.btcHoldings*.9?'danger':final.btcH>inp.btcHoldings?'good':''});
+    $('metricsGrid').innerHTML=metrics.map(function(m){return'<div class="metric-card"><div class="metric-label">'+m.label+'</div><div class="metric-value '+m.cls+'">'+m.value+'</div><div class="metric-sub">'+m.sub+'</div></div>'}).join('');
+}
+
+function renderWaterfall(final,inp){
+    var endBtcP=final.yearBtcPrice||btcPrice, totalBtcVal=final.btcH*endBtcP;
+    var endMnav=final.yearMnav||mnavMultiple, nav=final.navPerShare*final.shares;
+    $('waterfall').innerHTML=
+        '<div class="wf-step btc-val"><div class="wf-label">BTC VALUE</div><div class="wf-value">'+fmtB(totalBtcVal)+'</div></div>'+
+        '<div class="wf-arrow">\u2192</div><div class="wf-step claims"><div class="wf-label">\u2212 CLAIMS</div><div class="wf-value">'+fmtB(Math.max(0,final.netClaimsUsd))+'</div></div>'+
+        '<div class="wf-arrow">\u2192</div><div class="wf-step nav"><div class="wf-label">= NAV</div><div class="wf-value">'+fmtB(nav)+'</div></div>'+
+        '<div class="wf-arrow">\u2192</div><div class="wf-step shares"><div class="wf-label">\u00f7 '+(final.shares/1e6).toFixed(0)+'M</div><div class="wf-value">SHARES</div></div>'+
+        '<div class="wf-arrow">\u2192</div><div class="wf-step shares"><div class="wf-label">NAV/SH</div><div class="wf-value">'+fmtPrice(final.navPerShare)+'</div></div>'+
+        '<div class="wf-arrow">\u2192</div><div class="wf-step shares"><div class="wf-label">\u00d7 mNAV</div><div class="wf-value">'+endMnav.toFixed(2)+'\u00d7</div></div>'+
+        '<div class="wf-arrow">\u2192</div><div class="wf-step result"><div class="wf-label">PRICE</div><div class="wf-value" style="color:var(--orange-primary)">'+fmtPrice(final.modeledPrice)+'</div></div>';
+}
+
+function renderProjectionTable(proj){
+    var sec=$('projectionSection');if(horizonYears===0){sec.style.display='none';return}sec.style.display='block';
+    var sType=getActiveType(), isF=sType==='siege'||sType==='saylor'||sType==='singularity';
+    var h='<tr><th style="text-align:center">YEAR</th>';
+    if(isF)h+='<th>BTC PRICE</th>';
+    h+='<th>BTC HELD</th>';
+    var hasCapPlan=sType==='saylor'||sType==='singularity';
+    if(hasCapPlan)h+='<th>NEW BTC</th>';
+    h+='<th>SHARES</th><th>CEBE</th><th>DRAG</th><th>NAV/SH</th>';
+    if(isF)h+='<th>mNAV</th>';
+    h+='<th>PRICE</th><th>CASH</th><th>STATUS</th></tr>';
+    $('projHead').innerHTML=h;
+
+    var colCount=9+(isF?2:0)+(hasCapPlan?1:0);
+    $('projBody').innerHTML=proj.map(function(r){
+        var inp=getInputs();
+        var sE=r.status==='green'?'\u{1F7E2}':r.status==='amber'?'\u{1F7E1}':'\u{1F534}';
+        var sL=r.status==='green'?'Healthy':r.status==='amber'?(r.strcSkipped?'Skip D+C':'Skip STRD'):'BTC sold';
+        var hasEv=r.events&&r.events.length>0;
+        var row='<tr'+(hasEv?' class="event-row"':'')+'>';
+        row+='<td>'+sE+' '+(r.year===0?'Now':r.calYear)+'</td>';
+        if(isF)row+='<td class="cell-blue">'+fmtPrice(r.yearBtcPrice)+'</td>';
+        row+='<td class="'+(r.btcH<inp.btcHoldings?'cell-red':r.btcH>inp.btcHoldings?'cell-green':'')+'">'+fmt(Math.round(r.btcH))+'</td>';
+        if(hasCapPlan)row+='<td class="'+(r.newBtcAcquired>0?'cell-green':'cell-muted')+'">'+(r.newBtcAcquired>0?'+'+fmt(Math.round(r.newBtcAcquired)):'\u2014')+'</td>';
+        row+='<td>'+(r.shares/1e6).toFixed(1)+'M</td>';
+        row+='<td class="cell-bold">'+fmtSats(r.cebeSats)+'</td>';
+        row+='<td class="'+(r.drag>.5?'cell-red':r.drag>.35?'cell-amber':'')+'">'+fmtPct(r.drag)+'</td>';
+        row+='<td>'+fmtPrice(r.navPerShare)+'</td>';
+        if(isF)row+='<td>'+r.yearMnav.toFixed(1)+'\u00d7</td>';
+        row+='<td class="cell-bold" style="color:'+(r.modeledPrice>0?'var(--text-primary)':'var(--red)')+'">'+fmtPrice(r.modeledPrice)+'</td>';
+        row+='<td class="'+(r.cash<=0?'cell-red':'')+'">'+fmtB(Math.max(0,r.cash))+'</td>';
+        row+='<td style="font-size:10px">'+sL+'</td></tr>';
+        if(r.events)r.events.forEach(function(e){
+            row+='<tr class="event-row"><td colspan="'+colCount+'" style="text-align:left;font-size:11px;padding:6px 16px;color:'+(e.cls==='red'?'var(--red)':e.cls==='green'?'var(--green)':e.cls==='info'?'var(--blue)':'var(--yellow)')+'">'+e.icon+' '+e.text+'</td></tr>';
+        });
+        return row;
+    }).join('');
+}
+
+function renderSensitivityMatrix(){
+    var mp=liveMstrPrice||DEFAULTS.mstr_price;
+    var html='<thead><tr><th>BTC \u2193 mNAV \u2192</th>';
+    MATRIX_MNAVS.forEach(function(m){html+='<th>'+m.toFixed(2)+'\u00d7</th>'});
+    html+='</tr></thead><tbody>';
+    MATRIX_BTC.forEach(function(bp){
+        html+='<tr><td class="row-label">'+(bp>=1000?'$'+(bp/1000)+'K':'$'+bp)+'</td>';
+        MATRIX_MNAVS.forEach(function(mn){
+            var price=quickCalc(bp,mn), pctD=mp>0?(price-mp)/mp:0, cls='';
+            if(price>=1000)cls='matrix-cell-gold';else if(pctD>.5)cls='matrix-cell-green';else if(pctD>.1)cls='matrix-cell-lightgreen';else if(pctD<-.5)cls='matrix-cell-red';else if(pctD<-.1)cls='matrix-cell-lightred';
+            var isBtc=Math.abs(bp-btcPrice)/btcPrice<.15,isMnav=Math.abs(mn-mnavMultiple)<.05;
+            if(isBtc&&isMnav)cls+=' matrix-cell-current';
+            html+='<td class="'+cls+'">'+(price<=0?'$0':fmtPrice(price))+'</td>';
+        });html+='</tr>';
+    });html+='</tbody>';
+    $('matrixTable').innerHTML=html;
+}
+
+function renderCustomize(inp){
+    var streUsd=inp.streFaceEur*inp.eurusd;
+    var instruments=[
+        {name:'STRK',face:inp.strkFace,rate:'8.00%',cum:'Cumulative',annual:inp.strkFace*0.08},
+        {name:'STRF',face:inp.strfFace,rate:'10.00%',cum:'Cumulative',annual:inp.strfFace*0.10},
+        {name:'STRD',face:inp.strdFace,rate:'10.00%',cum:'Non-cum',annual:inp.strdFace*0.10},
+        {name:'STRC',face:inp.strcFace,rate:'11.25%',cum:'Non-cum',annual:inp.strcFace*0.1125},
+        {name:'STRE',face:streUsd,rate:'10.00%',cum:'Cumulative',annual:streUsd*0.10},
+    ];
+    var prefUsd=instruments.reduce(function(s,i){return s+i.face},0);
+    var totalAnnual=instruments.reduce(function(s,i){return s+i.annual},0);
+    var skippable=instruments.filter(function(i){return i.cum==='Non-cum'}).reduce(function(s,i){return s+i.annual},0);
+    var totalConvDebt=CONVERTS.reduce(function(s,c){return s+c.face},0);
+    $('customizeBody').innerHTML=
+        '<div style="margin-bottom:16px"><div style="font-size:11px;color:var(--text-muted);letter-spacing:1px;margin-bottom:8px;font-weight:600">PREFERRED STOCK STACK</div>'+
+        '<table class="pref-stack"><thead><tr><th>INSTRUMENT</th><th>FACE VALUE</th><th>RATE</th><th>TYPE</th><th>ANNUAL</th></tr></thead><tbody>'+
+        instruments.map(function(i){return'<tr><td>'+i.name+'</td><td>'+fmtB(i.face)+'</td><td>'+i.rate+'</td><td><span class="badge-cum">'+i.cum+'</span></td><td>'+fmtB(i.annual)+'</td></tr>'}).join('')+
+        '<tr style="border-top:2px solid var(--border-subtle)"><td style="color:var(--orange-primary)">TOTAL</td><td style="color:var(--orange-primary);font-weight:700">'+fmtB(prefUsd)+'</td><td></td><td></td><td style="color:var(--orange-primary);font-weight:700">'+fmtB(totalAnnual)+'</td></tr></tbody></table></div>'+
+        '<div style="margin-bottom:16px"><div style="font-size:11px;color:var(--text-muted);letter-spacing:1px;margin-bottom:8px;font-weight:600">CONVERTIBLE BONDS</div>'+
+        '<table class="pref-stack"><thead><tr><th>SERIES</th><th>FACE VALUE</th><th>MATURITY</th><th>CONV PRICE</th><th>CONV SHARES</th></tr></thead><tbody>'+
+        CONVERTS.map(function(c){return'<tr><td>'+c.id+'</td><td>'+fmtB(c.face)+'</td><td>'+c.maturity+'</td><td>'+fmtPrice(c.convPrice)+'</td><td>'+fmt(c.convShares)+'</td></tr>'}).join('')+
+        '<tr style="border-top:2px solid var(--border-subtle)"><td style="color:var(--orange-primary)">TOTAL</td><td style="color:var(--orange-primary);font-weight:700">'+fmtB(totalConvDebt)+'</td><td></td><td></td><td style="color:var(--orange-primary);font-weight:700">'+fmt(CONVERTS.reduce(function(s,c){return s+c.convShares},0))+'</td></tr></tbody></table></div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">'+
+        '<div class="metric-card"><div class="metric-label">ANNUAL DIV</div><div class="metric-value">'+fmtB(totalAnnual)+'</div><div class="metric-sub">/yr all cash</div></div>'+
+        '<div class="metric-card"><div class="metric-label">SKIPPABLE</div><div class="metric-value">'+fmtB(skippable)+'</div><div class="metric-sub">STRC + STRD non-cum</div></div>'+
+        '<div class="metric-card"><div class="metric-label">CONVERT DEBT</div><div class="metric-value">'+fmtB(totalConvDebt)+'</div><div class="metric-sub">zero-coupon</div></div></div>'+
+        '<div style="font-size:11px;color:var(--text-muted);line-height:1.6">'+
+        '<strong style="color:var(--text-secondary)">Distress cascade:</strong> All dividends paid in cash. If reserves depleted: skip STRD (non-cum) \u2192 skip STRC (non-cum) \u2192 sell BTC for cumulative (STRF, STRE, STRK).'+
+        '<br><br><strong style="color:var(--text-secondary)">Convert maturities:</strong> At maturity, if stock > conversion price \u2192 convert to shares. If stock < conversion price \u2192 redeem at par (cash drain / BTC liquidation).'+
+        '<br><br><strong style="color:var(--text-secondary)">Key defense:</strong> No convertible debt has early call provisions. Creditors cannot force liquidation.</div>';
+}
+
+function renderAssumptions(inp){
+    var sType=getActiveType(), t='';
+    if(sType==='saylor')t='<strong>Saylor Model (Base Case):</strong> BTC follows Saylor\u2019s 29% avg CAGR, declining 45%\u219221% over 10 years (sourced from Bitcoin 2024 Keynote, Nashville \u2014 \u201C55% ARR decelerates toward 20%\u201D). ~$80B deployed via 42/42 Plan (50/50 equity/preferred initially, shifting 30/70). Preferred at blended ~10.5%. ATM at mNAV minus 0.1\u00d7. Software income '+fmtB(inp.softwareIncome)+'/yr flat. Converts refinanced at maturity if below conversion price (capital market access assumed). STRK converts when price exceeds $1,000.';
+    else if(sType==='siege')t='<strong>Siege:</strong> BTC $50,000 for entire horizon. No new capital raised. mNAV 0.7\u00d7. All converts mature as cash redemptions. Dividends paid until cash depleted, then non-cum skipped, then BTC sold.';
+    else if(sType==='singularity')t='<strong>Singularity (Bull Case):</strong> BTC follows Saylor\u2019s 37% avg CAGR, declining 55%\u219227% over 10 years (Bitcoin 2024 Keynote \u2014 \u201C$49M bull case, 22% of global wealth\u201D). Strategy executes full ~$80B capital plan. Converts refinanced at maturity when below conversion price (capital market access assumed). mNAV rises to 3.0\u00d7 as market prices in both BTC appreciation and stack growth. STRK converts when price exceeds $1,000.';
+    else t='<strong>Assumptions:</strong> Capital structure frozen at snapshot ('+inp.snapshotDate+'). BTC price static across projection. All preferred divs paid cash. Distress cascade: skip non-cum then sell BTC. Software income ~'+fmtB(inp.softwareIncome)+'/yr.';
+    t+='<br><br><strong>Data:</strong> Holdings, shares, capital structure from Google Sheet (post-8K updates). Live BTC from CoinGecko. Live MSTR from Finnhub. '+(sheetData&&sheetData.strk_face_usd?'Preferred from live sheet.':'Using pre-Q4 estimates.')+' Convert face values approximate pending 10-K.';
+    $('assumptions').innerHTML=t;
+}
+
+// ═══════════════════════════════════════════════════
+// UI BUILDERS
+// ═══════════════════════════════════════════════════
+function buildScenarioBar(){
+    var snaps=SCENARIOS.filter(function(s){return s.group==='snapshot'});
+    var projs=SCENARIOS.filter(function(s){return s.group==='projection'});
+    function renderCard(s){
+        var isP=s.group==='projection', hLabel=s.horizon===0?'NOW':s.horizon+'Y';
+        var bClass=isP?'future-badge':'now-badge';
+        var cClass='scenario-card'+(isP?' projection':'')+(s.id===activeScenario?' active':'');
+        var pDisp;
+        if(s.type==='saylor')pDisp='Base CAGR';
+        else if(s.type==='singularity')pDisp='Bull CAGR';
+        else if(s.btc)pDisp=s.btc>=1e6?'$'+(s.btc/1e6)+'M':s.btc>=1000?'$'+(s.btc/1000)+'K':'$'+s.btc;
+        else pDisp=fmtPrice(btcPrice);
+        var mDisp=s.type==='saylor'?'1.0-1.8\u00d7':(s.type==='singularity'?'1.0-3.0\u00d7':((s.mnav||1).toFixed(1)+'\u00d7 mNAV'));
+        return'<div class="'+cClass+'" data-scenario="'+s.id+'"><span class="horizon-badge '+bClass+'">'+hLabel+'</span><div class="scenario-icon">'+s.icon+'</div><div class="scenario-name">'+s.name+'</div><div class="scenario-price">'+pDisp+'</div><div class="scenario-mnav">'+mDisp+'</div></div>';
+    }
+    $('snapshotBar').innerHTML=snaps.map(renderCard).join('');
+    $('projectionBar').innerHTML=projs.map(renderCard).join('');
+    document.querySelectorAll('.scenario-card').forEach(function(card){
+        card.addEventListener('click',function(){
+            var id=this.dataset.scenario,sc=SCENARIOS.find(function(s){return s.id===id});if(!sc)return;
+            activeScenario=id;
+            if(sc.type==='saylor'||sc.type==='singularity'){btcPrice=liveBtcPrice||DEFAULTS.btc_price;mnavMultiple=1.0}
+            else{btcPrice=sc.btc||(liveBtcPrice||DEFAULTS.btc_price);mnavMultiple=sc.mnav||1.0}
+            horizonYears=sc.horizon;
+            syncSliders();buildScenarioBar();updateHorizonBar();updateMnavPresets();render();
+        });
+    });
+}
+
+function updateSliderLocking(){
+    var locked=isSlidersLocked();
+    $('btcSlider').disabled=locked;$('mnavSlider').disabled=locked;
+    $('btcLockedMsg').style.display=locked?'block':'none';
+    $('mnavLockedMsg').style.display=locked?'block':'none';
+}
+
+function buildHorizonBar(){
+    $('horizonBar').innerHTML=HORIZON_OPTIONS.map(function(h){return'<button class="toggle-btn '+(h.years===horizonYears?'active':'')+'" data-years="'+h.years+'">'+h.label+'</button>'}).join('');
+    document.querySelectorAll('#horizonBar .toggle-btn').forEach(function(btn){
+        btn.addEventListener('click',function(){horizonYears=parseInt(this.dataset.years);activeScenario='';updateHorizonBar();buildScenarioBar();render()});
+    });
+}
+function updateHorizonBar(){document.querySelectorAll('#horizonBar .toggle-btn').forEach(function(btn){btn.classList.toggle('active',parseInt(btn.dataset.years)===horizonYears)});$('horizonDisplay').textContent=horizonYears===0?'Now':horizonYears+'Y'}
+function buildMnavPresets(){
+    $('mnavPresets').innerHTML=MNAV_PRESETS.map(function(m){return'<button class="mnav-btn '+(Math.abs(m-mnavMultiple)<.01?'active':'')+'" data-mnav="'+m+'">'+(m%1===0?m.toFixed(0):m.toFixed(2))+'\u00d7</button>'}).join('');
+    document.querySelectorAll('.mnav-btn').forEach(function(btn){
+        btn.addEventListener('click',function(){if(isSlidersLocked())return;mnavMultiple=parseFloat(this.dataset.mnav);$('mnavSlider').value=mnavMultiple*100;$('mnavDisplay').textContent=mnavMultiple.toFixed(2)+'\u00d7';activeScenario='';updateMnavPresets();buildScenarioBar();render()});
+    });
+}
+function updateMnavPresets(){document.querySelectorAll('.mnav-btn').forEach(function(btn){btn.classList.toggle('active',Math.abs(parseFloat(btn.dataset.mnav)-mnavMultiple)<.01)})}
+function syncSliders(){$('btcSlider').value=btcPrice;$('btcPriceDisplay').textContent=fmtPrice(btcPrice);$('mnavSlider').value=mnavMultiple*100;$('mnavDisplay').textContent=mnavMultiple.toFixed(2)+'\u00d7';updateHorizonBar();updateMnavPresets()}
+function updateSliderFills(){
+    var bs=$('btcSlider'),bp=((bs.value-20000)/(1e6-20000))*100;bs.style.background=bs.disabled?'#222':'linear-gradient(90deg,var(--orange-primary) '+bp+'%,#333 '+bp+'%)';
+    var ms=$('mnavSlider'),mp=((ms.value-30)/(400-30))*100;ms.style.background=ms.disabled?'#222':'linear-gradient(90deg,var(--orange-primary) '+mp+'%,#333 '+mp+'%)';
+}
+
+$('btcSlider').addEventListener('input',function(e){if(isSlidersLocked())return;btcPrice=parseInt(e.target.value);$('btcPriceDisplay').textContent=fmtPrice(btcPrice);activeScenario='';buildScenarioBar();render()});
+$('mnavSlider').addEventListener('input',function(e){if(isSlidersLocked())return;mnavMultiple=parseInt(e.target.value)/100;$('mnavDisplay').textContent=mnavMultiple.toFixed(2)+'\u00d7';activeScenario='';updateMnavPresets();buildScenarioBar();render()});
+
+document.addEventListener('keydown',function(e){
+    if(e.target.tagName==='INPUT')return;
+    if(e.key>='1'&&e.key<='6'){var idx=parseInt(e.key)-1;if(SCENARIOS[idx]){var sc=SCENARIOS[idx];activeScenario=sc.id;
+        if(sc.type==='saylor'||sc.type==='singularity'){btcPrice=liveBtcPrice||DEFAULTS.btc_price;mnavMultiple=1.0}else{btcPrice=sc.btc||(liveBtcPrice||DEFAULTS.btc_price);mnavMultiple=sc.mnav||1.0}
+        horizonYears=sc.horizon;syncSliders();buildScenarioBar();updateHorizonBar();updateMnavPresets();render()}}
+});
+
+loadData();
+</script>
+</body>
+</html>
