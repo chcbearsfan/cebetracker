@@ -1,1 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metaplanet CEBE Modeler | cebetracker.io</title>
+    <meta name="description" content="Model Metaplanet (MTPLF) share price using CEBE framework. See how BTC price and JPY/USD dynamics shape common equity Bitcoin exposure.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #09090b;
+            color: #fafafa;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* ═══ NAV BAR ═══ */
+        .nav-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px 20px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            flex-wrap: wrap;
+        }
+        .nav-pill {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            padding: 7px 18px;
+            border-radius: 20px;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        .nav-pill.inactive {
+            color: #71717a;
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.06);
+        }
+        .nav-pill.inactive:hover {
+            color: #a1a1aa;
+            background: rgba(255,255,255,0.06);
+        }
+        .nav-pill.active {
+            color: #f97316;
+            background: rgba(249,115,22,0.1);
+            border-color: rgba(249,115,22,0.3);
+        }
+
+        /* ═══ CONTAINER ═══ */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+
+        /* ═══ HEADER ═══ */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 28px 0 8px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .header-left { display: flex; flex-direction: column; gap: 4px; }
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: #ef4444;
+            background: rgba(239,68,68,0.08);
+            border: 1px solid rgba(239,68,68,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            width: fit-content;
+        }
+        .header-title {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        .header-title .co { color: #f87171; }
+        .header-subtitle {
+            font-size: 13px;
+            color: #52525b;
+        }
+        .header-right {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+        }
+        .header-logo {
+            font-size: 16px;
+            font-weight: 300;
+            letter-spacing: 8px;
+            padding-left: 8px;
+            background: linear-gradient(135deg, #f97316, #fb923c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header-date {
+            font-size: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            color: #3f3f46;
+        }
+        .live-dot {
+            display: inline-block;
+            width: 6px; height: 6px;
+            background: #22c55e;
+            border-radius: 50%;
+            margin-right: 4px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* ═══ SCENARIO BAR ═══ */
+        .scenario-section { padding: 20px 0 8px; }
+        .scenario-group-label {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #3f3f46;
+            margin-bottom: 8px;
+        }
+        .scenario-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+        .scenario-card {
+            flex: 1;
+            min-width: 140px;
+            background: #111113;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .scenario-card:hover {
+            border-color: rgba(249,115,22,0.3);
+            background: #151517;
+        }
+        .scenario-card.active {
+            border-color: #f97316;
+            background: rgba(249,115,22,0.06);
+            box-shadow: 0 0 20px rgba(249,115,22,0.08);
+        }
+        .sc-icon { font-size: 20px; margin-bottom: 4px; }
+        .sc-name { font-size: 13px; font-weight: 700; color: #e4e4e7; }
+        .sc-detail {
+            font-size: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            color: #52525b;
+            margin-top: 2px;
+        }
+        .sc-detail .fx { color: #f87171; }
+
+        /* ═══ HERO ═══ */
+        .hero {
+            background: #111113;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(239,68,68,0.04) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .hero-price-block { position: relative; z-index: 1; }
+        .hero-label {
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: #71717a;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .hero-price {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 48px;
+            font-weight: 700;
+            color: #fafafa;
+            line-height: 1;
+        }
+        .hero-price .currency {
+            font-size: 28px;
+            color: #71717a;
+            font-weight: 400;
+        }
+        .hero-change {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            margin-top: 6px;
+        }
+        .hero-change.up { color: #22c55e; }
+        .hero-change.down { color: #ef4444; }
+        .hero-change.flat { color: #71717a; }
+        .hero-usd {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: #52525b;
+            margin-top: 2px;
+        }
+        .hero-implied {
+            font-size: 11px;
+            color: #52525b;
+            margin-top: 8px;
+        }
+        .hero-implied span { color: #f97316; font-weight: 600; }
+
+        .hero-fx-block {
+            text-align: right;
+            position: relative;
+            z-index: 1;
+        }
+        .fx-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .fx-badge.compress {
+            background: rgba(34,197,94,0.1);
+            border: 1px solid rgba(34,197,94,0.2);
+            color: #22c55e;
+        }
+        .fx-badge.expand {
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.2);
+            color: #ef4444;
+        }
+        .fx-badge.neutral {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #71717a;
+        }
+        .fx-label {
+            font-size: 10px;
+            color: #52525b;
+            letter-spacing: 1px;
+        }
+
+        /* Metric Strip */
+        .metric-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 1px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .metric-cell {
+            background: #111113;
+            padding: 14px 16px;
+            text-align: center;
+        }
+        .metric-cell:first-child { border-radius: 10px 0 0 10px; }
+        .metric-cell:last-child { border-radius: 0 10px 10px 0; }
+        .mc-label {
+            font-size: 9px;
+            letter-spacing: 1.5px;
+            color: #52525b;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .mc-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 16px;
+            font-weight: 600;
+            color: #e4e4e7;
+        }
+        .mc-value.green { color: #22c55e; }
+        .mc-value.amber { color: #eab308; }
+        .mc-value.red { color: #ef4444; }
+        .mc-value.orange { color: #f97316; }
+
+        /* ═══ SLIDERS ═══ */
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        @media (max-width: 768px) {
+            .controls { grid-template-columns: 1fr; }
+        }
+        .control-card {
+            background: #111113;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 18px;
+        }
+        .ctrl-label {
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            color: #52525b;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .ctrl-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 22px;
+            font-weight: 700;
+            color: #fafafa;
+            margin-bottom: 12px;
+        }
+        .ctrl-value .unit {
+            font-size: 13px;
+            color: #52525b;
+            font-weight: 400;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: #27272a;
+            border-radius: 2px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #f97316;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(249,115,22,0.4);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: #f97316;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+        .ctrl-range-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: #3f3f46;
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 4px;
+        }
+        /* mNAV presets */
+        .mnav-presets {
+            display: flex;
+            gap: 4px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .mnav-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: transparent;
+            color: #71717a;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .mnav-btn:hover { border-color: #f97316; color: #f97316; }
+        .mnav-btn.active { background: rgba(249,115,22,0.15); border-color: #f97316; color: #f97316; }
+
+        /* FX slider special accent */
+        .control-card.fx-card { border-color: rgba(239,68,68,0.15); }
+        .control-card.fx-card input[type="range"]::-webkit-slider-thumb {
+            background: #ef4444;
+            box-shadow: 0 0 8px rgba(239,68,68,0.4);
+        }
+        .control-card.fx-card input[type="range"]::-moz-range-thumb {
+            background: #ef4444;
+        }
+
+        /* ═══ NARRATIVE CARDS ═══ */
+        .narratives {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .narrative-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #d4d4d8;
+        }
+        .narrative-card strong { font-weight: 700; }
+        .narrative-card .n-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+        .n-green { background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.15); }
+        .n-green strong { color: #22c55e; }
+        .n-amber { background: rgba(234,179,8,0.06); border: 1px solid rgba(234,179,8,0.15); }
+        .n-amber strong { color: #eab308; }
+        .n-red { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.15); }
+        .n-red strong { color: #ef4444; }
+        .n-info { background: rgba(249,115,22,0.06); border: 1px solid rgba(249,115,22,0.15); }
+        .n-info strong { color: #f97316; }
+        .n-blue { background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.15); }
+        .n-blue strong { color: #60a5fa; }
+
+        /* ═══ SECTIONS (collapsible) ═══ */
+        .section {
+            background: #111113;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+        .section-header {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        .section-header:hover { background: rgba(255,255,255,0.02); }
+        .sh-left { display: flex; align-items: center; gap: 10px; }
+        .sh-icon { font-size: 16px; }
+        .sh-title {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #a1a1aa;
+        }
+        .sh-chevron {
+            color: #3f3f46;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+        .section.open .sh-chevron { transform: rotate(180deg); }
+        .section-body {
+            display: none;
+            padding: 0 20px 20px;
+        }
+        .section.open .section-body { display: block; }
+
+        /* ═══ WATERFALL ═══ */
+        .waterfall-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .waterfall-row:last-child { border-bottom: none; }
+        .wf-label { font-size: 13px; color: #a1a1aa; }
+        .wf-label.indent { padding-left: 20px; color: #71717a; font-size: 12px; }
+        .wf-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            color: #e4e4e7;
+        }
+        .wf-value.subtract { color: #ef4444; }
+        .wf-value.add { color: #22c55e; }
+        .wf-divider {
+            border-top: 1px dashed rgba(249,115,22,0.3);
+            margin: 4px 0;
+        }
+        .wf-total .wf-label { font-weight: 700; color: #fafafa; }
+        .wf-total .wf-value { color: #f97316; font-size: 16px; }
+
+        /* ═══ CAPITAL STRUCTURE CARD ═══ */
+        .cap-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        @media (max-width: 600px) { .cap-grid { grid-template-columns: 1fr; } }
+        .cap-block {
+            background: rgba(255,255,255,0.02);
+            border-radius: 10px;
+            padding: 16px;
+        }
+        .cap-block-title {
+            font-size: 9px;
+            letter-spacing: 2px;
+            color: #52525b;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .cap-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 12px;
+        }
+        .cap-row .cl { color: #71717a; }
+        .cap-row .cv {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            color: #e4e4e7;
+        }
+
+        /* ═══ SENSITIVITY MATRIX ═══ */
+        .matrix-wrap { overflow-x: auto; }
+        .matrix-title {
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            color: #52525b;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .matrix {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+        }
+        .matrix th {
+            padding: 10px 14px;
+            font-size: 10px;
+            letter-spacing: 1px;
+            color: #52525b;
+            font-weight: 600;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .matrix th.corner { }
+        .matrix th.col-hdr { color: #71717a; }
+        .matrix td {
+            padding: 10px 14px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            font-weight: 500;
+            color: #a1a1aa;
+        }
+        .matrix td:first-child {
+            text-align: left;
+            font-weight: 700;
+            color: #71717a;
+        }
+        .matrix td.active-cell {
+            background: rgba(249,115,22,0.1);
+            color: #f97316;
+            font-weight: 700;
+            border-radius: 4px;
+        }
+        .matrix-spacer { height: 24px; }
+
+        /* Drag color coding in matrix */
+        .d-green { color: #22c55e !important; }
+        .d-yellow { color: #eab308 !important; }
+        .d-orange { color: #fb923c !important; }
+        .d-red { color: #ef4444 !important; }
+
+        /* ═══ FOOTER ═══ */
+        .page-footer {
+            border-top: 1px solid rgba(255,255,255,0.04);
+            padding: 20px 0;
+            text-align: center;
+        }
+        .footer-formula {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #27272a;
+            margin-bottom: 8px;
+        }
+        .footer-links {
+            font-size: 11px;
+            color: #3f3f46;
+        }
+        .footer-links a {
+            color: #f97316;
+            text-decoration: none;
+        }
+        .footer-links a:hover { text-decoration: underline; }
+        .footer-disclaimer {
+            font-size: 9px;
+            color: #27272a;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        /* ═══ RESPONSIVE ═══ */
+        @media (max-width: 768px) {
+            .hero-price { font-size: 36px; }
+            .hero-price .currency { font-size: 22px; }
+            .controls { grid-template-columns: 1fr; }
+            .metric-strip { grid-template-columns: repeat(3, 1fr); }
+            .metric-cell:first-child { border-radius: 10px 0 0 0; }
+            .metric-cell:last-child { border-radius: 0 0 10px 0; }
+            .cap-grid { grid-template-columns: 1fr; }
+            .page-header { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══ NAVIGATION ═══ -->
+<nav class="nav-bar">
+    <a href="https://cebetracker.io" class="nav-pill inactive">MAIN</a>
+    <a href="https://cebetracker.io/modeler" class="nav-pill inactive">MSTR MODELER</a>
+    <span class="nav-pill active">MTPLF MODELER</span>
+</nav>
+
+<div class="container">
+
+    <!-- ═══ HEADER ═══ -->
+    <div class="page-header">
+        <div class="header-left">
+            <div class="header-badge">&#127471;&#127477; METAPLANET MODELER</div>
+            <div class="header-title"><span class="co">Metaplanet</span> CEBE Share Price Modeler</div>
+            <div class="header-subtitle">TSE: 3350 &middot; OTC: MTPLF &middot; Double Compression Engine</div>
+        </div>
+        <div class="header-right">
+            <div class="header-logo">CEBE</div>
+            <div class="header-date"><span class="live-dot"></span>LIVE DATA</div>
+        </div>
+    </div>
+
+    <!-- ═══ SCENARIO BAR ═══ -->
+    <div class="scenario-section">
+        <div class="scenario-group-label">NOW &mdash; SNAPSHOT</div>
+        <div class="scenario-row" id="nowRow"></div>
+        <div class="scenario-group-label">FORWARD &mdash; PROJECTION</div>
+        <div class="scenario-row" id="forwardRow"></div>
+    </div>
+
+    <!-- ═══ HERO ═══ -->
+    <div class="hero">
+        <div class="hero-top">
+            <div class="hero-price-block">
+                <div class="hero-label">MODELED STOCK PRICE</div>
+                <div class="hero-price" id="heroPrice">&yen;---</div>
+                <div class="hero-change flat" id="heroChange">&mdash;</div>
+                <div class="hero-usd" id="heroUsd">&#8776; $---</div>
+                <div class="hero-implied" id="heroImplied"></div>
+            </div>
+            <div class="hero-fx-block">
+                <div class="fx-badge neutral" id="fxBadge">&#165;/$ ---</div>
+                <div class="fx-label" id="fxLabel">FX IMPACT</div>
+            </div>
+        </div>
+        <div class="metric-strip" id="metricStrip"></div>
+    </div>
+
+    <!-- ═══ INPUT SLIDERS ═══ -->
+    <div class="controls">
+        <div class="control-card">
+            <div class="ctrl-label">BITCOIN PRICE (USD)</div>
+            <div class="ctrl-value" id="btcDisplay">$100,000</div>
+            <input type="range" id="btcSlider" min="0" max="1000" value="500">
+            <div class="ctrl-range-labels"><span>$10K</span><span>$1M</span></div>
+        </div>
+        <div class="control-card fx-card">
+            <div class="ctrl-label">JPY/USD RATE &mdash; &#127471;&#127477; KILLER FEATURE</div>
+            <div class="ctrl-value" id="fxDisplay">&yen;153 <span class="unit">/ $1</span></div>
+            <input type="range" id="fxSlider" min="120" max="200" value="153" step="1">
+            <div class="ctrl-range-labels"><span>&yen;120 (strong)</span><span>&yen;200 (weak)</span></div>
+        </div>
+        <div class="control-card">
+            <div class="ctrl-label">mNAV MULTIPLE</div>
+            <div class="ctrl-value" id="mnavDisplay">1.00&times;</div>
+            <input type="range" id="mnavSlider" min="30" max="400" value="100">
+            <div class="ctrl-range-labels"><span>0.3&times;</span><span>4.0&times;</span></div>
+            <div class="mnav-presets" id="mnavPresets"></div>
+        </div>
+    </div>
+
+    <!-- ═══ NARRATIVE INSIGHTS ═══ -->
+    <div class="narratives" id="narratives"></div>
+
+    <!-- ═══ CAPITAL STRUCTURE ═══ -->
+    <div class="section open" id="capSection">
+        <div class="section-header" onclick="toggleSection('capSection')">
+            <div class="sh-left"><span class="sh-icon">&#127975;</span><span class="sh-title">CAPITAL STRUCTURE</span></div>
+            <span class="sh-chevron">&#9660;</span>
+        </div>
+        <div class="section-body" id="capBody"></div>
+    </div>
+
+    <!-- ═══ VALUE WATERFALL ═══ -->
+    <div class="section open" id="wfSection">
+        <div class="section-header" onclick="toggleSection('wfSection')">
+            <div class="sh-left"><span class="sh-icon">&#128202;</span><span class="sh-title">VALUE WATERFALL</span></div>
+            <span class="sh-chevron">&#9660;</span>
+        </div>
+        <div class="section-body" id="wfBody"></div>
+    </div>
+
+    <!-- ═══ SENSITIVITY MATRIX: BTC × JPY/USD → DRAG ═══ -->
+    <div class="section open" id="dragMatrixSection">
+        <div class="section-header" onclick="toggleSection('dragMatrixSection')">
+            <div class="sh-left"><span class="sh-icon">&#127471;&#127477;</span><span class="sh-title">DRAG MATRIX &mdash; BTC PRICE &times; JPY/USD</span></div>
+            <span class="sh-chevron">&#9660;</span>
+        </div>
+        <div class="section-body">
+            <div class="matrix-title">DOUBLE COMPRESSION / EXPANSION VISUALIZED</div>
+            <div class="matrix-wrap" id="dragMatrixWrap"></div>
+        </div>
+    </div>
+
+    <!-- ═══ SENSITIVITY MATRIX: BTC × mNAV → PRICE ═══ -->
+    <div class="section" id="priceMatrixSection">
+        <div class="section-header" onclick="toggleSection('priceMatrixSection')">
+            <div class="sh-left"><span class="sh-icon">&#128200;</span><span class="sh-title">PRICE MATRIX &mdash; BTC PRICE &times; mNAV</span></div>
+            <span class="sh-chevron">&#9660;</span>
+        </div>
+        <div class="section-body">
+            <div class="matrix-title">MODELED STOCK PRICE AT EACH INTERSECTION</div>
+            <div class="matrix-wrap" id="priceMatrixWrap"></div>
+        </div>
+    </div>
+
+    <!-- ═══ FOOTER ═══ -->
+    <div class="page-footer">
+        <div class="footer-formula">CEBE = (Total BTC &minus; Senior Claims in BTC) &divide; Shares Outstanding</div>
+        <div class="footer-links">
+            CEBE Framework by <a href="https://x.com/chcbearsfan" target="_blank">@chcbearsfan</a> &middot;
+            <a href="https://cebetracker.io" target="_blank">cebetracker.io</a>
+        </div>
+        <div class="footer-disclaimer">Not financial advice. Data subject to change. Verify all figures against official filings.</div>
+    </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// METAPLANET CEBE SHARE PRICE MODELER
+// cebetracker.io/modeler/metaplanet
+// ═══════════════════════════════════════════════════
+
+// ─── DEFAULTS (pre-Q4, update from filings) ───
+const DEFAULTS = {
+    btc_holdings: 35102,
+    shares: 1140000000,  // 1.14B from metaplanet.jp
+    jpy_claims: 43000000000,  // ¥43B total zero-coupon bonds
+    cash_usd: 0,  // conservative; update from filing
+    jpy_usd: 153,
+    btc_price: 65000,
+    stock_jpy: 340,
+    snapshot_date: 'Feb 6, 2026'
+};
+
+const SHEET_ID = '1BNsCWGVU08PDinDcfzJccqcuj9_KrK1VZGETErzBZvg';
+
+// ─── SCENARIOS ───
+const SCENARIOS = [
+    // NOW row
+    { id: 'wipeout', icon: '&#128128;', name: 'Wipeout',    btc: 25000,  fx: 140, mnav: 0.5, horizon: 0, group: 'now' },
+    { id: 'bear',    icon: '&#128059;', name: 'Bear',       btc: 50000,  fx: 145, mnav: 0.7, horizon: 0, group: 'now' },
+    { id: 'current', icon: '&#128205;', name: 'Current',    btc: null,   fx: null, mnav: 1.0, horizon: 0, group: 'now' },
+    // FORWARD row
+    { id: 'boj',     icon: '&#127974;', name: 'BOJ Shock',  btc: 75000,  fx: 130, mnav: 0.6, horizon: 3, group: 'forward' },
+    { id: 'gerovich',icon: '&#128208;', name: 'Gerovich',   btc: 200000, fx: 170, mnav: 2.0, horizon: 5, group: 'forward' },
+    { id: 'terminal',icon: '&#9854;',   name: 'Terminal',   btc: 1000000,fx: 180, mnav: 3.0, horizon: 10,group: 'forward' }
+];
+
+const MNAV_PRESETS = [0.6, 0.8, 1.0, 1.5, 2.0, 3.0];
+
+// ─── STATE ───
+let btcPrice = DEFAULTS.btc_price;
+let jpyUsd = DEFAULTS.jpy_usd;
+let mnavMultiple = 1.0;
+let activeScenario = 'current';
+let liveBtcPrice = null;
+let liveFxRate = null;
+let liveStockJpy = null;
+let data = { ...DEFAULTS };
+
+// ─── SLIDER MATH (logarithmic for BTC) ───
+function sliderToBtc(val) {
+    // 0-1000 → $10K-$1M logarithmic
+    const minLog = Math.log10(10000);
+    const maxLog = Math.log10(1000000);
+    return Math.round(Math.pow(10, minLog + (val / 1000) * (maxLog - minLog)));
+}
+function btcToSlider(btc) {
+    const minLog = Math.log10(10000);
+    const maxLog = Math.log10(1000000);
+    return Math.round(((Math.log10(btc) - minLog) / (maxLog - minLog)) * 1000);
+}
+
+// ─── CORE CEBE ENGINE ───
+function compute(btc, fx, mnav) {
+    const h = data.btc_holdings;
+    const s = data.shares;
+    const jpyClaims = data.jpy_claims;
+    const cashUsd = data.cash_usd;
+
+    const claimsUsd = jpyClaims / fx;
+    const netClaimsUsd = Math.max(0, claimsUsd - cashUsd);
+    const netClaimsBtc = netClaimsUsd / btc;
+    const drag = netClaimsBtc / h;
+    const commonOwnership = 1 - drag;
+    const cebeBtc = (h - netClaimsBtc) / s;
+    const cebeSats = Math.round(cebeBtc * 1e8);
+    const bpsSats = Math.round((h / s) * 1e8);
+    const navUsd = cebeBtc * btc;
+    const navJpy = navUsd * fx;
+    const priceJpy = navJpy * mnav;
+    const priceUsd = priceJpy / fx;
+    const amplification = drag < 1 ? 1 / (1 - drag) : Infinity;
+    const breakEvenBtc = h > 0 ? netClaimsUsd / h : 0;
+    const btcReserveUsd = h * btc;
+
+    return {
+        claimsUsd, netClaimsUsd, netClaimsBtc,
+        drag, commonOwnership,
+        cebeBtc, cebeSats, bpsSats,
+        navUsd, navJpy,
+        priceJpy, priceUsd,
+        amplification, breakEvenBtc,
+        btcReserveUsd
+    };
+}
+
+// ─── FORMAT HELPERS ───
+function fmtUsd(n) {
+    if (Math.abs(n) >= 1e9) return '$' + (n/1e9).toFixed(2) + 'B';
+    if (Math.abs(n) >= 1e6) return '$' + (n/1e6).toFixed(1) + 'M';
+    if (Math.abs(n) >= 1e3) return '$' + (n/1e3).toFixed(1) + 'K';
+    return '$' + n.toFixed(2);
+}
+function fmtJpy(n) {
+    if (Math.abs(n) >= 1e12) return '&yen;' + (n/1e12).toFixed(2) + 'T';
+    if (Math.abs(n) >= 1e9) return '&yen;' + (n/1e9).toFixed(1) + 'B';
+    if (Math.abs(n) >= 1e6) return '&yen;' + (n/1e6).toFixed(0) + 'M';
+    return '&yen;' + Math.round(n).toLocaleString();
+}
+function fmtBtcPrice(n) {
+    if (n >= 1e6) return '$' + (n/1e6).toFixed(2) + 'M';
+    return '$' + Math.round(n).toLocaleString();
+}
+function fmtPct(n) { return (n * 100).toFixed(1) + '%'; }
+function fmtSats(n) { return n.toLocaleString(); }
+function fmtNum(n) { return Math.round(n).toLocaleString(); }
+
+function dragColor(d) {
+    if (d <= 0.05) return 'green';
+    if (d <= 0.10) return 'green';
+    if (d <= 0.20) return 'amber';
+    if (d <= 0.35) return 'orange';
+    return 'red';
+}
+function dragColorClass(d) {
+    if (d <= 0.05) return 'd-green';
+    if (d <= 0.10) return 'd-green';
+    if (d <= 0.20) return 'd-yellow';
+    if (d <= 0.35) return 'd-orange';
+    return 'd-red';
+}
+
+// ─── BUILD SCENARIO BAR ───
+function buildScenarioBar() {
+    const nowRow = document.getElementById('nowRow');
+    const fwdRow = document.getElementById('forwardRow');
+    nowRow.innerHTML = '';
+    fwdRow.innerHTML = '';
+
+    SCENARIOS.forEach((s, i) => {
+        const card = document.createElement('div');
+        card.className = 'scenario-card' + (s.id === activeScenario ? ' active' : '');
+        const btcLabel = s.btc ? fmtBtcPrice(s.btc) : 'Live';
+        const fxLabel = s.fx ? '&yen;' + s.fx : 'Live';
+        card.innerHTML = `
+            <div class="sc-icon">${s.icon}</div>
+            <div class="sc-name">${s.name}</div>
+            <div class="sc-detail">${btcLabel} &middot; <span class="fx">${fxLabel}</span> &middot; ${s.mnav}&times;${s.horizon > 0 ? ' &middot; ' + s.horizon + 'Y' : ''}</div>
+        `;
+        card.addEventListener('click', () => selectScenario(s));
+        if (s.group === 'now') nowRow.appendChild(card);
+        else fwdRow.appendChild(card);
+    });
+}
+
+function selectScenario(s) {
+    activeScenario = s.id;
+    btcPrice = s.btc || (liveBtcPrice || DEFAULTS.btc_price);
+    jpyUsd = s.fx || (liveFxRate || DEFAULTS.jpy_usd);
+    mnavMultiple = s.mnav;
+    syncSliders();
+    buildScenarioBar();
+    render();
+}
+
+// ─── SYNC SLIDERS ───
+function syncSliders() {
+    document.getElementById('btcSlider').value = btcToSlider(btcPrice);
+    document.getElementById('fxSlider').value = jpyUsd;
+    document.getElementById('mnavSlider').value = Math.round(mnavMultiple * 100);
+    document.getElementById('btcDisplay').textContent = fmtBtcPrice(btcPrice);
+    document.getElementById('fxDisplay').innerHTML = '&yen;' + jpyUsd + ' <span class="unit">/ $1</span>';
+    document.getElementById('mnavDisplay').innerHTML = mnavMultiple.toFixed(2) + '&times;';
+    updateMnavPresets();
+}
+
+function updateMnavPresets() {
+    const wrap = document.getElementById('mnavPresets');
+    wrap.innerHTML = '';
+    MNAV_PRESETS.forEach(v => {
+        const btn = document.createElement('button');
+        btn.className = 'mnav-btn' + (Math.abs(mnavMultiple - v) < 0.05 ? ' active' : '');
+        btn.textContent = v.toFixed(1) + '\u00d7';
+        btn.addEventListener('click', () => {
+            mnavMultiple = v;
+            syncSliders();
+            activeScenario = null;
+            buildScenarioBar();
+            render();
+        });
+        wrap.appendChild(btn);
+    });
+}
+
+// ─── RENDER ───
+function render() {
+    const r = compute(btcPrice, jpyUsd, mnavMultiple);
+    const baseJpy = liveStockJpy || DEFAULTS.stock_jpy;
+
+    // Hero price
+    document.getElementById('heroPrice').innerHTML = '&yen;' + Math.round(r.priceJpy).toLocaleString();
+    const chg = r.priceJpy - baseJpy;
+    const chgPct = baseJpy > 0 ? (chg / baseJpy) * 100 : 0;
+    const chgEl = document.getElementById('heroChange');
+    if (Math.abs(chgPct) < 0.1) {
+        chgEl.className = 'hero-change flat';
+        chgEl.innerHTML = '&mdash; vs current';
+    } else {
+        chgEl.className = 'hero-change ' + (chg >= 0 ? 'up' : 'down');
+        chgEl.innerHTML = (chg >= 0 ? '+' : '') + Math.round(chg).toLocaleString() + ' (' + (chg >= 0 ? '+' : '') + chgPct.toFixed(1) + '%)';
+    }
+    document.getElementById('heroUsd').innerHTML = '&asymp; ' + fmtUsd(r.priceUsd) + ' USD';
+    document.getElementById('heroImplied').innerHTML = 'Market implies <span>' + mnavMultiple.toFixed(2) + '&times; mNAV</span>';
+
+    // FX badge
+    const baseFx = liveFxRate || DEFAULTS.jpy_usd;
+    const fxBadge = document.getElementById('fxBadge');
+    const fxDiff = jpyUsd - baseFx;
+    if (fxDiff > 2) {
+        fxBadge.className = 'fx-badge compress';
+        fxBadge.innerHTML = '&#165;' + jpyUsd + '/$ &uarr; JPY WEAK &rarr; COMPRESS';
+    } else if (fxDiff < -2) {
+        fxBadge.className = 'fx-badge expand';
+        fxBadge.innerHTML = '&#165;' + jpyUsd + '/$ &darr; JPY STRONG &rarr; EXPAND';
+    } else {
+        fxBadge.className = 'fx-badge neutral';
+        fxBadge.innerHTML = '&#165;' + jpyUsd + '/$ BASELINE';
+    }
+
+    // Metric strip
+    const strip = document.getElementById('metricStrip');
+    const metrics = [
+        { label: 'CEBE', value: fmtSats(r.cebeSats), color: '' },
+        { label: 'BPS', value: fmtSats(r.bpsSats), color: '' },
+        { label: 'DRAG', value: fmtPct(r.drag), color: dragColor(r.drag) },
+        { label: 'COMMON OWNS', value: fmtPct(r.commonOwnership), color: r.commonOwnership >= 0.9 ? 'green' : '' },
+        { label: 'AMPLIFICATION', value: r.amplification < 100 ? r.amplification.toFixed(2) + '&times;' : '&infin;', color: 'orange' },
+        { label: 'BREAK-EVEN', value: fmtBtcPrice(r.breakEvenBtc), color: btcPrice < r.breakEvenBtc * 2 ? 'red' : '' },
+        { label: 'NAV/SHARE', value: '&yen;' + Math.round(r.navJpy).toLocaleString(), color: '' }
+    ];
+    strip.innerHTML = metrics.map(m => `
+        <div class="metric-cell">
+            <div class="mc-label">${m.label}</div>
+            <div class="mc-value ${m.color}">${m.value}</div>
+        </div>
+    `).join('');
+
+    // Narratives
+    renderNarratives(r);
+
+    // Capital structure
+    renderCapitalStructure(r);
+
+    // Waterfall
+    renderWaterfall(r);
+
+    // Sensitivity matrices
+    renderDragMatrix();
+    renderPriceMatrix();
+}
+
+// ─── NARRATIVE ENGINE ───
+function renderNarratives(r) {
+    const cards = [];
+    const baseFx = liveFxRate || DEFAULTS.jpy_usd;
+    const baseBtc = liveBtcPrice || DEFAULTS.btc_price;
+
+    // FX dynamic insight
+    if (jpyUsd > baseFx + 5 && btcPrice > baseBtc * 1.2) {
+        const baseDrag = compute(baseBtc, baseFx, 1).drag;
+        const btcOnlyDrag = compute(btcPrice, baseFx, 1).drag;
+        const fxContrib = ((btcOnlyDrag - r.drag) * 100).toFixed(1);
+        cards.push({
+            cls: 'n-green', icon: '&#9889;',
+            text: `<strong>Double compression active.</strong> JPY weakened from &yen;${baseFx} to &yen;${jpyUsd} while BTC rose from ${fmtBtcPrice(baseBtc)} to ${fmtBtcPrice(btcPrice)}. Drag compressed from ${fmtPct(baseDrag)} to ${fmtPct(r.drag)}&mdash;FX contributed ${fxContrib}pp of additional compression.`
+        });
+    } else if (jpyUsd < baseFx - 5 && btcPrice < baseBtc * 0.8) {
+        const baseDrag = compute(baseBtc, baseFx, 1).drag;
+        const btcOnlyDrag = compute(btcPrice, baseFx, 1).drag;
+        const fxPenalty = ((r.drag - btcOnlyDrag) * 100).toFixed(1);
+        cards.push({
+            cls: 'n-red', icon: '&#9888;&#65039;',
+            text: `<strong>Double expansion active.</strong> JPY strengthened from &yen;${baseFx} to &yen;${jpyUsd} while BTC fell from ${fmtBtcPrice(baseBtc)} to ${fmtBtcPrice(btcPrice)}. Drag expanded from ${fmtPct(baseDrag)} to ${fmtPct(r.drag)}&mdash;FX added ${fxPenalty}pp of additional expansion.`
+        });
+    }
+
+    // Zero-cost advantage
+    cards.push({
+        cls: 'n-blue', icon: '&#128161;',
+        text: `<strong>Zero carry cost.</strong> Unlike Strategy's ~$1.4B/yr preferred dividend obligation, Metaplanet's zero-coupon bonds cost &yen;0 in annual interest. No cash drain, no share dilution from dividend coverage. The only obligation is returning principal at maturity.`
+    });
+
+    // Drag status
+    if (r.drag <= 0.05) {
+        cards.push({
+            cls: 'n-green', icon: '&#9989;',
+            text: `<strong>Drag is negligible at ${fmtPct(r.drag)}.</strong> Common equity owns ${fmtPct(r.commonOwnership)} of all BTC on the balance sheet. Senior claims are a rounding error at this price level. CEBE and BPS have effectively converged.`
+        });
+    } else if (r.drag > 0.25) {
+        cards.push({
+            cls: 'n-amber', icon: '&#9888;&#65039;',
+            text: `<strong>Elevated drag: ${fmtPct(r.drag)}.</strong> Senior claims consume ${fmtPct(r.drag)} of BTC reserves. Common equity owns only ${fmtPct(r.commonOwnership)} of holdings. At this level, amplification is ${r.amplification.toFixed(2)}&times;&mdash;significant leverage working in both directions.`
+        });
+    } else {
+        cards.push({
+            cls: 'n-info', icon: '&#128202;',
+            text: `<strong>Drag: ${fmtPct(r.drag)}.</strong> Common equity owns ${fmtPct(r.commonOwnership)} of Metaplanet's ${fmtNum(data.btc_holdings)} BTC. Amplification: ${r.amplification.toFixed(2)}&times;. Every 1% BTC move translates to ~${(r.amplification * 1).toFixed(2)}% move in CEBE.`
+        });
+    }
+
+    // Break-even proximity
+    if (btcPrice < r.breakEvenBtc * 1.5) {
+        const cushion = ((btcPrice / r.breakEvenBtc - 1) * 100).toFixed(0);
+        cards.push({
+            cls: 'n-red', icon: '&#128680;',
+            text: `<strong>Break-even proximity warning.</strong> BTC is only ${cushion}% above the break-even price of ${fmtBtcPrice(r.breakEvenBtc)}. Below break-even, common equity is theoretically worth &yen;0. However, Metaplanet has no callable debt&mdash;bondholders cannot force liquidation.`
+        });
+    }
+
+    // BOJ scenario specific
+    if (activeScenario === 'boj') {
+        cards.push({
+            cls: 'n-red', icon: '&#127974;',
+            text: `<strong>BOJ Shock scenario.</strong> Bank of Japan raises rates aggressively, yen surges to &yen;${jpyUsd}/$. JPY claims now convert to ${fmtUsd(r.claimsUsd)} (up from ~$280M at baseline). Combined with modest BTC price of ${fmtBtcPrice(btcPrice)}, drag expands to ${fmtPct(r.drag)}. Bond maturities become expensive to refinance in strong-yen environment.`
+        });
+    }
+
+    // Gerovich scenario specific
+    if (activeScenario === 'gerovich') {
+        cards.push({
+            cls: 'n-green', icon: '&#128208;',
+            text: `<strong>Gerovich Model.</strong> Continued accumulation funded by zero-cost JPY bonds with yen weakening to &yen;${jpyUsd}/$. At ${fmtBtcPrice(btcPrice)} BTC, drag compresses to just ${fmtPct(r.drag)}. The 555 Million Plan targets 100K BTC by end of 2026 and 210K BTC by 2027. Zero dividend cost means no equity erosion during accumulation.`
+        });
+    }
+
+    document.getElementById('narratives').innerHTML = cards.map(c =>
+        `<div class="narrative-card ${c.cls}"><span class="n-icon">${c.icon}</span><div>${c.text}</div></div>`
+    ).join('');
+}
+
+// ─── CAPITAL STRUCTURE ───
+function renderCapitalStructure(r) {
+    document.getElementById('capBody').innerHTML = `
+        <div class="cap-grid">
+            <div class="cap-block">
+                <div class="cap-block-title">BTC RESERVES</div>
+                <div class="cap-row"><span class="cl">Total BTC</span><span class="cv">${fmtNum(data.btc_holdings)} BTC</span></div>
+                <div class="cap-row"><span class="cl">Reserve Value</span><span class="cv">${fmtUsd(r.btcReserveUsd)}</span></div>
+                <div class="cap-row"><span class="cl">Shares Outstanding</span><span class="cv">${(data.shares / 1e9).toFixed(3)}B</span></div>
+                <div class="cap-row"><span class="cl">BPS</span><span class="cv">${fmtSats(r.bpsSats)} sats</span></div>
+            </div>
+            <div class="cap-block">
+                <div class="cap-block-title">SENIOR CLAIMS</div>
+                <div class="cap-row"><span class="cl">JPY Bonds (face)</span><span class="cv">${fmtJpy(data.jpy_claims)}</span></div>
+                <div class="cap-row"><span class="cl">JPY/USD Rate</span><span class="cv">&yen;${jpyUsd} / $1</span></div>
+                <div class="cap-row"><span class="cl">Claims in USD</span><span class="cv">${fmtUsd(r.claimsUsd)}</span></div>
+                <div class="cap-row"><span class="cl">Cash Reserves</span><span class="cv">${fmtUsd(data.cash_usd)}</span></div>
+                <div class="cap-row"><span class="cl">Net Claims (USD)</span><span class="cv" style="color:#f97316">${fmtUsd(r.netClaimsUsd)}</span></div>
+                <div class="cap-row"><span class="cl">Net Claims (BTC)</span><span class="cv">${fmtNum(r.netClaimsBtc)} BTC</span></div>
+            </div>
+        </div>
+        <div style="margin-top:12px;font-size:10px;color:#3f3f46;font-style:italic">
+            Zero-coupon bonds: 0% interest, no dividends, no conversion option. Principal returned at maturity.
+            Bond type: Zero-coupon unsecured ordinary bonds issued to EVO Fund. Claim currency: JPY.
+        </div>
+    `;
+}
+
+// ─── VALUE WATERFALL ───
+function renderWaterfall(r) {
+    const rows = [
+        { label: 'BTC Reserve Value', value: fmtUsd(r.btcReserveUsd), cls: '' },
+        { label: '&minus; JPY Bond Claims (in USD)', value: '(' + fmtUsd(r.claimsUsd) + ')', cls: 'subtract', indent: true },
+        { label: '+ Cash Reserves', value: fmtUsd(data.cash_usd), cls: 'add', indent: true },
+        { divider: true },
+        { label: '= NAV (Common Equity)', value: fmtUsd(r.navUsd * data.shares), cls: '', total: true },
+        { label: '&divide; Shares Outstanding', value: (data.shares / 1e9).toFixed(3) + 'B', cls: '', indent: true },
+        { label: '= NAV / Share (USD)', value: fmtUsd(r.navUsd), cls: '' },
+        { label: '= NAV / Share (JPY)', value: '&yen;' + Math.round(r.navJpy).toLocaleString(), cls: '' },
+        { label: '&times; mNAV Multiple', value: mnavMultiple.toFixed(2) + '&times;', cls: '' },
+        { divider: true },
+        { label: 'Modeled Share Price', value: '&yen;' + Math.round(r.priceJpy).toLocaleString(), cls: '', total: true }
+    ];
+
+    document.getElementById('wfBody').innerHTML = rows.map(r => {
+        if (r.divider) return '<div class="wf-divider"></div>';
+        return `<div class="waterfall-row ${r.total ? 'wf-total' : ''}">
+            <span class="wf-label ${r.indent ? 'indent' : ''}">${r.label}</span>
+            <span class="wf-value ${r.cls}">${r.value}</span>
+        </div>`;
+    }).join('');
+}
+
+// ─── DRAG MATRIX (BTC × JPY/USD) ───
+function renderDragMatrix() {
+    const btcPrices = [25000, 50000, 75000, 100000, 150000, 200000, 500000, 1000000];
+    const fxRates = [130, 140, 145, 153, 160, 170, 180, 200];
+
+    let html = '<table class="matrix"><thead><tr><th class="corner">BTC \\ JPY/$</th>';
+    fxRates.forEach(fx => {
+        html += `<th class="col-hdr">&yen;${fx}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+
+    btcPrices.forEach(btc => {
+        html += `<tr><td>${fmtBtcPrice(btc)}</td>`;
+        fxRates.forEach(fx => {
+            const r = compute(btc, fx, 1);
+            const isActive = Math.abs(btc - btcPrice) < btcPrice * 0.05 && Math.abs(fx - jpyUsd) < 3;
+            const cls = dragColorClass(r.drag) + (isActive ? ' active-cell' : '');
+            html += `<td class="${cls}">${fmtPct(r.drag)}</td>`;
+        });
+        html += '</tr>';
+    });
+
+    html += '</tbody></table>';
+    document.getElementById('dragMatrixWrap').innerHTML = html;
+}
+
+// ─── PRICE MATRIX (BTC × mNAV) ───
+function renderPriceMatrix() {
+    const btcPrices = [25000, 50000, 75000, 100000, 150000, 200000, 500000, 1000000];
+    const mnavs = [0.5, 0.7, 1.0, 1.5, 2.0, 2.5, 3.0];
+
+    let html = '<table class="matrix"><thead><tr><th class="corner">BTC \\ mNAV</th>';
+    mnavs.forEach(m => {
+        html += `<th class="col-hdr">${m.toFixed(1)}&times;</th>`;
+    });
+    html += '</tr></thead><tbody>';
+
+    btcPrices.forEach(btc => {
+        html += `<tr><td>${fmtBtcPrice(btc)}</td>`;
+        mnavs.forEach(m => {
+            const r = compute(btc, jpyUsd, m);
+            const isActive = Math.abs(btc - btcPrice) < btcPrice * 0.05 && Math.abs(m - mnavMultiple) < 0.05;
+            const pJpy = Math.round(r.priceJpy);
+            html += `<td class="${isActive ? 'active-cell' : ''}">&yen;${pJpy.toLocaleString()}</td>`;
+        });
+        html += '</tr>';
+    });
+
+    html += '</tbody></table>';
+    document.getElementById('priceMatrixWrap').innerHTML = html;
+}
+
+// ─── SECTION TOGGLE ───
+function toggleSection(id) {
+    document.getElementById(id).classList.toggle('open');
+}
+
+// ─── SLIDER EVENTS ───
+document.getElementById('btcSlider').addEventListener('input', function() {
+    btcPrice = sliderToBtc(parseInt(this.value));
+    document.getElementById('btcDisplay').textContent = fmtBtcPrice(btcPrice);
+    activeScenario = null;
+    buildScenarioBar();
+    render();
+});
+
+document.getElementById('fxSlider').addEventListener('input', function() {
+    jpyUsd = parseInt(this.value);
+    document.getElementById('fxDisplay').innerHTML = '&yen;' + jpyUsd + ' <span class="unit">/ $1</span>';
+    activeScenario = null;
+    buildScenarioBar();
+    render();
+});
+
+document.getElementById('mnavSlider').addEventListener('input', function() {
+    mnavMultiple = parseInt(this.value) / 100;
+    document.getElementById('mnavDisplay').innerHTML = mnavMultiple.toFixed(2) + '&times;';
+    updateMnavPresets();
+    activeScenario = null;
+    buildScenarioBar();
+    render();
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.key >= '1' && e.key <= '6') {
+        const idx = parseInt(e.key) - 1;
+        if (SCENARIOS[idx]) selectScenario(SCENARIOS[idx]);
+    }
+});
+
+// ─── LIVE DATA ───
+async function loadLiveData() {
+    // CoinGecko BTC price
+    try {
+        const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,jpy');
+        const d = await res.json();
+        if (d.bitcoin) {
+            liveBtcPrice = d.bitcoin.usd;
+            // Derive JPY/USD from BTC prices
+            if (d.bitcoin.jpy && d.bitcoin.usd) {
+                liveFxRate = Math.round(d.bitcoin.jpy / d.bitcoin.usd);
+            }
+        }
+    } catch(e) { console.warn('CoinGecko fetch failed:', e); }
+
+    // Google Sheets snapshot
+    try {
+        const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=snapshots&tq=SELECT * WHERE A='MTPLF' ORDER BY G DESC LIMIT 1`;
+        const res = await fetch(url);
+        const text = await res.text();
+        const json = JSON.parse(text.substring(47, text.length - 2));
+        if (json.table && json.table.rows && json.table.rows.length > 0) {
+            const row = json.table.rows[0].c;
+            // Expected columns: ticker, btc_holdings, shares, debt_usd, preferred_usd, cash_usd, btc_price, snapshot_date, source
+            if (row[1] && row[1].v) data.btc_holdings = row[1].v;
+            if (row[2] && row[2].v) data.shares = row[2].v;
+            if (row[3] && row[3].v) {
+                // debt_usd from sheet — convert back to JPY estimate
+                const debtUsd = row[3].v;
+                const estFx = liveFxRate || DEFAULTS.jpy_usd;
+                data.jpy_claims = debtUsd * estFx;
+            }
+            if (row[5] && row[5].v) data.cash_usd = row[5].v;
+        }
+    } catch(e) { console.warn('Sheet fetch failed, using defaults:', e); }
+
+    // Apply live data to Current scenario defaults
+    if (liveBtcPrice) {
+        btcPrice = liveBtcPrice;
+        SCENARIOS[2].btc = liveBtcPrice;
+    }
+    if (liveFxRate) {
+        jpyUsd = liveFxRate;
+        SCENARIOS[2].fx = liveFxRate;
+    }
+
+    syncSliders();
+    buildScenarioBar();
+    render();
+}
+
+// ─── INIT ───
+buildScenarioBar();
+syncSliders();
+render();
+loadLiveData();
+
+</script>
+</body>
+</html>
