@@ -1,1 +1,1438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Strive Modeler | CEBE Tracker</title>
+    <meta name="description" content="Model Strive share price through CEBE. Preferred equity structure, aggressive debt retirement, USD-denominated. Nasdaq: ASST.">
+    <meta name="theme-color" content="#09090b">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%2309090b' width='32' height='32' rx='4'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f97316'/%3E%3Cstop offset='100%25' stop-color='%23fb923c'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='16' y='15' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='url(%23g)' text-anchor='middle'%3ECE%3C/text%3E%3Ctext x='16' y='28' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='url(%23g)' text-anchor='middle'%3EBE%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #09090b;
+            --bg-secondary: #0f0f11;
+            --bg-card: #141416;
+            --bg-elevated: #1a1a1d;
+            --orange-primary: #f97316;
+            --orange-light: #fb923c;
+            --orange-glow: rgba(249, 115, 22, 0.12);
+            --orange-border: rgba(249, 115, 22, 0.25);
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #52525b;
+            --green: #22c55e;
+            --green-muted: rgba(34, 197, 94, 0.15);
+            --red: #ef4444;
+            --red-muted: rgba(239, 68, 68, 0.15);
+            --yellow: #eab308;
+            --yellow-muted: rgba(234, 179, 8, 0.15);
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --mono: 'JetBrains Mono', monospace;
+        }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(249,115,22,0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(249,115,22,0.015) 1px, transparent 1px);
+            background-size: 48px 48px;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 24px 16px 60px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ═══ HEADER ═══ */
+        .header { text-align: center; margin-bottom: 28px; }
+        .nav-back {
+            display: inline-block;
+            font-size: 12px;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+            transition: color 0.2s;
+        }
+        .nav-back:hover { color: var(--orange-primary); }
+        .logo-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 6px;
+        }
+        .logo {
+            font-size: 32px;
+            font-weight: 300;
+            letter-spacing: 16px;
+            padding-left: 16px;
+            color: var(--text-primary);
+            position: relative;
+            z-index: 1;
+        }
+        .logo span {
+            background: linear-gradient(135deg, var(--orange-primary) 0%, var(--orange-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 600;
+        }
+        .logo-whisper {
+            font-size: 11px;
+            font-weight: 400;
+            letter-spacing: 8px;
+            padding-left: 8px;
+            margin-top: 2px;
+            text-transform: lowercase;
+            background: linear-gradient(180deg, rgba(161,161,170,0.6) 0%, rgba(82,82,91,0.2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .logo-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 180px;
+            height: 50px;
+            background: radial-gradient(ellipse, rgba(249,115,22,0.3) 0%, transparent 70%);
+            filter: blur(20px);
+            z-index: 0;
+        }
+        .logo-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: var(--green-muted);
+            border: 1px solid rgba(34,197,94,0.3);
+            color: var(--green);
+            letter-spacing: 1px;
+            font-family: var(--mono);
+            margin-top: 8px;
+        }
+        .header-sub {
+            font-size: 13px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+        .live-strip {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 12px;
+            font-size: 11px;
+            font-family: var(--mono);
+            color: var(--text-muted);
+            flex-wrap: wrap;
+        }
+        .live-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+            display: inline-block;
+            animation: pulse-dot 2s ease infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .live-price { color: var(--text-secondary); }
+
+        /* ═══ COMPANY SELECTOR ═══ */
+        .company-selector {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+        .company-btn {
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: 1.5px solid var(--border-subtle);
+            background: var(--bg-card);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: center;
+            user-select: none;
+            flex: 1;
+            max-width: 280px;
+        }
+        .company-btn:hover {
+            border-color: rgba(255,255,255,0.12);
+            background: var(--bg-elevated);
+            transform: translateY(-2px);
+        }
+        .company-btn.active {
+            border-color: var(--orange-primary);
+            background: var(--orange-glow);
+            box-shadow: 0 0 20px rgba(249,115,22,0.1);
+        }
+        .company-btn-flag { font-size: 20px; margin-bottom: 2px; }
+        .company-btn-name {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .company-btn-ticker {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-family: var(--mono);
+            margin-top: 2px;
+        }
+
+        /* ═══ CLAIMS BANNER ═══ */
+        .claims-banner {
+            background: rgba(249,115,22,0.06);
+            border: 1px solid var(--orange-border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .claims-banner.low-drag {
+            background: var(--green-muted);
+            border-color: rgba(34,197,94,0.25);
+        }
+        .claims-banner.high-drag {
+            background: var(--red-muted);
+            border-color: rgba(239,68,68,0.25);
+        }
+        .claims-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--orange-primary);
+            margin-bottom: 4px;
+            font-family: var(--mono);
+        }
+        .claims-banner.low-drag .claims-title { color: var(--green); }
+        .claims-banner.high-drag .claims-title { color: var(--red); }
+        .claims-sub {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        /* ═══ CLAIMS STACK ═══ */
+        .claims-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 12px;
+        }
+        .claim-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-subtle);
+            font-size: 12px;
+        }
+        .claim-label { color: var(--text-secondary); font-weight: 500; }
+        .claim-value { font-family: var(--mono); font-weight: 600; }
+        .claim-badge {
+            font-size: 9px;
+            font-family: var(--mono);
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 6px;
+        }
+        .claim-badge.preferred { background: rgba(249,115,22,0.12); color: var(--orange-primary); }
+        .claim-badge.debt { background: rgba(239,68,68,0.1); color: var(--red); }
+        .claim-badge.cash { background: var(--green-muted); color: var(--green); }
+        .claim-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: rgba(249,115,22,0.06);
+            border: 1px solid var(--orange-border);
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .claim-total-label { color: var(--orange-light); }
+        .claim-total-value { font-family: var(--mono); color: var(--orange-primary); }
+
+        /* ═══ SCENARIO CARDS ═══ */
+        .scenarios-section { margin-bottom: 24px; }
+        .scenarios-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        @media (max-width: 500px) {
+            .scenarios-row { grid-template-columns: repeat(2, 1fr); }
+        }
+        .scenario-card {
+            padding: 16px 12px 14px;
+            border-radius: 12px;
+            border: 1.5px solid var(--border-subtle);
+            background: var(--bg-card);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: center;
+            user-select: none;
+            position: relative;
+        }
+        .scenario-card:hover {
+            border-color: rgba(255,255,255,0.12);
+            background: var(--bg-elevated);
+            transform: translateY(-2px);
+        }
+        .scenario-card.active {
+            border-color: var(--orange-primary);
+            background: var(--orange-glow);
+            box-shadow: 0 0 20px rgba(249,115,22,0.1);
+        }
+        .scenario-icon { font-size: 22px; margin-bottom: 4px; }
+        .scenario-name {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .scenario-price {
+            font-size: 15px;
+            font-weight: 700;
+            font-family: var(--mono);
+            color: var(--orange-light);
+        }
+        .scenario-mnav {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-family: var(--mono);
+            margin-top: 4px;
+        }
+
+        /* ═══ HERO ═══ */
+        .hero {
+            text-align: center;
+            padding: 28px 20px;
+            margin-bottom: 20px;
+            background: linear-gradient(180deg, rgba(249,115,22,0.04) 0%, transparent 100%);
+            border-radius: 20px;
+            border: 1px solid rgba(249,115,22,0.1);
+        }
+        .hero-label {
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .hero-price {
+            font-size: 64px;
+            font-weight: 700;
+            font-family: var(--mono);
+            line-height: 1;
+            margin-bottom: 8px;
+            transition: color 0.3s;
+        }
+        .hero-price.positive { color: var(--green); }
+        .hero-price.negative { color: var(--red); }
+        .hero-price.neutral { color: var(--text-primary); }
+        .hero-usd {
+            font-size: 18px;
+            font-family: var(--mono);
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+        .hero-change {
+            font-size: 16px;
+            font-weight: 600;
+            font-family: var(--mono);
+            margin-bottom: 4px;
+        }
+        .hero-change.up { color: var(--green); }
+        .hero-change.down { color: var(--red); }
+        .hero-vs {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        .hero-implied {
+            margin-top: 10px;
+            font-size: 12px;
+            font-family: var(--mono);
+            color: var(--text-secondary);
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-subtle);
+            display: inline-block;
+        }
+        .hero-implied em {
+            font-style: normal;
+            color: var(--orange-primary);
+            font-weight: 600;
+        }
+
+        /* ═══ NARRATIVE PANEL ═══ */
+        .narrative {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .narrative-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .narrative-body {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .narr-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .narr-item.green {
+            background: var(--green-muted);
+            border: 1px solid rgba(34,197,94,0.2);
+            color: #86efac;
+        }
+        .narr-item.red {
+            background: var(--red-muted);
+            border: 1px solid rgba(239,68,68,0.2);
+            color: #fca5a5;
+        }
+        .narr-item.amber {
+            background: var(--yellow-muted);
+            border: 1px solid rgba(234,179,8,0.2);
+            color: #fde68a;
+        }
+        .narr-item.info {
+            background: rgba(56,189,248,0.08);
+            border: 1px solid rgba(56,189,248,0.2);
+            color: #7dd3fc;
+        }
+        .narr-item.neutral {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+        }
+        .narr-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+        .narr-text strong { color: var(--text-primary); }
+
+        /* ═══ METRICS ROW ═══ */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .metric-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 12px 10px;
+            text-align: center;
+        }
+        .metric-label {
+            font-size: 8px;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+        .metric-value {
+            font-size: 17px;
+            font-weight: 700;
+            font-family: var(--mono);
+            line-height: 1.2;
+        }
+        .metric-sub {
+            font-size: 9px;
+            color: #3f3f46;
+            margin-top: 2px;
+            font-family: var(--mono);
+        }
+        .metric-value.good { color: var(--green); }
+        .metric-value.warn { color: var(--yellow); }
+        .metric-value.danger { color: var(--red); }
+
+        /* ═══ COLLAPSIBLE SECTIONS ═══ */
+        .collapse-section { margin-bottom: 12px; }
+        .collapse-section summary {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            list-style: none;
+            user-select: none;
+        }
+        .collapse-section summary::-webkit-details-marker { display: none; }
+        .collapse-section summary:hover {
+            border-color: rgba(255,255,255,0.12);
+            color: var(--text-primary);
+        }
+        .collapse-section[open] summary {
+            border-radius: 12px 12px 0 0;
+            border-bottom-color: transparent;
+            color: var(--orange-primary);
+        }
+        .collapse-body {
+            padding: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+        }
+
+        /* ═══ CONTROLS ═══ */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        @media (max-width: 500px) {
+            .controls-grid { grid-template-columns: 1fr; }
+        }
+        .control-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 14px;
+        }
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .control-label {
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        .control-value {
+            font-size: 18px;
+            font-weight: 700;
+            font-family: var(--mono);
+            color: var(--orange-light);
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #333;
+            outline: none;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--orange-primary);
+            box-shadow: 0 0 10px rgba(249,115,22,0.4);
+            cursor: grab;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--orange-primary);
+            border: none;
+            box-shadow: 0 0 10px rgba(249,115,22,0.4);
+            cursor: grab;
+        }
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: #444;
+            font-family: var(--mono);
+            margin-top: 4px;
+        }
+        .mnav-presets {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+        }
+        .mnav-btn {
+            flex: 1;
+            padding: 4px 0;
+            border-radius: 6px;
+            border: 1px solid var(--border-subtle);
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 10px;
+            font-family: var(--mono);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .mnav-btn:hover, .mnav-btn.active {
+            border-color: var(--orange-primary);
+            color: var(--orange-primary);
+            background: var(--orange-glow);
+        }
+
+        /* ═══ WATERFALL ═══ */
+        .waterfall {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            overflow-x: auto;
+            padding: 12px;
+            scrollbar-width: none;
+        }
+        .waterfall::-webkit-scrollbar { display: none; }
+        .wf-step {
+            flex: 0 0 auto;
+            text-align: center;
+            padding: 8px 14px;
+            border-radius: 8px;
+            min-width: 90px;
+        }
+        .wf-step.btc-val { background: rgba(249,115,22,0.08); border: 1px solid rgba(249,115,22,0.2); }
+        .wf-step.nav { background: var(--green-muted); border: 1px solid rgba(34,197,94,0.2); }
+        .wf-step.shares { background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); }
+        .wf-step.result { background: rgba(249,115,22,0.12); border: 1px solid var(--orange-border); }
+        .wf-label {
+            font-size: 8px;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+        .wf-value {
+            font-size: 12px;
+            font-weight: 700;
+            font-family: var(--mono);
+        }
+        .wf-arrow {
+            flex: 0 0 auto;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* ═══ SENSITIVITY MATRIX ═══ */
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .matrix-table th {
+            padding: 8px 10px;
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-subtle);
+            background: rgba(255,255,255,0.02);
+        }
+        .matrix-table td {
+            padding: 8px 10px;
+            text-align: center;
+            font-family: var(--mono);
+            font-size: 11px;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            transition: all 0.2s;
+        }
+        .matrix-table td.row-label {
+            text-align: right;
+            color: var(--text-secondary);
+            font-weight: 600;
+            background: rgba(255,255,255,0.02);
+        }
+        .matrix-table th:first-child { text-align: right; }
+        .matrix-cell-green { color: var(--green); background: rgba(34,197,94,0.06); }
+        .matrix-cell-lightgreen { color: #86efac; background: rgba(34,197,94,0.03); }
+        .matrix-cell-red { color: var(--red); background: rgba(239,68,68,0.06); }
+        .matrix-cell-lightred { color: #fca5a5; background: rgba(239,68,68,0.03); }
+        .matrix-cell-current { outline: 2px solid var(--orange-primary); outline-offset: -2px; border-radius: 4px; }
+
+        /* ═══ CONTRAST SECTION ═══ */
+        .contrast-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+        .contrast-title {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+        .contrast-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+        .contrast-item {
+            text-align: center;
+            padding: 10px 8px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-subtle);
+        }
+        .contrast-company {
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        .contrast-value {
+            font-size: 18px;
+            font-weight: 700;
+            font-family: var(--mono);
+        }
+        .contrast-label {
+            font-size: 9px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* ═══ FOOTER ═══ */
+        .footer {
+            text-align: center;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-subtle);
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 24px;
+        }
+        .footer a { color: var(--orange-primary); text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+        .footer-formula {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: #333;
+            margin-top: 8px;
+        }
+
+        /* ═══ LOADING ═══ */
+        .loading-screen {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-primary);
+            z-index: 999;
+        }
+        .loading-spinner {
+            width: 32px; height: 32px;
+            border: 3px solid #222;
+            border-top-color: var(--green);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 12px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { font-size: 12px; color: var(--text-muted); letter-spacing: 2px; }
+
+        /* ═══ RESPONSIVE ═══ */
+        @media (max-width: 768px) {
+            .hero-price { font-size: 48px; }
+        }
+        @media (max-width: 480px) {
+            .hero-price { font-size: 36px; }
+            .control-value { font-size: 16px; }
+            .logo { font-size: 24px; letter-spacing: 10px; padding-left: 10px; }
+            .contrast-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">LOADING LIVE DATA</div>
+</div>
+
+<div class="container" id="app" style="display:none">
+
+    <!-- Header -->
+    <div class="header">
+        <a href="/modeler" class="nav-back">&larr; modelers</a>
+        <div class="logo-container">
+            <div class="logo-glow"></div>
+            <div class="logo"><span>CEBE</span></div>
+            <p class="logo-whisper">tracker</p>
+        </div>
+        <div class="logo-badge">&#127482;&#127480; STRIVE MODELER</div>
+        <div class="header-sub" id="headerSub">Bitcoin-First Asset Manager &middot; Nasdaq: ASST</div>
+        <div class="live-strip" id="liveStrip">
+            <span><span class="live-dot"></span> Live Data</span>
+            <span class="live-price" id="liveBtcDisplay">BTC $&mdash;</span>
+            <span class="live-price" id="liveDataDate">&mdash;</span>
+        </div>
+    </div>
+
+    <!-- Claims Banner -->
+    <div class="claims-banner" id="claimsBanner">
+        <div class="claims-title" id="claimsDragDisplay">DRAG: —%</div>
+        <div class="claims-sub" id="claimsSub">SATA preferred + residual debt − cash offsets</div>
+    </div>
+
+    <!-- Scenario Cards -->
+    <div class="scenarios-section">
+        <div class="scenarios-row" id="scenarioBar"></div>
+    </div>
+
+    <!-- Hero -->
+    <div class="hero">
+        <div class="hero-label" id="heroLabel">MODELED SHARE PRICE</div>
+        <div class="hero-price neutral" id="heroPrice">&mdash;</div>
+        <div class="hero-usd" id="heroUsd"></div>
+        <div class="hero-change" id="heroChange">&mdash;</div>
+        <div class="hero-vs" id="heroVs">vs current market price</div>
+        <div class="hero-implied" id="heroImplied" style="display:none">
+            Market implies <em id="impliedMnavVal">&mdash;</em> mNAV
+        </div>
+    </div>
+
+    <!-- Narrative Panel -->
+    <div class="narrative" id="narrativePanel">
+        <div class="narrative-title">&#128269; What happens here</div>
+        <div class="narrative-body" id="narrativeBody"></div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="metrics-grid" id="metricsGrid"></div>
+
+    <!-- Advanced Controls (collapsed) -->
+    <details class="collapse-section">
+        <summary>&#9881; Adjust Inputs</summary>
+        <div class="collapse-body">
+            <div class="controls-grid">
+                <div class="control-card">
+                    <div class="control-header">
+                        <span class="control-label">BTC PRICE</span>
+                        <span class="control-value" id="btcPriceDisplay">$&mdash;</span>
+                    </div>
+                    <input type="range" id="btcSlider" min="0" max="1000" value="500">
+                    <div class="slider-labels"><span>$10K</span><span>$1M</span></div>
+                </div>
+                <div class="control-card">
+                    <div class="control-header">
+                        <span class="control-label">mNAV MULTIPLE</span>
+                        <span class="control-value" id="mnavDisplay">1.00&times;</span>
+                    </div>
+                    <input type="range" id="mnavSlider" min="30" max="400" value="100">
+                    <div class="mnav-presets" id="mnavPresets"></div>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <!-- Claims Stack (collapsed) -->
+    <details class="collapse-section">
+        <summary>&#9878; Senior Claims Stack</summary>
+        <div class="collapse-body" id="claimsBody"></div>
+    </details>
+
+    <!-- Value Waterfall (collapsed) -->
+    <details class="collapse-section">
+        <summary>&#128256; Value Waterfall</summary>
+        <div class="collapse-body" style="padding:0;">
+            <div class="waterfall" id="waterfall"></div>
+        </div>
+    </details>
+
+    <!-- Sensitivity Matrix (collapsed) -->
+    <details class="collapse-section">
+        <summary>&#127919; Price Sensitivity Matrix</summary>
+        <div class="collapse-body" style="padding:0;">
+            <div style="overflow-x:auto;">
+                <table class="matrix-table" id="matrixTable"></table>
+            </div>
+        </div>
+    </details>
+
+    <!-- Drag Contrast (collapsed) -->
+    <details class="collapse-section">
+        <summary>&#9878; How Strive Drag Compares</summary>
+        <div class="collapse-body" id="contrastBody"></div>
+    </details>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>CEBE Framework by <a href="https://x.com/chcbearsfan" target="_blank">&#64;chcbearsfan</a> &middot; <a href="/">cebetracker.io</a> &middot; <a href="https://x.com/chcbearsfan/status/2014767364819063207" target="_blank">Read the Framework</a></p>
+        <p style="margin-top:4px">Not financial advice &middot; Data updates after each filing</p>
+        <p class="footer-formula">CEBE = (Total BTC &minus; Senior Claims in BTC) &divide; Shares Outstanding</p>
+    </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// CEBE STRIVE MODELER
+// cebetracker.io — Strive
+// SATA preferred + residual debt
+// ═══════════════════════════════════════════════
+
+// ─── COMPANY DATA ───
+const COMPANY = {
+    name: 'Strive',
+    flag: '&#127482;&#127480;',
+    tickers: 'Nasdaq: ASST',
+    tagline: "Bitcoin-First Asset Manager",
+    currency: 'USD',
+    currencySymbol: '$',
+    sheetTicker: 'ASST',
+    defaults: {
+        btc_holdings: 13132,
+        shares: 62371840,
+        stock_price_local: 16.20,
+        fx_rate: 1.0,
+        debt_usd: 10000000,
+        preferred_usd: 426550000,
+        cash_usd: 181000000,
+    }
+};
+
+const SHEET_ID = '1BNsCWGVU08PDinDcfzJccqcuj9_KrK1VZGETErzBZvg';
+const SNAPSHOTS_GID = '771405586';
+
+const SCENARIOS = [
+    { id: 'crash',   icon: '&#128128;', name: 'Crash',    btc: 25000,   mnav: 0.5 },
+    { id: 'bear',    icon: '&#128059;', name: 'Bear',     btc: 50000,   mnav: 0.7 },
+    { id: 'current', icon: '&#128205;', name: 'Current',  btc: null,    mnav: 1.0 },
+    { id: 'bull',    icon: '&#9728;',   name: 'Bull',     btc: 150000,  mnav: 1.5 },
+    { id: 'mega',    icon: '&#128640;', name: 'Mega',     btc: 500000,  mnav: 2.0 },
+    { id: 'moon',    icon: '&#9854;',   name: 'Moon',     btc: 1000000, mnav: 3.0 },
+];
+
+const MNAV_PRESETS = [0.5, 0.75, 1.0, 1.5, 2.0, 3.0];
+const MATRIX_BTC = [25000, 50000, 75000, 100000, 150000, 200000, 300000, 500000, 1000000];
+const MATRIX_MNAVS = [0.5, 0.75, 1.0, 1.5, 2.0, 3.0];
+
+// ─── STATE ───
+let btcPrice = 97000;
+let mnavMultiple = 1.0;
+let activeScenario = 'current';
+let liveBtcPrice = null;
+let liveFxRate = COMPANY.defaults.fx_rate;
+let loadedData = {};
+
+// ─── HELPERS ───
+const $ = id => document.getElementById(id);
+const fmt = n => Math.round(n).toLocaleString('en-US');
+const fmtB = n => n >= 1e9 ? '$' + (n/1e9).toFixed(1) + 'B' : n >= 1e6 ? '$' + (n/1e6).toFixed(0) + 'M' : '$' + fmt(n);
+const fmtPrice = p => {
+    if (p >= 1e6) return '$' + (p/1e6).toFixed(1) + 'M';
+    if (p >= 1000) return '$' + fmt(p);
+    if (p >= 0.01) return '$' + p.toFixed(2);
+    return '$0.00';
+};
+const fmtPct = (p, dec=1) => (p * 100).toFixed(dec) + '%';
+const fmtSats = s => fmt(Math.round(s));
+
+// Logarithmic BTC slider (matches MSTR modeler)
+function sliderToBtc(val) {
+    const minLog = Math.log10(10000);
+    const maxLog = Math.log10(1000000);
+    return Math.round(Math.pow(10, minLog + (val / 1000) * (maxLog - minLog)));
+}
+function btcToSlider(btc) {
+    const minLog = Math.log10(10000);
+    const maxLog = Math.log10(1000000);
+    return Math.round(((Math.log10(Math.max(10000, btc)) - minLog) / (maxLog - minLog)) * 1000);
+}
+
+function getData() {
+    return {
+        btcHoldings: loadedData.btc_holdings || COMPANY.defaults.btc_holdings,
+        shares: loadedData.shares || COMPANY.defaults.shares,
+        stockLocal: loadedData.stock_price_local || COMPANY.defaults.stock_price_local,
+        fxRate: 1.0,
+        debtUsd: loadedData.debt_usd || COMPANY.defaults.debt_usd,
+        preferredUsd: loadedData.preferred_usd || COMPANY.defaults.preferred_usd,
+        cashUsd: loadedData.cash_usd || COMPANY.defaults.cash_usd,
+        snapshotDate: loadedData.snapshot_date || null,
+    };
+}
+
+// ─── CSV PARSER ───
+function parseCSVLine(line) {
+    const r = []; let c = '', q = false;
+    for (const ch of line) { if (ch === '"') q = !q; else if (ch === ',' && !q) { r.push(c); c = ''; } else c += ch; }
+    r.push(c); return r;
+}
+function parseCSV(text) {
+    const lines = text.split('\n');
+    const headers = parseCSVLine(lines[0]);
+    return lines.slice(1).filter(l => l.trim()).map(l => {
+        const vals = parseCSVLine(l);
+        const row = {};
+        headers.forEach((h, i) => { row[h.replace(/"/g,'').trim()] = vals[i]?.replace(/"/g,'').trim() || ''; });
+        return row;
+    });
+}
+
+// ─── CORE MATH ───
+// Strive: SATA preferred + residual debt - cash
+function compute(btcH, shares, btcP, mnav, debtUsd, prefUsd, cashUsd) {
+    var netClaims = Math.max(0, (debtUsd || 0) + (prefUsd || 0) - (cashUsd || 0));
+    var claimsBtc = btcP > 0 ? netClaims / btcP : 0;
+    var drag = btcH > 0 ? claimsBtc / btcH : 0;
+    var bpsBtc = shares > 0 ? btcH / shares : 0;
+    var bpsSats = Math.round(bpsBtc * 1e8);
+    var cebeBtc = shares > 0 ? (btcH - claimsBtc) / shares : 0;
+    var cebeSats = Math.max(0, Math.round(cebeBtc * 1e8));
+    var navUsd = (btcH * btcP) - netClaims;
+    var navPerShare = shares > 0 ? navUsd / shares : 0;
+    var modeledUsd = navPerShare * mnav;
+    var breakEven = btcH > 0 ? netClaims / btcH : 0;
+    var amplification = drag < 1 ? 1 / (1 - drag) : Infinity;
+    return { bpsBtc, bpsSats, cebeBtc, cebeSats, navUsd, navPerShare, modeledUsd, drag, netClaims, claimsBtc, breakEven, amplification, debtUsd: debtUsd || 0, prefUsd: prefUsd || 0, cashUsd: cashUsd || 0 };
+}
+
+// ─── DATA LOADING ───
+async function loadData() {
+    try {
+        // BTC price + FX rates from CoinGecko
+        const btcRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd')
+            .then(r => r.json()).catch(() => null);
+
+        if (btcRes && btcRes.bitcoin) {
+            liveBtcPrice = btcRes.bitcoin.usd;
+            liveFxRate = 1.0;  // USD-denominated, no FX
+        }
+
+        // Google Sheet data
+        const sheetText = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${SNAPSHOTS_GID}`)
+            .then(r => r.text()).catch(() => null);
+
+        if (sheetText) {
+            const rows = parseCSV(sheetText);
+            let best = null;
+            rows.forEach(r => {
+                if (r.ticker === COMPANY.sheetTicker && (!r.status || r.status.toLowerCase() === 'live')) {
+                    if (!best || r.snapshot_date > best.snapshot_date) best = r;
+                }
+            });
+            if (best) {
+                loadedData = {
+                    btc_holdings: parseFloat(best.btc_holdings) || COMPANY.defaults.btc_holdings,
+                    shares: parseFloat(best.shares_outstanding) || COMPANY.defaults.shares,
+                    debt_usd: parseFloat(best.debt_usd) || COMPANY.defaults.debt_usd,
+                    preferred_usd: parseFloat(best.preferred_usd) || COMPANY.defaults.preferred_usd,
+                    cash_usd: parseFloat(best.cash_usd) || COMPANY.defaults.cash_usd,
+                    snapshot_date: best.snapshot_date || null,
+                };
+            }
+        }
+
+        btcPrice = liveBtcPrice || 97000;
+        SCENARIOS.find(s => s.id === 'current').btc = btcPrice;
+
+        $('loadingScreen').style.display = 'none';
+        $('app').style.display = 'block';
+
+        $('headerSub').innerHTML = COMPANY.tagline + ' &middot; ' + COMPANY.tickers;
+        buildScenarioBar();
+        buildMnavPresets();
+        syncSliders();
+        render();
+    } catch (err) {
+        console.error('Load failed:', err);
+        $('loadingScreen').innerHTML = '<div style="text-align:center;color:#a1a1aa;font-size:13px"><p style="margin-bottom:12px">Failed to load data</p><p style="font-size:11px;color:#52525b">' + err.message + '</p><p style="margin-top:12px"><a href="/modeler" style="color:#f97316">&larr; Back to modelers</a></p></div>';
+    }
+}
+
+// ═══════════════════════════════════════════════
+// RENDERING
+// ═══════════════════════════════════════════════
+
+function render() {
+    const co = COMPANY;
+    const d = getData();
+    const r = compute(d.btcHoldings, d.shares, btcPrice, mnavMultiple, d.debtUsd, d.preferredUsd, d.cashUsd);
+
+    renderHero(r, co, d);
+    renderClaimsBanner(r);
+    renderNarrative(r, co, d);
+    renderMetrics(r, co, d);
+    renderClaims(r);
+    renderWaterfall(r, co, d);
+    renderMatrix(co, d);
+    renderContrast(r);
+
+    // Live strip
+    $('liveBtcDisplay').textContent = 'BTC ' + fmtPrice(liveBtcPrice || btcPrice);
+    $('liveDataDate').textContent = d.snapshotDate ? 'Data: ' + d.snapshotDate : '';
+
+    updateSliderFills();
+}
+
+function renderHero(r, co, d) {
+    const price = r.modeledUsd;
+    const el = $('heroPrice');
+
+    $('heroLabel').innerHTML = 'MODELED ' + co.name.toUpperCase() + ' SHARE PRICE';
+
+    if (price <= 0) {
+        el.textContent = '$0.00';
+        el.className = 'hero-price negative';
+        $('heroUsd').textContent = 'Common equity wiped out at this price';
+        $('heroChange').textContent = '';
+        $('heroVs').textContent = '';
+        $('heroImplied').style.display = 'none';
+        return;
+    }
+
+    el.innerHTML = '$' + (price >= 1 ? price.toFixed(2) : price.toFixed(4));
+    $('heroUsd').textContent = '';
+
+    // Change vs market
+    const market = d.stockLocal;
+    if (market > 0) {
+        const chg = price - market;
+        const chgPct = (chg / market) * 100;
+        const sign = chg >= 0 ? '+' : '';
+        $('heroChange').textContent = sign + chgPct.toFixed(1) + '%';
+        $('heroChange').className = 'hero-change ' + (chg >= 0 ? 'up' : 'down');
+        el.className = 'hero-price ' + (chgPct > 5 ? 'positive' : chgPct < -5 ? 'negative' : 'neutral');
+        $('heroVs').innerHTML = 'vs market $' + market.toFixed(2);
+    } else {
+        $('heroChange').textContent = '';
+        el.className = 'hero-price neutral';
+        $('heroVs').textContent = '';
+    }
+
+    // Implied mNAV
+    if (market > 0 && r.navPerShare > 0) {
+        const impliedMnav = market / r.navPerShare;
+        $('impliedMnavVal').textContent = impliedMnav.toFixed(2) + '\u00d7';
+        $('heroImplied').style.display = 'inline-block';
+    } else {
+        $('heroImplied').style.display = 'none';
+    }
+}
+
+function renderClaimsBanner(r) {
+    const banner = $('claimsBanner');
+    const dragPct = (r.drag * 100).toFixed(1);
+    $('claimsDragDisplay').textContent = 'DRAG: ' + dragPct + '%';
+    $('claimsSub').innerHTML = 'Common equity owns ' + ((1 - r.drag) * 100).toFixed(1) + '% of ' + fmt(Math.round(r.claimsBtc + (r.navUsd + r.netClaims) / btcPrice)) + ' BTC &middot; Break-even: ' + fmtPrice(r.breakEven);
+    banner.className = 'claims-banner' + (r.drag < 0.2 ? ' low-drag' : r.drag > 0.5 ? ' high-drag' : '');
+}
+
+function renderNarrative(r, co, d) {
+    const items = [];
+    const scenarioObj = SCENARIOS.find(s => s.id === activeScenario);
+    const scenarioName = scenarioObj ? scenarioObj.name : 'Custom';
+
+    document.querySelector('.narrative-title').innerHTML = '&#128269; ' + scenarioName + ' &mdash; ' + fmtPrice(btcPrice) + ' BTC';
+
+    // Drag status
+    const dragPct = (r.drag * 100).toFixed(1);
+    const ownPct = ((1 - r.drag) * 100).toFixed(1);
+    if (r.drag < 0.15) {
+        items.push({ cls: 'green', icon: '&#9989;', text: '<strong>' + dragPct + '% drag &mdash; near pure equity.</strong> After aggressive debt retirement ($120M &rarr; $10M), Strive\'s capital structure is 97.7% preferred equity. Common shareholders own ' + ownPct + '% of the ' + fmt(d.btcHoldings) + ' BTC.' });
+    } else if (r.drag < 0.4) {
+        items.push({ cls: 'info', icon: '&#128200;', text: '<strong>' + dragPct + '% drag.</strong> Common equity owns ' + ownPct + '% of the ' + fmt(d.btcHoldings) + ' BTC on the balance sheet. $' + (r.prefUsd / 1e6).toFixed(0) + 'M in SATA preferred is the primary senior claim.' });
+    } else {
+        items.push({ cls: 'amber', icon: '&#9888;', text: '<strong>' + dragPct + '% drag &mdash; elevated.</strong> At ' + fmtPrice(btcPrice) + ' BTC, SATA preferred claims consume ' + dragPct + '% of holdings. Common equity owns ' + ownPct + '% of the ' + fmt(d.btcHoldings) + ' BTC.' });
+    }
+
+    // Amplification
+    if (r.amplification < 10) {
+        items.push({ cls: 'neutral', icon: '&#9878;', text: '<strong>Amplification: ' + r.amplification.toFixed(2) + '&times;</strong> Common equity gets ' + r.amplification.toFixed(2) + '&times; the BTC price movement. SATA preferred creates leverage that works both directions &mdash; amplifying gains in a bull run and losses in a drawdown.' });
+    }
+
+    // Break-even context
+    if (btcPrice < r.breakEven * 2) {
+        items.push({ cls: 'red', icon: '&#128680;', text: '<strong>Break-even proximity.</strong> At ' + fmtPrice(r.breakEven) + ', net senior claims equal total BTC value and common equity hits zero. Current price is ' + ((btcPrice / r.breakEven - 1) * 100).toFixed(0) + '% above break-even. No callable debt means no forced liquidation, but NAV goes to zero.' });
+    } else {
+        items.push({ cls: 'green', icon: '&#128161;', text: '<strong>Break-even: ' + fmtPrice(r.breakEven) + '.</strong> BTC would need to fall ' + ((1 - r.breakEven / btcPrice) * 100).toFixed(0) + '% from here before common equity hits zero. No callable debt &mdash; creditors cannot force liquidation at any price.' });
+    }
+
+    // Cash offset
+    if (r.cashUsd > 0) {
+        items.push({ cls: 'info', icon: '&#128176;', text: '<strong>$' + (r.cashUsd / 1e6).toFixed(0) + 'M cash reserve</strong> offsets senior claims, reducing net drag. Strive retired $110M in debt in two weeks (Jan 2026), shifting from mixed debt to 97.7% preferred equity structure.' });
+    }
+
+    // mNAV interpretation
+    if (mnavMultiple > 1.1) {
+        items.push({ cls: 'amber', icon: '&#9888;', text: '<strong>Premium at ' + mnavMultiple.toFixed(2) + '&times; mNAV.</strong> Market is pricing execution premium above net BTC value. Justified by BTC Yield (21%+ QTD) and aggressive accumulation strategy.' });
+    } else if (mnavMultiple < 0.9) {
+        items.push({ cls: 'green', icon: '&#128176;', text: '<strong>Discount at ' + mnavMultiple.toFixed(2) + '&times; mNAV.</strong> Market is pricing Strive below its net Bitcoin value. At this mNAV, you\u2019re buying BTC exposure cheaper than spot through the equity.' });
+    }
+
+    $('narrativeBody').innerHTML = items.map(i =>
+        '<div class="narr-item ' + i.cls + '"><span class="narr-icon">' + i.icon + '</span><span>' + i.text + '</span></div>'
+    ).join('');
+}
+
+function renderMetrics(r, co, d) {
+    const dragPct = (r.drag * 100).toFixed(1);
+    const dragCls = r.drag < 0.2 ? 'good' : r.drag > 0.5 ? 'danger' : 'warn';
+    const metrics = [
+        { label: 'CEBE', value: fmtSats(r.cebeSats) + ' sats', cls: '' },
+        { label: 'DRAG', value: dragPct + '%', cls: dragCls },
+        { label: 'AMPLIFICATION', value: r.amplification < 10 ? r.amplification.toFixed(2) + '&times;' : '&infin;', cls: '' },
+        { label: 'BREAK-EVEN', value: fmtPrice(r.breakEven), cls: btcPrice < r.breakEven * 2 ? 'danger' : '' },
+        { label: 'NAV/SHARE', value: '$' + (r.navPerShare >= 1 ? r.navPerShare.toFixed(2) : r.navPerShare.toFixed(4)), cls: '' },
+        { label: 'NET CLAIMS', value: fmtB(r.netClaims), cls: '' },
+    ];
+
+    $('metricsGrid').innerHTML = metrics.map(m =>
+        '<div class="metric-card"><div class="metric-label">' + m.label + '</div><div class="metric-value ' + m.cls + '">' + m.value + '</div></div>'
+    ).join('');
+}
+
+function renderClaims(r) {
+    $('claimsBody').innerHTML =
+        '<div class="claims-stack">' +
+            '<div class="claim-row"><span class="claim-label">SATA Preferred <span class="claim-badge preferred">PERP</span></span><span class="claim-value">' + fmtB(r.prefUsd) + '</span></div>' +
+            '<div class="claim-row"><span class="claim-label">Debt <span class="claim-badge debt">RESIDUAL</span></span><span class="claim-value">' + fmtB(r.debtUsd) + '</span></div>' +
+            '<div class="claim-row"><span class="claim-label">Cash Reserve <span class="claim-badge cash">OFFSET</span></span><span class="claim-value" style="color:var(--green)">-' + fmtB(r.cashUsd) + '</span></div>' +
+            '<div class="claim-total"><span class="claim-total-label">NET SENIOR CLAIMS</span><span class="claim-total-value">' + fmtB(r.netClaims) + '</span></div>' +
+            '<div style="margin-top:10px;font-size:11px;color:var(--text-muted);text-align:center">= ' + fmt(Math.round(r.claimsBtc)) + ' BTC at ' + fmtPrice(btcPrice) + '</div>' +
+        '</div>';
+}
+
+function renderWaterfall(r, co, d) {
+    const sym = co.currencySymbol;
+    const navLocal = r.navPerShare / d.fxRate;
+    const priceLocal = r.modeledUsd / d.fxRate;
+
+    var grossBtcVal = d.btcHoldings * btcPrice;
+    $('waterfall').innerHTML =
+        '<div class="wf-step btc-val"><div class="wf-label">BTC RESERVE</div><div class="wf-value">' + fmtB(grossBtcVal) + '</div></div>' +
+        '<span class="wf-arrow">&#8594;</span>' +
+        '<div class="wf-step" style="background:var(--red-muted);border:1px solid rgba(239,68,68,0.2)"><div class="wf-label">CLAIMS</div><div class="wf-value" style="color:var(--red)">&#8722;' + fmtB(r.netClaims) + '</div></div>' +
+        '<span class="wf-arrow">=</span>' +
+        '<div class="wf-step nav"><div class="wf-label">NAV</div><div class="wf-value">' + fmtB(r.navUsd) + '</div></div>' +
+        '<span class="wf-arrow">&#247;</span>' +
+        '<div class="wf-step shares"><div class="wf-label">SHARES</div><div class="wf-value">' + (d.shares / 1e6).toFixed(0) + 'M</div></div>' +
+        '<span class="wf-arrow">=</span>' +
+        '<div class="wf-step shares"><div class="wf-label">NAV/SHARE</div><div class="wf-value">' + sym + (navLocal >= 1 ? navLocal.toFixed(2) : navLocal.toFixed(4)) + '</div></div>' +
+        '<span class="wf-arrow">&times;</span>' +
+        '<div class="wf-step shares"><div class="wf-label">mNAV</div><div class="wf-value">' + mnavMultiple.toFixed(2) + '&times;</div></div>' +
+        '<span class="wf-arrow">=</span>' +
+        '<div class="wf-step result"><div class="wf-label">PRICE</div><div class="wf-value">' + sym + (priceLocal >= 1 ? priceLocal.toFixed(2) : priceLocal.toFixed(4)) + '</div></div>';
+}
+
+function renderMatrix(co, d) {
+    const sym = co.currencySymbol;
+    let html = '<thead><tr><th>BTC &#8595; \\ mNAV &#8594;</th>';
+    MATRIX_MNAVS.forEach(m => { html += '<th>' + m.toFixed(m % 1 === 0 ? 0 : 2) + '&times;</th>'; });
+    html += '</tr></thead><tbody>';
+
+    MATRIX_BTC.forEach(btcP => {
+        const r = compute(d.btcHoldings, d.shares, btcP, 1.0);
+        const label = btcP >= 1e6 ? '$' + (btcP/1e6) + 'M' : '$' + (btcP/1e3) + 'K';
+        html += '<tr><td class="row-label">' + label + '</td>';
+        MATRIX_MNAVS.forEach(m => {
+            const priceUsd = r.navPerShare * m;
+            const priceLocal = priceUsd / d.fxRate;
+            const display = priceLocal >= 100 ? sym + Math.round(priceLocal).toLocaleString() : priceLocal >= 1 ? sym + priceLocal.toFixed(2) : sym + priceLocal.toFixed(4);
+
+            // Color relative to current market
+            const marketUsd = d.stockLocal * d.fxRate;
+            let cls = '';
+            if (marketUsd > 0) {
+                const ratio = priceUsd / marketUsd;
+                if (ratio > 1.5) cls = 'matrix-cell-green';
+                else if (ratio > 1.1) cls = 'matrix-cell-lightgreen';
+                else if (ratio < 0.5) cls = 'matrix-cell-red';
+                else if (ratio < 0.9) cls = 'matrix-cell-lightred';
+            }
+
+            // Highlight nearest to current inputs
+            const btcClose = Math.abs(btcP - btcPrice) < btcPrice * 0.25;
+            const mnavClose = Math.abs(m - mnavMultiple) < 0.15;
+            if (btcClose && mnavClose) cls += ' matrix-cell-current';
+
+            html += '<td class="' + cls + '">' + display + '</td>';
+        });
+        html += '</tr>';
+    });
+    html += '</tbody>';
+    $('matrixTable').innerHTML = html;
+}
+
+function renderContrast(r) {
+    const striveDrag = (r.drag * 100).toFixed(1);
+    const striveOwn = ((1 - r.drag) * 100).toFixed(1);
+    const striveColor = r.drag < 0.2 ? 'var(--green)' : r.drag > 0.5 ? 'var(--red)' : 'var(--yellow)';
+
+    $('contrastBody').innerHTML =
+        '<div class="contrast-title">DRAG COMPARISON AT ' + fmtPrice(btcPrice) + ' BTC</div>' +
+        '<div class="contrast-row">' +
+            '<div class="contrast-item"><div class="contrast-company">STRIVE</div><div class="contrast-value" style="color:' + striveColor + '">' + striveDrag + '%</div><div class="contrast-label">owns ' + striveOwn + '%</div></div>' +
+            '<div class="contrast-item"><div class="contrast-company">METAPLANET</div><div class="contrast-value" style="color:var(--yellow)">~14%</div><div class="contrast-label">owns ~86%</div></div>' +
+            '<div class="contrast-item"><div class="contrast-company">STRATEGY</div><div class="contrast-value" style="color:var(--orange-light)">~27%</div><div class="contrast-label">owns ~73%</div></div>' +
+        '</div>' +
+        '<div style="margin-top:14px;font-size:12px;color:var(--text-muted);line-height:1.6">' +
+            '<strong style="color:var(--text-secondary)">Strive\u2019s structure:</strong> Nearly all senior claims come from SATA perpetual preferred equity ($' + (r.prefUsd / 1e6).toFixed(0) + 'M). After retiring $110M in debt, only $' + (r.debtUsd / 1e6).toFixed(0) + 'M in residual debt remains. No convertible bonds, no complex maturity schedule.' +
+            '<br><br>' +
+            '<strong style="color:var(--text-secondary)">The SATA advantage:</strong> Perpetual preferred has no maturity date \u2014 no forced redemption at any BTC price. This removes the existential convert maturity risk that Strategy faces. The tradeoff is ongoing preferred dividend obligations.' +
+        '</div>';
+}
+
+
+// ═══════════════════════════════════════════════
+// UI BUILDERS & EVENT HANDLERS
+// ═══════════════════════════════════════════════
+
+function buildScenarioBar() {
+    $('scenarioBar').innerHTML = SCENARIOS.map(s => {
+        const priceDisplay = s.btc ? (s.btc >= 1e6 ? '$' + (s.btc/1e6) + 'M' : '$' + (s.btc/1e3) + 'K') : fmtPrice(btcPrice);
+        return '<div class="scenario-card ' + (s.id === activeScenario ? 'active' : '') + '" data-scenario="' + s.id + '">' +
+            '<div class="scenario-icon">' + s.icon + '</div>' +
+            '<div class="scenario-name">' + s.name + '</div>' +
+            '<div class="scenario-price">' + priceDisplay + '</div>' +
+            '<div class="scenario-mnav">' + s.mnav.toFixed(1) + '&times; mNAV</div>' +
+        '</div>';
+    }).join('');
+
+    document.querySelectorAll('.scenario-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const id = card.dataset.scenario;
+            const scenario = SCENARIOS.find(s => s.id === id);
+            if (!scenario) return;
+            activeScenario = id;
+            btcPrice = scenario.btc || (liveBtcPrice || 97000);
+            mnavMultiple = scenario.mnav;
+            syncSliders();
+            buildScenarioBar();
+            updateMnavPresets();
+            render();
+        });
+    });
+}
+
+function buildMnavPresets() {
+    $('mnavPresets').innerHTML = MNAV_PRESETS.map(m =>
+        '<button class="mnav-btn ' + (Math.abs(m - mnavMultiple) < 0.01 ? 'active' : '') + '" data-mnav="' + m + '">' + m.toFixed(m % 1 === 0 ? 0 : 2) + '&times;</button>'
+    ).join('');
+
+    document.querySelectorAll('.mnav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            mnavMultiple = parseFloat(btn.dataset.mnav);
+            $('mnavSlider').value = mnavMultiple * 100;
+            $('mnavDisplay').textContent = mnavMultiple.toFixed(2) + '\u00d7';
+            activeScenario = '';
+            updateMnavPresets();
+            buildScenarioBar();
+            render();
+        });
+    });
+}
+
+function updateMnavPresets() {
+    document.querySelectorAll('.mnav-btn').forEach(btn => {
+        btn.classList.toggle('active', Math.abs(parseFloat(btn.dataset.mnav) - mnavMultiple) < 0.01);
+    });
+}
+
+function syncSliders() {
+    $('btcSlider').value = btcToSlider(btcPrice);
+    $('btcPriceDisplay').textContent = fmtPrice(btcPrice);
+    $('mnavSlider').value = mnavMultiple * 100;
+    $('mnavDisplay').textContent = mnavMultiple.toFixed(2) + '\u00d7';
+    updateMnavPresets();
+}
+
+function updateSliderFills() {
+    const btcSlider = $('btcSlider');
+    const btcPct = (btcSlider.value / 1000) * 100;
+    btcSlider.style.background = 'linear-gradient(90deg, var(--orange-primary) ' + btcPct + '%, #333 ' + btcPct + '%)';
+
+    const mnavSlider = $('mnavSlider');
+    const mnavPct = ((mnavSlider.value - 30) / (400 - 30)) * 100;
+    mnavSlider.style.background = 'linear-gradient(90deg, var(--orange-primary) ' + mnavPct + '%, #333 ' + mnavPct + '%)';
+}
+
+// ─── SLIDER EVENTS ───
+$('btcSlider').addEventListener('input', (e) => {
+    btcPrice = sliderToBtc(parseInt(e.target.value));
+    $('btcPriceDisplay').textContent = fmtPrice(btcPrice);
+    activeScenario = '';
+    buildScenarioBar();
+    render();
+});
+
+$('mnavSlider').addEventListener('input', (e) => {
+    mnavMultiple = parseInt(e.target.value) / 100;
+    $('mnavDisplay').textContent = mnavMultiple.toFixed(2) + '\u00d7';
+    activeScenario = '';
+    updateMnavPresets();
+    buildScenarioBar();
+    render();
+});
+
+// ─── KEYBOARD SHORTCUTS ───
+document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.key >= '1' && e.key <= '6') {
+        const idx = parseInt(e.key) - 1;
+        if (SCENARIOS[idx]) {
+            const scenario = SCENARIOS[idx];
+            activeScenario = scenario.id;
+            btcPrice = scenario.btc || (liveBtcPrice || 97000);
+            mnavMultiple = scenario.mnav;
+            syncSliders();
+            buildScenarioBar();
+            updateMnavPresets();
+            render();
+        }
+    }
+
+});
+
+// ─── INIT ───
+loadData();
+</script>
+</body>
+</html>
