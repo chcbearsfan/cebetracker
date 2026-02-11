@@ -71,6 +71,7 @@
         .scenario-price { font-size:15px; font-weight:700; font-family:var(--mono); color:var(--orange-light); }
         .scenario-mnav { font-size:10px; color:var(--text-muted); font-family:var(--mono); margin-top:4px; }
         .scenario-fx { font-size:10px; color:var(--red); font-family:var(--mono); margin-top:2px; }
+        .scenario-usd { font-size:10px; color:var(--text-secondary); font-family:var(--mono); margin-top:3px; font-weight:600; }
 
         /* HERO */
         .hero { text-align:center; padding:28px 20px; margin-bottom:20px; background:linear-gradient(180deg,rgba(249,115,22,0.04),transparent); border-radius:20px; border:1px solid rgba(249,115,22,0.1); }
@@ -195,7 +196,7 @@
 <div class="loading-screen" id="loadingScreen"><div class="loading-spinner"></div><div class="loading-text">LOADING LIVE DATA</div></div>
 <div class="container" id="app" style="display:none">
     <div class="header">
-        <a href="/" class="nav-back">&larr; cebetracker.io</a>
+        <a href="/modeler" class="nav-back">&larr; modelers</a>
         <div class="logo-container"><div class="logo-glow"></div><div class="logo"><span>CEBE</span></div><p class="logo-whisper">tracker</p></div>
         <div class="logo-badge">&#127471;&#127477; METAPLANET MODELER</div>
         <div class="header-sub">Pick a scenario. See what your MTPLF is worth.</div>
@@ -224,7 +225,7 @@
         <div class="hero-vs" id="heroVs">vs current market price</div>
         <div class="hero-context" id="heroContext"></div>
         <div class="hero-fx fx-neutral" id="heroFx" style="display:none"></div>
-        <div class="hero-implied" id="heroImplied" style="display:none">Market implies <em id="impliedMnavVal">&mdash;</em> mNAV</div>
+        <div class="hero-implied" id="heroImplied" style="display:none">Market implies <em id="impliedMnavVal">&mdash;</em> mNAV <span style="opacity:0.5;font-size:10px">(NAV basis)</span></div>
     </div>
     <div class="narrative" id="narrativePanel"><div class="narrative-title" id="narrativeTitle">&#128269; What happens here</div><div class="narrative-body" id="narrativeBody"></div></div>
     <div class="metrics-grid" id="metricsGrid"></div>
@@ -422,8 +423,11 @@ function renderHero(r,marketJpy){
         fb.style.display='inline-block';
     }else{fb.className='hero-fx fx-neutral';fb.textContent='FX neutral';fb.style.display='inline-block'}
 
-    // Implied mNAV
-    if(marketJpy>0&&r.navJpy>0){$('impliedMnavVal').textContent=(marketJpy/r.navJpy).toFixed(2)+'\u00d7';$('heroImplied').style.display='inline-block'}
+    // Implied mNAV — always use CURRENT prices, not scenario prices
+    var curBtc=liveBtcPrice||DEFAULTS.btc_price, curFx=liveFxRate||DEFAULTS.jpyusd;
+    var inp=getInputs();
+    var curR=calcCEBE(inp.btcH,inp.shares,inp.debtJpy,inp.cashUsd,curBtc,curFx,1.0);
+    if(marketJpy>0&&curR.navJpy>0){$('impliedMnavVal').textContent=(marketJpy/curR.navJpy).toFixed(2)+'\u00d7';$('heroImplied').style.display='inline-block'}
     else{$('heroImplied').style.display='none'}
 }
 
@@ -432,15 +436,17 @@ function renderNarrative(r,inp){
     var sObj=SCENARIOS.find(function(s){return s.id===activeScenario}), sName=sObj?sObj.name:'Custom';
     $('narrativeTitle').innerHTML='\u{1F50D} '+sName+' \u2014 '+fmtPrice(btcPrice)+' BTC \u00b7 \u00a5'+fxRate+'/$';
 
+    // Scenario-specific — lead with this
+    if(activeScenario==='boj')items.push({cls:'amber',icon:'\u{1F3E6}',text:'<strong>BOJ Shock scenario.</strong> Bank of Japan tightens aggressively. Yen surges to \u00a5130/$. Combined with BTC decline to $50K, drag expands from both FX and price. This is Metaplanet\u2019s structural risk \u2014 the double compression engine works in reverse.'});
+    if(activeScenario==='gerovich')items.push({cls:'info',icon:'\u{1F4D0}',text:'<strong>Gerovich Model.</strong> 555 Million Plan executing. BTC $200K, yen weakens to \u00a5170 as BOJ maintains accommodation. Zero-cost bond leverage + FX tailwind = maximum drag compression. Target: 100K BTC by end 2026.'});
+    if(activeScenario==='terminal')items.push({cls:'green',icon:'\u{1F300}',text:'<strong>Terminal value.</strong> At $1M BTC with \u00a5180/$, drag becomes negligible. CEBE converges to BPS. Common equity owns effectively 100% of the Bitcoin.'});
+
     // Drag
     if(r.drag<.05)items.push({cls:'green',icon:'\u2705',text:'<strong>Drag nearly zero ('+dp.toFixed(1)+'%).</strong> Common owns '+cp.toFixed(1)+'% of Metaplanet\u2019s '+fmt(inp.btcH)+' BTC.'});
     else if(r.drag<.20)items.push({cls:'green',icon:'\u{1F4C8}',text:'<strong>Low drag ('+dp.toFixed(1)+'%).</strong> Common owns '+cp.toFixed(1)+'% of the Bitcoin. Claims '+fmtB(r.netClaimsUsd)+' ('+fmtByen(inp.debtJpy)+').'});
     else if(r.drag<.40)items.push({cls:'neutral',icon:'\u2696',text:'<strong>Moderate drag ('+dp.toFixed(1)+'%).</strong> Common owns '+cp.toFixed(1)+'% of BTC. Net claims '+fmtB(r.netClaimsUsd)+'.'});
     else if(r.drag<.70)items.push({cls:'amber',icon:'\u26A0',text:'<strong>High drag ('+dp.toFixed(1)+'%).</strong> Only '+cp.toFixed(1)+'% of Bitcoin left for common.'});
     else items.push({cls:'red',icon:'\u{1F4A5}',text:'<strong>Critical drag ('+dp.toFixed(1)+'%).</strong> Senior claims consume most Bitcoin value.'});
-
-    // Zero carry cost — always show
-    items.push({cls:'info',icon:'\u{1F4B0}',text:'<strong>Zero carry cost.</strong> Unlike Strategy\u2019s ~$1.4B/yr preferred dividend obligation, Metaplanet\u2019s zero-coupon bonds cost \u00a50 in annual interest. No cash drain, no share dilution from dividend coverage.'});
 
     // FX dynamics
     var baseFx=liveFxRate||DEFAULTS.jpyusd;
@@ -459,10 +465,8 @@ function renderNarrative(r,inp){
     else if(btcPrice<=r.breakEven*1.15)items.push({cls:'red',icon:'\u26A0',text:'<strong>Near break-even.</strong> BTC only '+((btcPrice/r.breakEven-1)*100).toFixed(0)+'% above '+fmtPrice(r.breakEven)+' floor.'});
     else if(btcPrice>r.breakEven*3)items.push({cls:'green',icon:'\u{1F6E1}',text:'<strong>Break-even safety margin: '+((btcPrice/r.breakEven-1)*100).toFixed(0)+'%.</strong> BTC must fall to '+fmtPrice(r.breakEven)+' to wipe common equity.'});
 
-    // Scenario-specific
-    if(activeScenario==='boj')items.push({cls:'amber',icon:'\u{1F3E6}',text:'<strong>BOJ Shock scenario.</strong> Bank of Japan tightens aggressively. Yen surges to \u00a5130/$. Combined with BTC decline to $50K, drag expands from both FX and price. This is Metaplanet\u2019s structural risk \u2014 the double compression engine works in reverse.'});
-    if(activeScenario==='gerovich')items.push({cls:'info',icon:'\u{1F4D0}',text:'<strong>Gerovich Model.</strong> 555 Million Plan executing. BTC $200K, yen weakens to \u00a5170 as BOJ maintains accommodation. Zero-cost bond leverage + FX tailwind = maximum drag compression. Target: 100K BTC by end 2026.'});
-    if(activeScenario==='terminal')items.push({cls:'green',icon:'\u{1F300}',text:'<strong>Terminal value.</strong> At $1M BTC with \u00a5180/$, drag becomes negligible. CEBE converges to BPS. Common equity owns effectively 100% of the Bitcoin.'});
+    // Zero carry cost — always show, at the end
+    items.push({cls:'info',icon:'\u{1F4B0}',text:'<strong>Zero carry cost.</strong> Unlike Strategy\u2019s ~$1.4B/yr preferred dividend obligation, Metaplanet\u2019s zero-coupon bonds cost \u00a50 in annual interest. No cash drain, no share dilution from dividend coverage.'});
 
     $('narrativeBody').innerHTML=items.map(function(i){return'<div class="narr-item '+i.cls+'"><span class="narr-icon">'+i.icon+'</span><span class="narr-text">'+i.text+'</span></div>'}).join('');
 }
@@ -554,6 +558,7 @@ function renderAssumptions(inp){
 // UI BUILDERS
 // ═══════════════════════════════════════════════════
 function buildScenarioBar(){
+    var inp=getInputs();
     var snaps=SCENARIOS.filter(function(s){return s.group==='snapshot'});
     var projs=SCENARIOS.filter(function(s){return s.group==='projection'});
     function renderCard(s){
@@ -565,7 +570,10 @@ function buildScenarioBar(){
         else pDisp=fmtPrice(btcPrice);
         var mDisp=(s.mnav||1).toFixed(1)+'\u00d7 mNAV';
         var fxDisp=s.fx?'\u00a5'+s.fx+'/$':'\u00a5'+fxRate+'/$';
-        return'<div class="'+cClass+'" data-scenario="'+s.id+'"><span class="horizon-badge '+bClass+'">'+hLabel+'</span><div class="scenario-icon">'+s.icon+'</div><div class="scenario-name">'+s.name+'</div><div class="scenario-price">'+pDisp+'</div><div class="scenario-mnav">'+mDisp+'</div><div class="scenario-fx">'+fxDisp+'</div></div>';
+        var sBtc=s.btc||(liveBtcPrice||DEFAULTS.btc_price), sFx=s.fx||(liveFxRate||DEFAULTS.jpyusd), sMn=s.mnav||1.0;
+        var sR=calcCEBE(inp.btcH,inp.shares,inp.debtJpy,inp.cashUsd,sBtc,sFx,sMn);
+        var usdDisp=sR.modeledUsd>0?'$'+(sR.modeledUsd>=1?sR.modeledUsd.toFixed(2):sR.modeledUsd.toFixed(4))+' USD':'$0';
+        return'<div class="'+cClass+'" data-scenario="'+s.id+'"><span class="horizon-badge '+bClass+'">'+hLabel+'</span><div class="scenario-icon">'+s.icon+'</div><div class="scenario-name">'+s.name+'</div><div class="scenario-price">'+pDisp+'</div><div class="scenario-mnav">'+mDisp+'</div><div class="scenario-fx">'+fxDisp+'</div><div class="scenario-usd">'+usdDisp+'</div></div>';
     }
     $('snapshotBar').innerHTML=snaps.map(renderCard).join('');
     $('projectionBar').innerHTML=projs.map(renderCard).join('');
