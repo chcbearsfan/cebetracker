@@ -1405,7 +1405,8 @@
                 lastUpdated: '2026-02-05',
                 btcReserveForCalc: 60000000000, // ~$60B for wrapper fee % calc
                 items: [
-                    { category: 'dividends', label: 'Preferred Dividends (all series)', sublabel: 'STRK 8% · STRF 10% · STRD 10% · STRC 11.25% · STRE 10%', amount: 888000000, pctOfReserve: null, verified: false, note: 'Currently all paid in cash. STRK/STRD can be paid in shares at Strategy\'s election but no share-settled payments observed in 8-K filings to date.' },
+                    { category: 'dividends', label: 'Preferred Dividends (share-settled)', sublabel: 'STRK 8% + STRD 10%', amount: 348000000, pctOfReserve: null, verified: false, note: 'Paid via share issuance — dilutes common equity' },
+                    { category: 'dividends', label: 'Preferred Dividends (cash-settled)', sublabel: 'STRF 10% + STRC 11.25% + STRE 10%', amount: 540000000, pctOfReserve: null, verified: false, note: 'Drains USD Reserve / cash' },
                     { category: 'interest', label: 'Convertible Debt Interest', sublabel: '0.42% weighted avg on $8.2B', amount: 35000000, pctOfReserve: null, verified: true, note: 'Contractual — zero-coupon on most tranches' },
                     { category: 'sbc', label: 'Stock-Based Compensation', sublabel: 'RSUs, PSUs, options — all employees', amount: 85000000, pctOfReserve: null, verified: false, note: 'FY2024: $77M, ~10% YoY growth. Dilutes shares without buying BTC.' },
                     { category: 'exec', label: 'Executive Cash Compensation', sublabel: 'CEO, CFO, GC, Chairman', amount: 4300000, pctOfReserve: null, verified: true, note: 'From DEF 14A: Le $1.88M, Kang $1.19M, Shao $1.19M, Saylor $1' },
