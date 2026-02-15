@@ -1061,6 +1061,128 @@
             margin-top: 20px;
         }
         
+        /* Encumbrance / Costs Tab */
+        .cost-section { margin-bottom: 20px; }
+        .cost-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .cost-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: 13px;
+        }
+        .cost-row:last-child { border-bottom: none; }
+        .cost-row.total-row {
+            border-top: 2px solid var(--orange-border);
+            border-bottom: none;
+            margin-top: 4px;
+            padding-top: 12px;
+            font-weight: 600;
+        }
+        .cost-row.offset-row { color: var(--green); }
+        .cost-row.net-row {
+            border-top: 2px solid var(--orange-primary);
+            border-bottom: none;
+            margin-top: 4px;
+            padding-top: 12px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .cost-label {
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .cost-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+        }
+        .cost-value-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .cost-pct {
+            font-size: 11px;
+            color: var(--text-muted);
+            min-width: 52px;
+            text-align: right;
+        }
+        .est-badge {
+            display: inline-block;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 1px 4px;
+            border-radius: 3px;
+            background: var(--yellow-muted);
+            color: var(--yellow);
+            vertical-align: middle;
+        }
+        .verified-badge {
+            display: inline-block;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 1px 4px;
+            border-radius: 3px;
+            background: var(--green-muted);
+            color: var(--green);
+            vertical-align: middle;
+        }
+        .wrapper-fee-hero {
+            text-align: center;
+            padding: 20px;
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+            margin-bottom: 20px;
+        }
+        .wrapper-fee-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--orange-primary);
+        }
+        .wrapper-fee-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            letter-spacing: 0.5px;
+        }
+        .wrapper-fee-sublabel {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .cost-pending {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        .cost-pending-icon { font-size: 32px; margin-bottom: 12px; }
+        .cost-note {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-subtle);
+            line-height: 1.5;
+        }
+        
         /* Responsive */
         @media (max-width: 900px) {
             .data-table { display: block; overflow-x: auto; }
@@ -1275,6 +1397,89 @@
         let allSnapshots = [];
         let companiesData = {};
         
+        // Encumbrance data — Annual Cost to Common Equity
+        // Sources: 10-K, DEF 14A, 8-K, earnings releases
+        // EST = estimated from prior filings, will backfill from upcoming 10-Ks
+        const encumbranceData = {
+            MSTR: {
+                lastUpdated: '2026-02-05',
+                btcReserveForCalc: 60000000000, // ~$60B for wrapper fee % calc
+                items: [
+                    { category: 'dividends', label: 'Preferred Dividends (share-settled)', sublabel: 'STRK 8% + STRD 10%', amount: 348000000, pctOfReserve: null, verified: false, note: 'Paid via share issuance — dilutes common equity' },
+                    { category: 'dividends', label: 'Preferred Dividends (cash-settled)', sublabel: 'STRF 10% + STRC 11.25% + STRE 10%', amount: 540000000, pctOfReserve: null, verified: false, note: 'Drains USD Reserve / cash' },
+                    { category: 'interest', label: 'Convertible Debt Interest', sublabel: '0.42% weighted avg on $8.2B', amount: 35000000, pctOfReserve: null, verified: true, note: 'Contractual — zero-coupon on most tranches' },
+                    { category: 'sbc', label: 'Stock-Based Compensation', sublabel: 'RSUs, PSUs, options — all employees', amount: 85000000, pctOfReserve: null, verified: false, note: 'FY2024: $77M, ~10% YoY growth. Dilutes shares without buying BTC.' },
+                    { category: 'exec', label: 'Executive Cash Compensation', sublabel: 'CEO, CFO, GC, Chairman', amount: 4300000, pctOfReserve: null, verified: true, note: 'From DEF 14A: Le $1.88M, Kang $1.19M, Shao $1.19M, Saylor $1' },
+                    { category: 'board', label: 'Board Compensation', sublabel: '7 directors', amount: 2000000, pctOfReserve: null, verified: false, note: 'Estimated from DEF 14A board comp tables' },
+                ],
+                offsets: [
+                    { label: 'Net Software Business Income', sublabel: '~$490M revenue, ~66% margin, minus SG&A (ex-SBC)', amount: 5000000, verified: false, note: 'Software business roughly break-even on non-GAAP basis (ex-SBC). Q4 2025: $123M rev, 66.1% margin. Full-year OpEx detail pending FY2025 10-K.' },
+                ],
+                sources: [
+                    'Q4 2025 Earnings Release (Feb 5, 2026)',
+                    'FY2024 DEF 14A Proxy Statement',
+                    'FY2024 10-K (filed Feb 18, 2025)',
+                ],
+                pendingBackfill: [
+                    'FY2025 10-K (expected ~Feb 18, 2026) — full SBC detail, operating expenses',
+                    'FY2025 DEF 14A (~Apr 2026) — updated exec comp, RSU/PSU schedules',
+                ]
+            },
+            ASST: {
+                lastUpdated: '2026-02-13',
+                btcReserveForCalc: 1280000000, // ~$1.28B at ~$97K
+                items: [
+                    { category: 'dividends', label: 'SATA Preferred Dividend', sublabel: '12.50% on $426.6M notional (variable rate)', amount: 53300000, pctOfReserve: null, verified: true, note: 'Rate adjusts monthly. 4.27M SATA shares × $100 par × 12.50%' },
+                    { category: 'interest', label: 'Legacy Debt Interest', sublabel: 'Semler debt retiring Apr 2026', amount: 500000, pctOfReserve: null, verified: false, note: '~$10M remaining, retiring soon' },
+                    { category: 'sbc', label: 'Stock-Based Compensation', sublabel: 'CEO $20.2M grant + other exec awards', amount: 20000000, pctOfReserve: null, verified: false, note: 'From S-4: Matt Cole $19.3M in stock awards (vests over multiple years). Annualized estimate.' },
+                    { category: 'exec', label: 'Executive Cash Compensation', sublabel: 'CEO, CLO, other named execs', amount: 3000000, pctOfReserve: null, verified: false, note: 'Estimated pending first post-merger proxy' },
+                ],
+                offsets: [
+                    { label: 'Strive AUM Management Fees', sublabel: '~$2.3B AUM generating advisory fees', amount: 12000000, verified: false, note: 'Estimated. Actual fee schedule not yet disclosed in filings.' },
+                ],
+                sources: [
+                    '8-K (Feb 13, 2026) — SATA details, BTC holdings',
+                    'S-4 Registration Statement — exec comp, merger terms',
+                ],
+                pendingBackfill: [
+                    'FY2025 10-K (expected ~Mar 31, 2026) — first full post-merger filing',
+                    'DEF 14A (~Apr-May 2026) — complete exec comp tables, SBC schedules',
+                ]
+            },
+            MTPLF: {
+                lastUpdated: null,
+                btcReserveForCalc: null,
+                items: [],
+                offsets: [],
+                sources: [],
+                pendingBackfill: ['Metaplanet reports under Japanese GAAP via TDnet. Encumbrance data collection in progress.']
+            },
+            TSWCF: {
+                lastUpdated: null,
+                btcReserveForCalc: null,
+                items: [],
+                offsets: [],
+                sources: [],
+                pendingBackfill: ['Smarter Web Co reports via UK Companies House / RNS. Encumbrance data collection in progress.']
+            },
+            ALCPB: {
+                lastUpdated: null,
+                btcReserveForCalc: null,
+                items: [],
+                offsets: [],
+                sources: [],
+                pendingBackfill: ['Capital B reports via Euronext / AMF (France). 0% drag — minimal encumbrances expected.']
+            },
+            OBTC3: {
+                lastUpdated: null,
+                btcReserveForCalc: null,
+                items: [],
+                offsets: [],
+                sources: [],
+                pendingBackfill: ['OranjeBTC reports via B3 / CVM (Brazil). Encumbrance data collection in progress.']
+            }
+        };
+        
         // Fetch and parse Google Sheets CSV
         async function fetchSheetData(gid) {
             const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}`;
@@ -1468,6 +1673,163 @@
             });
         }
         
+        function renderCostsTab(ticker) {
+            const enc = encumbranceData[ticker];
+            if (!enc || !enc.lastUpdated || enc.items.length === 0) {
+                const pendingMsg = enc?.pendingBackfill?.[0] || 'Encumbrance data not yet available for this company.';
+                return `
+                    <div class="cost-pending">
+                        <div class="cost-pending-icon">📋</div>
+                        <div style="font-weight:600; margin-bottom:8px;">Encumbrance Data Pending</div>
+                        <div style="font-size:12px; line-height:1.6;">${pendingMsg}</div>
+                    </div>
+                `;
+            }
+            
+            // Calculate totals
+            const totalCost = enc.items.reduce((sum, i) => sum + i.amount, 0);
+            const totalOffset = enc.offsets.reduce((sum, o) => sum + o.amount, 0); // positive = helps reduce cost
+            const netCost = totalCost - totalOffset;
+            
+            // Use live BTC reserve value if available, otherwise use hardcoded
+            const btcReserve = enc.btcReserveForCalc || 1;
+            const wrapperFee = (netCost / btcReserve) * 100;
+            
+            // Build cost rows
+            function costRow(item) {
+                const pct = ((item.amount / btcReserve) * 100).toFixed(2);
+                const badge = item.verified 
+                    ? '<span class="verified-badge">VERIFIED</span>' 
+                    : '<span class="est-badge">EST</span>';
+                return `
+                    <div class="cost-row" title="${item.note || ''}">
+                        <div class="cost-label">
+                            <span>${item.label}</span>
+                            ${badge}
+                        </div>
+                        <div class="cost-value-group">
+                            <span class="cost-pct">${pct}%</span>
+                            <span class="cost-value">${formatCurrency(item.amount)}</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            function offsetRow(item) {
+                const net = item.amount;
+                const pct = ((Math.abs(net) / btcReserve) * 100).toFixed(2);
+                const badge = item.verified 
+                    ? '<span class="verified-badge">VERIFIED</span>' 
+                    : '<span class="est-badge">EST</span>';
+                return `
+                    <div class="cost-row offset-row" title="${item.note || ''}">
+                        <div class="cost-label">
+                            <span>${item.label}</span>
+                            ${badge}
+                        </div>
+                        <div class="cost-value-group">
+                            <span class="cost-pct">-${pct}%</span>
+                            <span class="cost-value">-${formatCurrency(Math.abs(net))}</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Group items by category
+            const dividendItems = enc.items.filter(i => i.category === 'dividends');
+            const interestItems = enc.items.filter(i => i.category === 'interest');
+            const sbcItems = enc.items.filter(i => i.category === 'sbc');
+            const compItems = enc.items.filter(i => i.category === 'exec' || i.category === 'board');
+            
+            let html = '';
+            
+            // Wrapper Fee Hero
+            html += `
+                <div class="wrapper-fee-hero">
+                    <div class="wrapper-fee-value">${wrapperFee.toFixed(2)}%</div>
+                    <div class="wrapper-fee-label">Annual Cost to Common Equity</div>
+                    <div class="wrapper-fee-sublabel">${formatCurrency(netCost)} / yr on ${formatCurrency(btcReserve)} BTC reserve</div>
+                </div>
+            `;
+            
+            // Dividend Costs
+            if (dividendItems.length > 0) {
+                html += `<div class="cost-section">
+                    <div class="cost-section-title">💰 Dividend Obligations</div>
+                    ${dividendItems.map(costRow).join('')}
+                </div>`;
+            }
+            
+            // Interest Costs
+            if (interestItems.length > 0) {
+                html += `<div class="cost-section">
+                    <div class="cost-section-title">🏦 Debt Service</div>
+                    ${interestItems.map(costRow).join('')}
+                </div>`;
+            }
+            
+            // SBC
+            if (sbcItems.length > 0) {
+                html += `<div class="cost-section">
+                    <div class="cost-section-title">📊 Stock-Based Compensation</div>
+                    ${sbcItems.map(costRow).join('')}
+                </div>`;
+            }
+            
+            // Exec & Board Comp
+            if (compItems.length > 0) {
+                html += `<div class="cost-section">
+                    <div class="cost-section-title">👔 Cash Compensation</div>
+                    ${compItems.map(costRow).join('')}
+                </div>`;
+            }
+            
+            // Total line
+            const totalPct = ((totalCost / btcReserve) * 100).toFixed(2);
+            html += `
+                <div class="cost-row total-row">
+                    <div class="cost-label"><span>Total Annual Cost</span></div>
+                    <div class="cost-value-group">
+                        <span class="cost-pct">${totalPct}%</span>
+                        <span class="cost-value">${formatCurrency(totalCost)}</span>
+                    </div>
+                </div>
+            `;
+            
+            // Revenue Offsets
+            if (enc.offsets.length > 0) {
+                html += `<div class="cost-section" style="margin-top:16px;">
+                    <div class="cost-section-title">📈 Revenue Offsets</div>
+                    ${enc.offsets.map(offsetRow).join('')}
+                </div>`;
+            }
+            
+            // Net Cost line
+            const netPct = ((netCost / btcReserve) * 100).toFixed(2);
+            html += `
+                <div class="cost-row net-row">
+                    <div class="cost-label"><span>Net Annual Cost (Wrapper Fee)</span></div>
+                    <div class="cost-value-group">
+                        <span class="cost-pct" style="color:var(--orange-primary)">${netPct}%</span>
+                        <span class="cost-value" style="color:var(--orange-primary)">${formatCurrency(netCost)}</span>
+                    </div>
+                </div>
+            `;
+            
+            // Sources & pending
+            html += `<div class="cost-note">`;
+            html += `<strong>Sources:</strong> ${enc.sources.join(' · ')}<br>`;
+            if (enc.pendingBackfill.length > 0) {
+                html += `<strong>Pending backfill:</strong> ${enc.pendingBackfill.join(' · ')}`;
+            }
+            html += `<br><br>`;
+            html += `<span class="est-badge">EST</span> = estimated from prior filings &nbsp; <span class="verified-badge">VERIFIED</span> = confirmed from current filings`;
+            html += `<br>Data as of ${enc.lastUpdated}. Hover any row for detail.`;
+            html += `</div>`;
+            
+            return `<div class="modal-section">${html}</div>`;
+        }
+        
         function openModal(ticker) {
             const data = companiesData[ticker];
             if (!data) return;
@@ -1508,6 +1870,7 @@
             document.getElementById('modalBody').innerHTML = `
                 <div class="modal-tabs">
                     <button class="modal-tab active" data-tab="overview">Overview</button>
+                    <button class="modal-tab" data-tab="costs">Costs</button>
                     <button class="modal-tab" data-tab="simulate">Simulate</button>
                     <button class="modal-tab" data-tab="calculation">Calculation</button>
                     <button class="modal-tab" data-tab="history">History</button>
@@ -1564,6 +1927,11 @@
                         <span>${data.exchange}</span>
                         <span>Source: ${data.source || 'N/A'}</span>
                     </div>
+                </div>
+                
+                <!-- Costs Tab -->
+                <div class="tab-content" id="tab-costs">
+                    ${renderCostsTab(ticker)}
                 </div>
                 
                 <!-- Simulate Tab -->
