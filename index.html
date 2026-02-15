@@ -149,6 +149,48 @@
             color: var(--orange-primary);
         }
         
+        /* CEBE Explainer Banner */
+        .cebe-banner {
+            max-width: 720px;
+            margin: 0 auto 16px;
+            padding: 16px 20px;
+            border: 1px solid var(--orange-border, rgba(249,115,22,0.25));
+            background: rgba(249, 115, 22, 0.06);
+            border-radius: 12px;
+            text-align: center;
+        }
+        .cebe-banner-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--orange-primary);
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .cebe-banner-formula {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-bottom: 8px;
+        }
+        .cebe-banner-formula .label {
+            display: inline-block;
+            color: #71717a;
+            margin-right: 4px;
+        }
+        .cebe-banner-formula .val {
+            color: #a1a1aa;
+        }
+        .cebe-banner-formula .highlight {
+            color: var(--orange-primary);
+        }
+        .cebe-banner-note {
+            font-size: 11px;
+            color: #52525b;
+            line-height: 1.5;
+        }
+        
         /* Table Container */
         .table-container {
             background: var(--bg-card);
@@ -1199,6 +1241,8 @@
             .company-tickers { gap: 4px; }
             .ticker-badge { font-size: 10px; padding: 2px 4px; }
             .ticker-badge.primary { font-size: 12px; }
+            .cebe-banner { margin: 0 4px 16px; padding: 12px 14px; }
+            .cebe-banner-formula .label { display: block; margin-bottom: 2px; margin-right: 0; }
         }
     </style>
     <script>
@@ -1226,6 +1270,17 @@
             </div>
             <p class="last-updated" id="lastUpdated">Loading data...</p>
         </header>
+        
+        <div class="cebe-banner">
+            <div class="cebe-banner-title">DRAG ≠ "AMPLIFICATION"</div>
+            <div class="cebe-banner-formula">
+                <span class="label">Companies report:</span> <span class="val">(Debt + Preferred) ÷ BTC Reserve</span><br>
+                <span class="label">CEBE measures:</span> <span class="highlight">(Debt + Preferred − Cash) ÷ BTC Reserve</span>
+            </div>
+            <div class="cebe-banner-note">
+                Cash can service senior claims. It reduces what actually compresses common equity ownership. CEBE drag is always lower than company-reported amplification.
+            </div>
+        </div>
         
         <p class="table-hint">Click any company to view full CEBE breakdown, simulations, and historical tracking</p>
         
@@ -1405,12 +1460,11 @@
                 lastUpdated: '2026-02-05',
                 btcReserveForCalc: 60000000000, // ~$60B for wrapper fee % calc
                 items: [
-                    { category: 'dividends', label: 'Preferred Dividends (share-settled)', sublabel: 'STRK 8% + STRD 10%', amount: 348000000, pctOfReserve: null, verified: false, note: 'Paid via share issuance — dilutes common equity' },
-                    { category: 'dividends', label: 'Preferred Dividends (cash-settled)', sublabel: 'STRF 10% + STRC 11.25% + STRE 10%', amount: 540000000, pctOfReserve: null, verified: false, note: 'Drains USD Reserve / cash' },
+                    { category: 'dividends', label: 'Preferred Dividends (all series)', sublabel: 'STRK 8% · STRF 10% · STRD 10% · STRC 11.25% · STRE 10%', amount: 888000000, pctOfReserve: null, verified: false, note: 'Currently all paid in cash. STRK/STRD can be paid in shares at Strategy\'s election but no share-settled payments observed in 8-K filings to date.' },
                     { category: 'interest', label: 'Convertible Debt Interest', sublabel: '0.42% weighted avg on $8.2B', amount: 35000000, pctOfReserve: null, verified: true, note: 'Contractual — zero-coupon on most tranches' },
                     { category: 'sbc', label: 'Stock-Based Compensation', sublabel: 'RSUs, PSUs, options — all employees', amount: 85000000, pctOfReserve: null, verified: false, note: 'FY2024: $77M, ~10% YoY growth. Dilutes shares without buying BTC.' },
-                    { category: 'exec', label: 'Executive Cash Compensation', sublabel: 'CEO, CFO, GC, Chairman', amount: 4300000, pctOfReserve: null, verified: true, note: 'From DEF 14A: Le $1.88M, Kang $1.19M, Shao $1.19M, Saylor $1' },
-                    { category: 'board', label: 'Board Compensation', sublabel: '7 directors', amount: 2000000, pctOfReserve: null, verified: false, note: 'Estimated from DEF 14A board comp tables' },
+                    { category: 'exec', label: 'Executive Cash Compensation', sublabel: 'CEO, CFO, GC, Chairman', amount: 5700000, pctOfReserve: null, verified: true, note: 'FY2024 DEF 14A: Le salary $1M + bonus $880K + other $473K = $2.35M. Kang salary $640K + bonus $564K + other $173K = $1.38M. Shao salary $640K + bonus $564K + other $18K = $1.22M. Saylor salary $1 + other $792K (security/perks) = $792K. Total: $5.74M.' },
+                    { category: 'board', label: 'Board Compensation (cash only)', sublabel: '7 outside directors · equity captured in SBC line', amount: 900000, pctOfReserve: null, verified: true, note: 'DEF 14A: $100K/yr base retainer + committee fees per director. Board equity awards (~$350K/yr/director) included in SBC expense line, not here. Cash portion only to avoid double-count.' },
                 ],
                 offsets: [
                     { label: 'Net Software Business Income', sublabel: '~$490M revenue, ~66% margin, minus SG&A (ex-SBC)', amount: 5000000, verified: false, note: 'Software business roughly break-even on non-GAAP basis (ex-SBC). Q4 2025: $123M rev, 66.1% margin. Full-year OpEx detail pending FY2025 10-K.' },
@@ -1431,8 +1485,8 @@
                 items: [
                     { category: 'dividends', label: 'SATA Preferred Dividend', sublabel: '12.50% on $426.6M notional (variable rate)', amount: 53300000, pctOfReserve: null, verified: true, note: 'Rate adjusts monthly. 4.27M SATA shares × $100 par × 12.50%' },
                     { category: 'interest', label: 'Legacy Debt Interest', sublabel: 'Semler debt retiring Apr 2026', amount: 500000, pctOfReserve: null, verified: false, note: '~$10M remaining, retiring soon' },
-                    { category: 'sbc', label: 'Stock-Based Compensation', sublabel: 'CEO $20.2M grant + other exec awards', amount: 20000000, pctOfReserve: null, verified: false, note: 'From S-4: Matt Cole $19.3M in stock awards (vests over multiple years). Annualized estimate.' },
-                    { category: 'exec', label: 'Executive Cash Compensation', sublabel: 'CEO, CLO, other named execs', amount: 3000000, pctOfReserve: null, verified: false, note: 'Estimated pending first post-merger proxy' },
+                    { category: 'sbc', label: 'Stock-Based Compensation', sublabel: 'CEO + CLO + CFO + CMO RSU grants', amount: 8000000, pctOfReserve: null, verified: false, note: 'Cole $17M/5yr=$3.4M. Beirne 2.2M RSUs/3yr=$2.8M. Pham 556K RSUs/3yr=$706K. Sarkhani 741K RSUs/3yr=$941K. Grant-date FMV ~$3.81 (Sept 15, 2025). Source: S-4 employment agreements.' },
+                    { category: 'exec', label: 'Executive Cash Compensation', sublabel: 'CEO + CLO + CFO + CMO base + target bonus', amount: 5200000, pctOfReserve: null, verified: true, note: 'Cole: $800K + $1.6M bonus + $250K security = $2.65M. Pham: $500K + $500K = $1M. Beirne: $500K + $500K = $1M. Sarkhani: $350K + $175K = $525K. Source: S-4 employment agreements, Sept 15 2025.' },
                 ],
                 offsets: [
                     { label: 'Strive AUM Management Fees', sublabel: '~$2.3B AUM generating advisory fees', amount: 12000000, verified: false, note: 'Estimated. Actual fee schedule not yet disclosed in filings.' },
