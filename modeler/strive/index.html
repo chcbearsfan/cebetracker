@@ -235,6 +235,13 @@
             font-size: 13px;
             color: var(--text-secondary);
         }
+        .claims-formula {
+            font-size: 11px;
+            color: #71717a;
+            font-family: var(--mono);
+            margin-top: 6px;
+            letter-spacing: 0.3px;
+        }
         
         /* ═══ CLAIMS STACK ═══ */
         .claims-stack {
@@ -594,6 +601,7 @@
             font-family: var(--mono);
             margin-top: 4px;
         }
+        .control-locked { font-size:10px; color:var(--orange-primary); opacity:0.7; margin-top:6px; font-family:var(--mono); letter-spacing:0.5px; }
         .mnav-presets {
             display: flex;
             gap: 4px;
@@ -777,6 +785,25 @@
         .loading-text { font-size: 12px; color: var(--text-muted); letter-spacing: 2px; }
 
         /* ═══ RESPONSIVE ═══ */
+        /* Horizon toggle */
+        .toggle-row { display:flex; gap:4px; margin-top:8px; }
+        .toggle-btn { flex:1; padding:5px 0; border-radius:6px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-muted); font-size:10px; font-family:var(--mono); cursor:pointer; transition:all 0.2s; }
+        .toggle-btn:hover, .toggle-btn.active { border-color:var(--orange-primary); color:var(--orange-primary); background:rgba(249,115,22,0.08); }
+        .horizon-badge { position:absolute; top:8px; right:8px; font-size:9px; font-weight:700; font-family:var(--mono); padding:2px 6px; border-radius:4px; letter-spacing:.5px; }
+        .horizon-badge.now-badge { background:rgba(255,255,255,0.04); color:#52525b; border:1px solid rgba(255,255,255,0.06); }
+        .horizon-badge.future-badge { background:rgba(249,115,22,0.1); color:var(--orange-primary); border:1px solid var(--orange-border); }
+        .scenario-group-label { font-size:9px; letter-spacing:1.5px; color:var(--text-muted); text-transform:uppercase; margin:12px 0 6px; font-weight:600; }
+        .group-label { display:flex; align-items:center; gap:10px; margin-bottom:8px; padding-left:4px; }
+        .group-label-badge { font-size:9px; font-family:var(--mono); font-weight:700; letter-spacing:1.5px; padding:3px 8px; border-radius:4px; white-space:nowrap; }
+        .group-label-badge.now { background:rgba(255,255,255,0.04); color:var(--text-muted); border:1px solid rgba(255,255,255,0.06); }
+        .group-label-badge.future { background:rgba(249,115,22,0.08); color:var(--orange-primary); border:1px solid var(--orange-border); }
+        .group-label-text { font-size:9px; letter-spacing:2px; font-weight:600; color:var(--text-muted); }
+        .group-label-line { flex:1; height:1px; background:var(--border-subtle); }
+        .scenario-group { margin-bottom:16px; }
+        /* Status colors in projection */
+        .status-green { color: var(--green); }
+        .status-amber { color: #f59e0b; }
+        .status-red { color: var(--red); }
         @media (max-width: 768px) {
             .hero-price { font-size: 48px; }
         }
@@ -818,11 +845,19 @@
     <div class="claims-banner" id="claimsBanner">
         <div class="claims-title" id="claimsDragDisplay">DRAG: —%</div>
         <div class="claims-sub" id="claimsSub">SATA preferred + residual debt − cash offsets</div>
+        <div class="claims-formula" id="claimsFormula"></div>
     </div>
 
     <!-- Scenario Cards -->
     <div class="scenarios-section">
-        <div class="scenarios-row" id="scenarioBar"></div>
+        <div class="scenario-group">
+            <div class="group-label"><span class="group-label-badge now">&#9889; NOW</span><span class="group-label-text">WHAT IF BTC WERE AT THIS PRICE TODAY</span><div class="group-label-line"></div></div>
+            <div class="scenarios-row" id="snapshotBar"></div>
+        </div>
+        <div class="scenario-group">
+            <div class="group-label"><span class="group-label-badge future">&rarr; FORWARD</span><span class="group-label-text">10-YEAR PROJECTIONS &middot; SATA ENGINE &middot; WRAPPER COSTS</span><div class="group-label-line"></div></div>
+            <div class="scenarios-row" id="projectionBar"></div>
+        </div>
     </div>
 
     <!-- Hero -->
@@ -858,6 +893,7 @@
                     </div>
                     <input type="range" id="btcSlider" min="0" max="1000" value="500">
                     <div class="slider-labels"><span>$10K</span><span>$1M</span></div>
+                    <div class="control-locked" id="btcLockedMsg" style="display:none">&#128274; Controlled by scenario CAGR curve</div>
                 </div>
                 <div class="control-card">
                     <div class="control-header">
@@ -866,6 +902,11 @@
                     </div>
                     <input type="range" id="mnavSlider" min="30" max="400" value="100">
                     <div class="mnav-presets" id="mnavPresets"></div>
+                    <div class="control-locked" id="mnavLockedMsg" style="display:none">&#128274; Controlled by scenario mNAV curve</div>
+                </div>
+                <div class="control-card">
+                    <div class="control-header"><span class="control-label">TIME HORIZON</span><span class="control-value" id="horizonDisplay">Now</span></div>
+                    <div class="toggle-row" id="horizonBar"></div>
                 </div>
             </div>
         </div>
@@ -884,6 +925,27 @@
             <div class="waterfall" id="waterfall"></div>
         </div>
     </details>
+
+    <!-- Year-by-Year Projection (hidden when horizon=0) -->
+    <div id="projectionSection" style="display:none;">
+        <details class="collapse-section" open>
+            <summary>&#128200; Year-by-Year Projection</summary>
+            <div class="collapse-body" style="padding:0;">
+                <div style="overflow-x:auto;">
+                    <table class="matrix-table" id="projTable"></table>
+                </div>
+                <div id="projEvents" style="padding:12px 16px;font-size:12px;color:#a1a1aa;line-height:1.7;"></div>
+            </div>
+        </details>
+    </div>
+
+    <!-- Assumptions (visible for projections) -->
+    <div id="assumptionsSection" style="display:none;">
+        <details class="collapse-section">
+            <summary>&#128196; Assumptions &amp; Sources</summary>
+            <div class="collapse-body" id="assumptions" style="font-size:12px;color:#a1a1aa;line-height:1.7;"></div>
+        </details>
+    </div>
 
     <!-- Sensitivity Matrix (collapsed) -->
     <details class="collapse-section">
@@ -928,34 +990,79 @@ const COMPANY = {
     sheetTicker: 'ASST',
     defaults: {
         btc_holdings: 13132,
-        shares: 62371840,
-        stock_price_local: 16.20,
+        shares: 63048519,          // Feb 11 8-K: 53,168,237 Class A + 9,880,282 Class B
+        stock_price_local: 8.31,   // Feb 13 close
         fx_rate: 1.0,
-        debt_usd: 10000000,
-        preferred_usd: 426550000,
-        cash_usd: 181000000,
-    }
+        debt_usd: 10000000,        // $10M Semler converts remaining (retire by Apr 2026)
+        preferred_usd: 426551800,  // 4,265,518 SATA × $100 stated
+        cash_usd: 127200000,       // Feb 11 8-K
+        // Granular columns (preferred when available from sheet)
+        sata_face_usd: 426551800,  // 4,265,518 shares × $100
+        semler_convert_usd: 10000000, // $10M remaining of $100M (retire by Apr 2026)
+        coinbase_debt_usd: 0,      // Fully retired Jan 28, 2026
+    },
+    // Wrapper fee components (verified from Costs tab)
+    sata_div_rate: 0.125,       // 12.50% — variable rate, effective Feb 16 2026
+    sbc_annual_usd: 8e6,        // $8M/yr — S-4 employment agreements, annualized
+    cash_comp_annual_usd: 5.2e6,// $5.2M/yr — Cole+Pham+Beirne+Sarkhani base+bonus
+    aum_fee_income: 12e6,       // $12M/yr — Strive ETF management fee revenue offset
+    legacy_debt_usd: 10e6,      // Retiring Apr 2026
+    debt_retire_year: 2026,
 };
 
 const SHEET_ID = '1BNsCWGVU08PDinDcfzJccqcuj9_KrK1VZGETErzBZvg';
 const SNAPSHOTS_GID = '771405586';
 
 const SCENARIOS = [
-    { id: 'crash',   icon: '&#128128;', name: 'Crash',    btc: 25000,   mnav: 0.5 },
-    { id: 'bear',    icon: '&#128059;', name: 'Bear',     btc: 50000,   mnav: 0.7 },
-    { id: 'current', icon: '&#128205;', name: 'Current',  btc: null,    mnav: 1.0 },
-    { id: 'bull',    icon: '&#9728;',   name: 'Bull',     btc: 150000,  mnav: 1.5 },
-    { id: 'mega',    icon: '&#128640;', name: 'Mega',     btc: 500000,  mnav: 2.0 },
-    { id: 'moon',    icon: '&#9854;',   name: 'Moon',     btc: 1000000, mnav: 3.0 },
+    { id: 'wipeout', icon: '&#128128;', name: 'Wipeout',      btc: 25000,   mnav: 0.5, horizon: 0, group: 'snapshot', type: 'static' },
+    { id: 'current', icon: '&#128205;', name: 'Current',      btc: null,    mnav: 1.0, horizon: 0, group: 'snapshot', type: 'static' },
+    { id: 'bull',    icon: '&#9728;',   name: 'Bull',         btc: 150000,  mnav: 1.5, horizon: 0, group: 'snapshot', type: 'static' },
+    { id: 'siege',    icon: '&#127984;', name: 'Siege',        btc: 50000,   mnav: 0.7, horizon: 10, group: 'projection', type: 'siege' },
+    { id: 'powerlaw', icon: '&#128200;', name: 'Power Law Support', btc: null, mnav: null, horizon: 10, group: 'projection', type: 'powerlaw' },
+    { id: 'cole10',  icon: '&#128640;', name: 'Cole 10-Year', btc: null,    mnav: null, horizon: 10, group: 'projection', type: 'cole10' },
 ];
+
+// Power Law Support Line: ~23% avg CAGR → ~$770K by 2036 (Santostasi/Burger model, floor)
+// Decelerating curve matching power law's flattening slope
+const POWERLAW_CAGR = [
+    {year:1,cagr:.30},{year:2,cagr:.27},{year:3,cagr:.25},{year:4,cagr:.24},{year:5,cagr:.23},
+    {year:6,cagr:.22},{year:7,cagr:.21},{year:8,cagr:.20},{year:9,cagr:.19},{year:10,cagr:.18},
+];
+// Conservative mNAV — modest premium, no hype cycle
+const POWERLAW_MNAV = [
+    {year:0,mnav:1.0},{year:1,mnav:1.0},{year:2,mnav:1.1},{year:3,mnav:1.1},{year:4,mnav:1.2},
+    {year:5,mnav:1.2},{year:6,mnav:1.2},{year:7,mnav:1.2},{year:8,mnav:1.2},{year:9,mnav:1.2},{year:10,mnav:1.2},
+];
+
+// Cole 10-Year BTC price path: ~26% avg CAGR → ~$1M from ~$97K start
+// Decelerating curve — calibrated so Y10 ≈ $1M at current live BTC
+const COLE_CAGR = [
+    {year:1,cagr:.35},{year:2,cagr:.32},{year:3,cagr:.29},{year:4,cagr:.27},{year:5,cagr:.26},
+    {year:6,cagr:.25},{year:7,cagr:.24},{year:8,cagr:.23},{year:9,cagr:.22},{year:10,cagr:.21},
+];
+// Strive mNAV curve — more conservative than MSTR (smaller company, less institutional premium)
+const COLE_MNAV = [
+    {year:0,mnav:1.0},{year:1,mnav:1.2},{year:2,mnav:1.3},{year:3,mnav:1.5},{year:4,mnav:1.5},
+    {year:5,mnav:1.5},{year:6,mnav:1.5},{year:7,mnav:1.5},{year:8,mnav:1.5},{year:9,mnav:1.5},{year:10,mnav:1.5},
+];
+// Cole's stated target: "25% plus amplification" maintained via SATA (Stephan Livera SLP710, Jan 2026)
+// Gross amplification = (Debt + Preferred) / BTC NAV
+const COLE_TARGET_AMP = 0.25;
+const COLE_MAX_SATA_YEAR = 2e9; // Cap: $2B new SATA per year (market capacity limit)
+const POWERLAW_TARGET_AMP = 0.15; // Maintenance: 15% gross amp (vs 25% Cole)
+const POWERLAW_MAX_SATA_YEAR = 500e6; // Cap: $500M new SATA per year
 
 const MNAV_PRESETS = [0.5, 0.75, 1.0, 1.5, 2.0, 3.0];
 const MATRIX_BTC = [25000, 50000, 75000, 100000, 150000, 200000, 300000, 500000, 1000000];
 const MATRIX_MNAVS = [0.5, 0.75, 1.0, 1.5, 2.0, 3.0];
 
+const HORIZON_OPTIONS = [{label:'Now',years:0},{label:'1Y',years:1},{label:'3Y',years:3},{label:'5Y',years:5},{label:'10Y',years:10}];
+const START_YEAR = 2026;
+
 // ─── STATE ───
 let btcPrice = 97000;
 let mnavMultiple = 1.0;
+let horizonYears = 0;
 let activeScenario = 'current';
 let liveBtcPrice = null;
 let liveFxRate = COMPANY.defaults.fx_rate;
@@ -1034,6 +1141,197 @@ function compute(btcH, shares, btcP, mnav, debtUsd, prefUsd, cashUsd) {
     return { bpsBtc, bpsSats, cebeBtc, cebeSats, navUsd, navPerShare, modeledUsd, drag, netClaims, claimsBtc, breakEven, amplification, debtUsd: debtUsd || 0, prefUsd: prefUsd || 0, cashUsd: cashUsd || 0 };
 }
 
+// ─── HELPER: get active scenario type ───
+function getActiveType() {
+    var s = SCENARIOS.find(function(x){return x.id===activeScenario});
+    return s ? s.type : 'static';
+}
+function isSlidersLocked() { var t = getActiveType(); return t === 'cole10' || t === 'powerlaw'; }
+
+// ─── PROJECTION ENGINE ───
+function projectYears(years) {
+    var d = getData(), co = COMPANY;
+    var btcH = d.btcHoldings, shares = d.shares, cash = d.cashUsd;
+    var prefUsd = d.preferredUsd, debtUsd = d.debtUsd;
+    var sataDivRate = co.sata_div_rate;
+    var sbcAnnual = co.sbc_annual_usd;
+    var cashComp = co.cash_comp_annual_usd;
+    var aumFee = co.aum_fee_income;
+    var debtRetireYear = co.debt_retire_year;
+    var results = [], allEvents = [];
+    var startBtc = liveBtcPrice || btcPrice;
+
+    for (var y = 0; y <= years; y++) {
+        var calYear = START_YEAR + y, yearEvents = [];
+
+        // 1. BTC PRICE + mNAV for this year
+        var yearBtcPrice, yearMnav;
+        var sType = getActiveType();
+        if (sType === 'siege') { yearBtcPrice = 50000; yearMnav = 0.7; }
+        else if (sType === 'powerlaw') {
+            if (y === 0) { yearBtcPrice = startBtc; yearMnav = POWERLAW_MNAV[0].mnav; }
+            else {
+                var ce = POWERLAW_CAGR[Math.min(y - 1, POWERLAW_CAGR.length - 1)];
+                var prevB = y === 1 ? startBtc : results[y - 1].yearBtcPrice;
+                yearBtcPrice = prevB * (1 + ce.cagr);
+                yearMnav = POWERLAW_MNAV[Math.min(y, POWERLAW_MNAV.length - 1)].mnav;
+            }
+        }
+        else if (sType === 'cole10') {
+            if (y === 0) { yearBtcPrice = startBtc; yearMnav = COLE_MNAV[0].mnav; }
+            else {
+                var ce = COLE_CAGR[Math.min(y - 1, COLE_CAGR.length - 1)];
+                var prevB = y === 1 ? startBtc : results[y - 1].yearBtcPrice;
+                yearBtcPrice = prevB * (1 + ce.cagr);
+                yearMnav = COLE_MNAV[Math.min(y, COLE_MNAV.length - 1)].mnav;
+            }
+        }
+        else { yearBtcPrice = btcPrice; yearMnav = mnavMultiple; }
+
+        // 2. DEBT RETIREMENT (one-time)
+        if (y > 0 && debtUsd > 0 && calYear >= debtRetireYear) {
+            cash -= debtUsd;
+            yearEvents.push({type:'debt',cls:'green',icon:'\u2705',text:'<strong>Legacy debt retired.</strong> $' + (debtUsd/1e6).toFixed(0) + 'M paid from cash reserves.'});
+            debtUsd = 0;
+        }
+
+        // 3. PAY DIVIDENDS + OPERATING COSTS (just subtract from cash)
+        var status = 'green', btcSold = 0, yearSbcShares = 0, atmSharesForCash = 0;
+        var TARGET_RUNWAY_YEARS = 2;
+        if (y > 0) {
+            var sataDivAnnual = prefUsd * sataDivRate;
+            var netDrain = sataDivAnnual + cashComp - aumFee;
+            cash -= netDrain;
+
+            // Siege: capital markets closed — sell BTC immediately if cash negative
+            if (sType === 'siege' && cash < 0) {
+                var deficit = Math.abs(cash);
+                btcSold = yearBtcPrice > 0 ? deficit / yearBtcPrice : 0;
+                btcH = Math.max(0, btcH - btcSold);
+                cash = 0;
+                status = 'red';
+                yearEvents.push({type:'btcsale',cls:'red',icon:'\u26A0\uFE0F',text:'<strong>BTC liquidated.</strong> Sold ' + fmt(Math.round(btcSold)) + ' BTC (' + fmtB(deficit) + ') to cover obligations. Capital markets assumed closed.'});
+            }
+        }
+
+        // 4. COLE 10-YEAR CAPITAL ENGINE — maintain 25% gross amplification via SATA
+        var newSataIssued = 0, newBtcAcq = 0;
+        if (y > 0 && sType === 'cole10') {
+            var btcNAV = btcH * yearBtcPrice;
+            var grossAmp = btcNAV > 0 ? (debtUsd + prefUsd) / btcNAV : 0;
+            if (grossAmp < COLE_TARGET_AMP && btcNAV > 0) {
+                var currentClaims = debtUsd + prefUsd;
+                newSataIssued = (COLE_TARGET_AMP * btcNAV - currentClaims) / (1 - COLE_TARGET_AMP);
+                newSataIssued = Math.max(0, Math.min(newSataIssued, COLE_MAX_SATA_YEAR));
+                if (newSataIssued > 0) {
+                    newBtcAcq = yearBtcPrice > 0 ? newSataIssued / yearBtcPrice : 0;
+                    btcH += newBtcAcq;
+                    prefUsd += newSataIssued;
+                    yearEvents.push({type:'sata',cls:'info',icon:'\u{1F4E6}',text:'<strong>SATA re-leverage.</strong> Issued ' + fmtB(newSataIssued) + ' new SATA to maintain 25% amplification. Acquired ' + fmt(Math.round(newBtcAcq)) + ' BTC.'});
+                }
+            }
+        }
+
+        // 4b. POWER LAW MAINTENANCE SATA — 15% target, $500M/yr cap
+        if (y > 0 && sType === 'powerlaw') {
+            var btcNAV = btcH * yearBtcPrice;
+            var grossAmp = btcNAV > 0 ? (debtUsd + prefUsd) / btcNAV : 0;
+            if (grossAmp < POWERLAW_TARGET_AMP && btcNAV > 0) {
+                var currentClaims = debtUsd + prefUsd;
+                newSataIssued = (POWERLAW_TARGET_AMP * btcNAV - currentClaims) / (1 - POWERLAW_TARGET_AMP);
+                newSataIssued = Math.max(0, Math.min(newSataIssued, POWERLAW_MAX_SATA_YEAR));
+                if (newSataIssued > 0) {
+                    newBtcAcq = yearBtcPrice > 0 ? newSataIssued / yearBtcPrice : 0;
+                    btcH += newBtcAcq;
+                    prefUsd += newSataIssued;
+                    yearEvents.push({type:'sata',cls:'info',icon:'\u{1F4E6}',text:'<strong>Maintenance SATA.</strong> Issued ' + fmtB(newSataIssued) + ' new SATA to maintain 15% amplification. Acquired ' + fmt(Math.round(newBtcAcq)) + ' BTC.'});
+                }
+            }
+        }
+
+        // 5. CASH RESERVE MAINTENANCE (non-siege only, AFTER SATA so target reflects new obligations)
+        if (y > 0 && sType !== 'siege') {
+            var currentAnnDrain = (prefUsd * sataDivRate) + cashComp - aumFee;
+            var targetCash = Math.max(0, currentAnnDrain * TARGET_RUNWAY_YEARS);
+
+            if (cash < 0) {
+                // Cash negative — ATM to cover deficit + rebuild to target
+                var atmNeeded = Math.abs(cash) + targetCash;
+                var netCl = Math.max(0, debtUsd + prefUsd);
+                var navNow = Math.max(0, (btcH * yearBtcPrice) - netCl);
+                var navPS = shares > 0 ? navNow / shares : 0;
+                var atmPrice = navPS * yearMnav;
+                if (atmPrice > 0) {
+                    atmSharesForCash = atmNeeded / atmPrice;
+                    shares += atmSharesForCash;
+                    cash = targetCash;
+                    status = 'amber';
+                    yearEvents.push({type:'atm',cls:'amber',icon:'\u{1F4B3}',text:'<strong>ATM to maintain reserves.</strong> Issued ' + fmt(Math.round(atmSharesForCash)) + ' shares (' + fmtB(atmNeeded) + ') to cover obligations and maintain ' + TARGET_RUNWAY_YEARS + '-year cash reserve.'});
+                } else {
+                    btcSold = yearBtcPrice > 0 ? Math.abs(cash) / yearBtcPrice : 0;
+                    btcH = Math.max(0, btcH - btcSold);
+                    cash = 0;
+                    status = 'red';
+                    yearEvents.push({type:'btcsale',cls:'red',icon:'\u26A0\uFE0F',text:'<strong>NAV too low for ATM.</strong> Sold ' + fmt(Math.round(btcSold)) + ' BTC to cover obligations.'});
+                }
+            } else if (cash < targetCash) {
+                // Cash positive but below target — top up
+                var topUp = targetCash - cash;
+                var netCl = Math.max(0, debtUsd + prefUsd - cash);
+                var navNow = Math.max(0, (btcH * yearBtcPrice) - netCl);
+                var navPS = shares > 0 ? navNow / shares : 0;
+                var atmPrice = navPS * yearMnav;
+                if (atmPrice > 0 && topUp > 1e6) {
+                    atmSharesForCash = topUp / atmPrice;
+                    shares += atmSharesForCash;
+                    cash += topUp;
+                    yearEvents.push({type:'atm',cls:'info',icon:'\u{1F4B3}',text:'<strong>ATM reserve top-up.</strong> Issued ' + fmt(Math.round(atmSharesForCash)) + ' shares (' + fmtB(topUp) + ') to maintain ' + TARGET_RUNWAY_YEARS + '-year cash reserve (' + fmtB(targetCash) + ' target).'});
+                }
+            }
+        }
+
+        // 6. SBC DILUTION — shares issued, no BTC acquired
+        if (y > 0 && sbcAnnual > 0) {
+            var netCl = Math.max(0, debtUsd + prefUsd - cash);
+            var navNow = Math.max(0, (btcH * yearBtcPrice) - netCl);
+            var navPS = shares > 0 ? navNow / shares : 0;
+            var tmpPrice = navPS * yearMnav;
+            if (tmpPrice > 0) { yearSbcShares = sbcAnnual / tmpPrice; shares += yearSbcShares; }
+        }
+
+        // 7. YEAR-END STATE
+        var netClaims = Math.max(0, debtUsd + prefUsd - cash);
+        var m = compute(btcH, shares, yearBtcPrice, yearMnav, debtUsd, prefUsd, cash);
+        var sataDivAnnualEnd = prefUsd * sataDivRate;
+        var netDrainEnd = sataDivAnnualEnd + cashComp - aumFee;
+        var runway = netDrainEnd > 0 ? (cash > 0 ? cash / netDrainEnd : 0) : Infinity;
+
+        // Wrapper fee
+        var totalAnnualCost = sataDivAnnualEnd + sbcAnnual + cashComp;
+        var netAnnualCost = totalAnnualCost - aumFee;
+        var btcReserveVal = btcH * yearBtcPrice;
+        var wrapperFee = btcReserveVal > 0 ? netAnnualCost / btcReserveVal : 0;
+
+        // Gross amplification for display
+        var grossAmpEnd = btcReserveVal > 0 ? (debtUsd + prefUsd) / btcReserveVal : 0;
+
+        results.push({
+            year: y, calYear: calYear, btcH: btcH, shares: shares, cebeSats: m.cebeSats, drag: m.drag,
+            navPerShare: m.navPerShare, modeledPrice: m.modeledUsd, cash: cash, btcSold: btcSold, status: status,
+            amp: m.amplification, breakEven: m.breakEven, cashRunway: runway,
+            yearBtcPrice: yearBtcPrice, yearMnav: yearMnav,
+            sbcSharesAdded: yearSbcShares, events: yearEvents, netClaimsUsd: netClaims,
+            remainingDebt: debtUsd, totalPrefFace: prefUsd,
+            totalDivObligation: sataDivAnnualEnd, wrapperFee: wrapperFee, netAnnualCost: netAnnualCost,
+            newSataIssued: newSataIssued, newBtcAcq: newBtcAcq, grossAmp: grossAmpEnd,
+            atmSharesForDiv: atmSharesForCash
+        });
+        yearEvents.forEach(function(e){ allEvents.push({year:y, type:e.type, cls:e.cls, icon:e.icon, text:e.text}); });
+    }
+    results._events = allEvents;
+    return results;
+}
+
 // ─── DATA LOADING ───
 async function loadData() {
     try {
@@ -1066,11 +1364,29 @@ async function loadData() {
                     preferred_usd: parseFloat(best.preferred_usd) || COMPANY.defaults.preferred_usd,
                     cash_usd: parseFloat(best.cash_usd) || COMPANY.defaults.cash_usd,
                     snapshot_date: best.snapshot_date || null,
+                    stock_price_local: parseFloat(best.btc_price) ? undefined : undefined, // use live
+                    // Granular columns — override lump sums when present
+                    sata_face_usd: parseFloat(best.sata_face_usd) || null,
+                    sata_div_rate: parseFloat(best.sata_div_rate) || null,
+                    semler_convert_usd: parseFloat(best.semler_convert_usd),
+                    coinbase_debt_usd: parseFloat(best.coinbase_debt_usd),
                 };
+                // If granular preferred column exists, prefer it over lump preferred_usd
+                if (loadedData.sata_face_usd) {
+                    loadedData.preferred_usd = loadedData.sata_face_usd;
+                }
+                // If granular debt columns exist, compute total debt from them
+                if (!isNaN(loadedData.semler_convert_usd) && !isNaN(loadedData.coinbase_debt_usd)) {
+                    loadedData.debt_usd = loadedData.semler_convert_usd + loadedData.coinbase_debt_usd;
+                }
+                // Override variable div rate from sheet if present
+                if (loadedData.sata_div_rate) {
+                    COMPANY.sata_div_rate = loadedData.sata_div_rate;
+                }
             }
         }
 
-        btcPrice = liveBtcPrice || 97000;
+        btcPrice = liveBtcPrice || 70000;
         SCENARIOS.find(s => s.id === 'current').btc = btcPrice;
 
         $('loadingScreen').style.display = 'none';
@@ -1079,6 +1395,7 @@ async function loadData() {
         $('headerSub').innerHTML = COMPANY.tagline + ' &middot; ' + COMPANY.tickers;
         buildScenarioBar();
         buildMnavPresets();
+        buildHorizonBar();
         syncSliders();
         render();
     } catch (err) {
@@ -1094,16 +1411,45 @@ async function loadData() {
 function render() {
     const co = COMPANY;
     const d = getData();
-    const r = compute(d.btcHoldings, d.shares, btcPrice, mnavMultiple, d.debtUsd, d.preferredUsd, d.cashUsd);
+    var projResults = null, endR = null;
+
+    if (horizonYears > 0) {
+        projResults = projectYears(horizonYears);
+        var endState = projResults[projResults.length - 1];
+        // Use projected end-state for hero/metrics
+        endR = compute(endState.btcH, endState.shares, endState.yearBtcPrice, endState.yearMnav, endState.remainingDebt, endState.totalPrefFace, endState.cash);
+        endR._proj = endState; // attach projection data
+    }
+
+    const r = endR || compute(d.btcHoldings, d.shares, btcPrice, mnavMultiple, d.debtUsd, d.preferredUsd, d.cashUsd);
 
     renderHero(r, co, d);
     renderClaimsBanner(r);
-    renderNarrative(r, co, d);
-    renderMetrics(r, co, d);
+    renderNarrative(r, co, d, projResults);
+    renderMetrics(r, co, d, projResults);
     renderClaims(r);
     renderWaterfall(r, co, d);
     renderMatrix(co, d);
     renderContrast(r);
+
+    // Projection table
+    if (projResults && horizonYears > 0) {
+        $('projectionSection').style.display = 'block';
+        $('assumptionsSection').style.display = 'block';
+        renderProjectionTable(projResults);
+        renderAssumptions();
+    } else {
+        $('projectionSection').style.display = 'none';
+        $('assumptionsSection').style.display = 'none';
+    }
+
+    // Horizon badge on hero
+    var heroLabel = $('heroLabel');
+    if (horizonYears > 0) {
+        heroLabel.innerHTML = 'MODELED ' + co.name.toUpperCase() + ' SHARE PRICE <span class="horizon-badge future-badge">Y' + horizonYears + '</span>';
+    } else {
+        heroLabel.innerHTML = 'MODELED ' + co.name.toUpperCase() + ' SHARE PRICE';
+    }
 
     // Live strip
     $('liveBtcDisplay').textContent = 'BTC ' + fmtPrice(liveBtcPrice || btcPrice);
@@ -1160,27 +1506,36 @@ function renderHero(r, co, d) {
 function renderClaimsBanner(r) {
     const banner = $('claimsBanner');
     const dragPct = (r.drag * 100).toFixed(1);
+    const useBtcP = r._proj ? r._proj.yearBtcPrice : btcPrice;
+    const totalBtc = useBtcP > 0 ? Math.round((r.navUsd + r.netClaims) / useBtcP) : 0;
+    const claimsBtc = Math.round(r.claimsBtc);
+    const netBtc = totalBtc - claimsBtc;
+    const sharesM = r._proj ? (r._proj.shares / 1e6).toFixed(1) : (getData().shares / 1e6).toFixed(1);
     $('claimsDragDisplay').textContent = 'DRAG: ' + dragPct + '%';
-    $('claimsSub').innerHTML = 'Common equity owns ' + ((1 - r.drag) * 100).toFixed(1) + '% of ' + fmt(Math.round(r.claimsBtc + (r.navUsd + r.netClaims) / btcPrice)) + ' BTC &middot; Break-even: ' + fmtPrice(r.breakEven);
+    $('claimsSub').innerHTML = 'Common equity owns ' + ((1 - r.drag) * 100).toFixed(1) + '% of ' + fmt(totalBtc) + ' BTC &middot; Break-even: ' + fmtPrice(r.breakEven);
+    $('claimsFormula').innerHTML = 'CEBE = (' + fmt(totalBtc) + ' \u2212 ' + fmt(claimsBtc) + ') \u00f7 ' + sharesM + 'M = ' + fmtSats(r.cebeSats) + ' sats/share';
     banner.className = 'claims-banner' + (r.drag < 0.2 ? ' low-drag' : r.drag > 0.5 ? ' high-drag' : '');
 }
 
-function renderNarrative(r, co, d) {
+function renderNarrative(r, co, d, projResults) {
     const items = [];
     const scenarioObj = SCENARIOS.find(s => s.id === activeScenario);
     const scenarioName = scenarioObj ? scenarioObj.name : 'Custom';
+    var useBtc = (r._proj ? r._proj.yearBtcPrice : btcPrice);
+    var useMnav = (r._proj ? r._proj.yearMnav : mnavMultiple);
+    var useBtcH = (r._proj ? r._proj.btcH : d.btcHoldings);
 
-    document.querySelector('.narrative-title').innerHTML = '&#128269; ' + scenarioName + ' &mdash; ' + fmtPrice(btcPrice) + ' BTC';
+    document.querySelector('.narrative-title').innerHTML = '&#128269; ' + scenarioName + (horizonYears > 0 ? ' &mdash; Year ' + horizonYears : '') + ' &mdash; ' + fmtPrice(useBtc) + ' BTC';
 
     // Drag status
     const dragPct = (r.drag * 100).toFixed(1);
     const ownPct = ((1 - r.drag) * 100).toFixed(1);
     if (r.drag < 0.15) {
-        items.push({ cls: 'green', icon: '&#9989;', text: '<strong>' + dragPct + '% drag &mdash; near pure equity.</strong> After aggressive debt retirement ($120M &rarr; $10M), Strive\'s capital structure is 97.7% preferred equity. Common shareholders own ' + ownPct + '% of the ' + fmt(d.btcHoldings) + ' BTC.' });
+        items.push({ cls: 'green', icon: '&#9989;', text: '<strong>' + dragPct + '% drag &mdash; near pure equity.</strong> After aggressive debt retirement ($120M &rarr; $10M), Strive\'s capital structure is 97.7% preferred equity. Common shareholders own ' + ownPct + '% of the ' + fmt(useBtcH) + ' BTC.' });
     } else if (r.drag < 0.4) {
-        items.push({ cls: 'info', icon: '&#128200;', text: '<strong>' + dragPct + '% drag.</strong> Common equity owns ' + ownPct + '% of the ' + fmt(d.btcHoldings) + ' BTC on the balance sheet. $' + (r.prefUsd / 1e6).toFixed(0) + 'M in SATA preferred is the primary senior claim.' });
+        items.push({ cls: 'info', icon: '&#128200;', text: '<strong>' + dragPct + '% drag.</strong> Common equity owns ' + ownPct + '% of the ' + fmt(useBtcH) + ' BTC on the balance sheet. ' + fmtB(r.prefUsd) + ' in SATA preferred is the primary senior claim.' });
     } else {
-        items.push({ cls: 'amber', icon: '&#9888;', text: '<strong>' + dragPct + '% drag &mdash; elevated.</strong> At ' + fmtPrice(btcPrice) + ' BTC, SATA preferred claims consume ' + dragPct + '% of holdings. Common equity owns ' + ownPct + '% of the ' + fmt(d.btcHoldings) + ' BTC.' });
+        items.push({ cls: 'amber', icon: '&#9888;', text: '<strong>' + dragPct + '% drag &mdash; elevated.</strong> At ' + fmtPrice(useBtc) + ' BTC, SATA preferred claims consume ' + dragPct + '% of holdings. Common equity owns ' + ownPct + '% of the ' + fmt(useBtcH) + ' BTC.' });
     }
 
     // Amplification
@@ -1188,23 +1543,70 @@ function renderNarrative(r, co, d) {
         items.push({ cls: 'neutral', icon: '&#9878;', text: '<strong>Amplification: ' + r.amplification.toFixed(2) + '&times;</strong> Common equity gets ' + r.amplification.toFixed(2) + '&times; the BTC price movement. SATA preferred creates leverage that works both directions &mdash; amplifying gains in a bull run and losses in a drawdown.' });
     }
 
-    // Break-even context
-    if (btcPrice < r.breakEven * 2) {
-        items.push({ cls: 'red', icon: '&#128680;', text: '<strong>Break-even proximity.</strong> At ' + fmtPrice(r.breakEven) + ', net senior claims equal total BTC value and common equity hits zero. Current price is ' + ((btcPrice / r.breakEven - 1) * 100).toFixed(0) + '% above break-even. No callable debt means no forced liquidation, but NAV goes to zero.' });
+    // Break-even context — use projected BTC price
+    if (useBtc < r.breakEven * 2) {
+        items.push({ cls: 'red', icon: '&#128680;', text: '<strong>Break-even proximity.</strong> At ' + fmtPrice(r.breakEven) + ', net senior claims equal total BTC value and common equity hits zero. Current price is ' + ((useBtc / r.breakEven - 1) * 100).toFixed(0) + '% above break-even. No callable debt means no forced liquidation, but NAV goes to zero.' });
     } else {
-        items.push({ cls: 'green', icon: '&#128161;', text: '<strong>Break-even: ' + fmtPrice(r.breakEven) + '.</strong> BTC would need to fall ' + ((1 - r.breakEven / btcPrice) * 100).toFixed(0) + '% from here before common equity hits zero. No callable debt &mdash; creditors cannot force liquidation at any price.' });
+        items.push({ cls: 'green', icon: '&#128161;', text: '<strong>Break-even: ' + fmtPrice(r.breakEven) + '.</strong> BTC would need to fall ' + ((1 - r.breakEven / useBtc) * 100).toFixed(0) + '% from here before common equity hits zero. No callable debt &mdash; creditors cannot force liquidation at any price.' });
     }
 
     // Cash offset
-    if (r.cashUsd > 0) {
-        items.push({ cls: 'info', icon: '&#128176;', text: '<strong>$' + (r.cashUsd / 1e6).toFixed(0) + 'M cash reserve</strong> offsets senior claims, reducing net drag. Strive retired $110M in debt in two weeks (Jan 2026), shifting from mixed debt to 97.7% preferred equity structure.' });
+    var cashToShow = r._proj ? r._proj.cash : r.cashUsd;
+    if (cashToShow > 0) {
+        items.push({ cls: 'info', icon: '&#128176;', text: '<strong>' + fmtB(cashToShow) + ' cash reserve</strong> offsets senior claims, reducing net drag. Strive retired $110M in debt in two weeks (Jan 2026), shifting from mixed debt to 97.7% preferred equity structure.' });
     }
 
-    // mNAV interpretation
-    if (mnavMultiple > 1.1) {
-        items.push({ cls: 'amber', icon: '&#9888;', text: '<strong>Premium at ' + mnavMultiple.toFixed(2) + '&times; mNAV.</strong> Market is pricing execution premium above net BTC value. Justified by BTC Yield (21%+ QTD) and aggressive accumulation strategy.' });
-    } else if (mnavMultiple < 0.9) {
-        items.push({ cls: 'green', icon: '&#128176;', text: '<strong>Discount at ' + mnavMultiple.toFixed(2) + '&times; mNAV.</strong> Market is pricing Strive below its net Bitcoin value. At this mNAV, you\u2019re buying BTC exposure cheaper than spot through the equity.' });
+    // mNAV interpretation — use projected mNAV
+    if (useMnav > 1.1) {
+        items.push({ cls: 'amber', icon: '&#9888;', text: '<strong>Premium at ' + useMnav.toFixed(2) + '&times; mNAV.</strong> Market is pricing execution premium above net BTC value. Justified by BTC Yield (21%+ QTD) and aggressive accumulation strategy.' });
+    } else if (useMnav < 0.9) {
+        items.push({ cls: 'green', icon: '&#128176;', text: '<strong>Discount at ' + useMnav.toFixed(2) + '&times; mNAV.</strong> Market is pricing Strive below its net Bitcoin value. At this mNAV, you\u2019re buying BTC exposure cheaper than spot through the equity.' });
+    }
+
+    // Wrapper fee (snapshot or projection)
+    var wfBtcH = r._proj ? r._proj.btcH : d.btcHoldings;
+    var wfBtcP = r._proj ? r._proj.yearBtcPrice : btcPrice;
+    var btcResVal = wfBtcH * wfBtcP;
+    var sataDivAnn = (r._proj ? r._proj.totalPrefFace : d.preferredUsd) * co.sata_div_rate;
+    var annCost = sataDivAnn + co.sbc_annual_usd + co.cash_comp_annual_usd;
+    var netCost = annCost - co.aum_fee_income;
+    var wfPct = btcResVal > 0 ? netCost / btcResVal : 0;
+    if (wfPct > 0.025) {
+        items.push({ cls: 'amber', icon: '&#128203;', text: '<strong>Wrapper fee: ' + (wfPct*100).toFixed(2) + '% of BTC reserve.</strong> Annual cost of ' + fmtB(netCost) + ' (SATA div ' + fmtB(sataDivAnn) + ' + SBC ' + fmtB(co.sbc_annual_usd) + ' + comp ' + fmtB(co.cash_comp_annual_usd) + ' \u2212 AUM fee ' + fmtB(co.aum_fee_income) + '). Compresses as BTC appreciates.' });
+    } else if (wfPct > 0) {
+        items.push({ cls: 'green', icon: '&#128203;', text: '<strong>Wrapper fee: ' + (wfPct*100).toFixed(2) + '%.</strong> Low annual cost relative to BTC reserve. AUM fee income significantly offsets operating expenses.' });
+    }
+
+    // Projection-specific: cash runway + events
+    if (r._proj && horizonYears > 0) {
+        var runway = r._proj.cashRunway;
+        var sType = getActiveType();
+        var isAtmScenario = (sType === 'powerlaw' || sType === 'cole10');
+        if (sType === 'siege') {
+            var totalBtcSold = 0;
+            if (projResults) { projResults.forEach(function(row) { totalBtcSold += row.btcSold; }); }
+            if (totalBtcSold > 0) {
+                items.push({ cls: 'red', icon: '&#128680;', text: '<strong>BTC treasury depleted.</strong> Over ' + horizonYears + ' years at $50K, ' + fmt(Math.round(totalBtcSold)) + ' BTC liquidated to cover obligations. Capital markets assumed closed.' });
+            }
+            if (runway < 1) {
+                items.push({ cls: 'red', icon: '&#9888;', text: '<strong>Cash runway: 0 years.</strong> All cash reserves consumed. Ongoing BTC sales required.' });
+            }
+        } else if (isAtmScenario) {
+            if (r._proj.cash > 0) {
+                var rwyYrs = r._proj.cashRunway;
+                var rwyText = rwyYrs >= 100 ? '\u221e' : rwyYrs.toFixed(1);
+                items.push({ cls: 'green', icon: '&#128176;', text: '<strong>Cash reserves maintained: ' + fmtB(r._proj.cash) + '.</strong> ' + rwyText + ' years of coverage. Company issues ATM equity as needed to maintain reserves alongside growing SATA obligations.' });
+            }
+        } else if (runway < 3) {
+            items.push({ cls: 'red', icon: '&#128680;', text: '<strong>Cash runway: ' + runway.toFixed(1) + ' years.</strong> Cash reserves low.' });
+        } else if (runway < Infinity) {
+            items.push({ cls: 'info', icon: '&#128176;', text: '<strong>Cash runway: ' + runway.toFixed(1) + ' years.</strong> Cash reserves cover ' + runway.toFixed(1) + ' years of net operating costs.' });
+        }
+        // Break-even safety margin
+        var beMargin = useBtc > 0 && r.breakEven > 0 ? ((useBtc / r.breakEven - 1) * 100) : 999;
+        if (beMargin < 200) {
+            items.push({ cls: 'amber', icon: '&#9888;', text: '<strong>Break-even safety: ' + beMargin.toFixed(0) + '%.</strong> BTC at ' + fmtPrice(useBtc) + ' is ' + beMargin.toFixed(0) + '% above break-even (' + fmtPrice(r.breakEven) + '). Margin is compressed.' });
+        }
     }
 
     $('narrativeBody').innerHTML = items.map(i =>
@@ -1212,20 +1614,45 @@ function renderNarrative(r, co, d) {
     ).join('');
 }
 
-function renderMetrics(r, co, d) {
+function renderMetrics(r, co, d, projResults) {
     const dragPct = (r.drag * 100).toFixed(1);
     const dragCls = r.drag < 0.2 ? 'good' : r.drag > 0.5 ? 'danger' : 'warn';
+
+    // Wrapper fee calc
+    var wfBtcH = r._proj ? r._proj.btcH : d.btcHoldings;
+    var wfBtcP = r._proj ? r._proj.yearBtcPrice : btcPrice;
+    var btcResVal = wfBtcH * wfBtcP;
+    var sataDivAnn = (r._proj ? r._proj.totalPrefFace : d.preferredUsd) * co.sata_div_rate;
+    var annCost = sataDivAnn + co.sbc_annual_usd + co.cash_comp_annual_usd;
+    var netCost = annCost - co.aum_fee_income;
+    var wfPct = btcResVal > 0 ? netCost / btcResVal : 0;
+    var wfCls = wfPct > 0.05 ? 'danger' : wfPct > 0.03 ? 'warn' : '';
+
+    // Cash runway
+    var cashRunwayVal = '--';
+    if (r._proj) {
+        var rwy = r._proj.cashRunway;
+        if (rwy >= 100) { cashRunwayVal = '&infin;'; }
+        else { cashRunwayVal = rwy.toFixed(1) + 'yr'; }
+    } else {
+        var netDrain = sataDivAnn + co.cash_comp_annual_usd - co.aum_fee_income;
+        if (netDrain > 0 && d.cashUsd > 0) { cashRunwayVal = (d.cashUsd / netDrain).toFixed(1) + 'yr'; }
+        else { cashRunwayVal = '&infin;'; }
+    }
+
     const metrics = [
         { label: 'CEBE', value: fmtSats(r.cebeSats) + ' sats', cls: '' },
         { label: 'DRAG', value: dragPct + '%', cls: dragCls },
         { label: 'AMPLIFICATION', value: r.amplification < 10 ? r.amplification.toFixed(2) + '&times;' : '&infin;', cls: '' },
         { label: 'BREAK-EVEN', value: fmtPrice(r.breakEven), cls: btcPrice < r.breakEven * 2 ? 'danger' : '' },
         { label: 'NAV/SHARE', value: '$' + (r.navPerShare >= 1 ? r.navPerShare.toFixed(2) : r.navPerShare.toFixed(4)), cls: '' },
+        { label: 'WRAPPER FEE', value: (wfPct * 100).toFixed(2) + '%', sub: fmtB(netCost) + '/yr net', cls: wfCls },
+        { label: 'CASH RUNWAY', value: cashRunwayVal, cls: '' },
         { label: 'NET CLAIMS', value: fmtB(r.netClaims), cls: '' },
     ];
 
     $('metricsGrid').innerHTML = metrics.map(m =>
-        '<div class="metric-card"><div class="metric-label">' + m.label + '</div><div class="metric-value ' + m.cls + '">' + m.value + '</div></div>'
+        '<div class="metric-card"><div class="metric-label">' + m.label + '</div><div class="metric-value ' + (m.cls||'') + '">' + m.value + '</div>' + (m.sub ? '<div style="font-size:10px;color:#71717a;margin-top:2px">' + m.sub + '</div>' : '') + '</div>'
     ).join('');
 }
 
@@ -1325,16 +1752,102 @@ function renderContrast(r) {
 // UI BUILDERS & EVENT HANDLERS
 // ═══════════════════════════════════════════════
 
-function buildScenarioBar() {
-    $('scenarioBar').innerHTML = SCENARIOS.map(s => {
-        const priceDisplay = s.btc ? (s.btc >= 1e6 ? '$' + (s.btc/1e6) + 'M' : '$' + (s.btc/1e3) + 'K') : fmtPrice(btcPrice);
-        return '<div class="scenario-card ' + (s.id === activeScenario ? 'active' : '') + '" data-scenario="' + s.id + '">' +
-            '<div class="scenario-icon">' + s.icon + '</div>' +
-            '<div class="scenario-name">' + s.name + '</div>' +
-            '<div class="scenario-price">' + priceDisplay + '</div>' +
-            '<div class="scenario-mnav">' + s.mnav.toFixed(1) + '&times; mNAV</div>' +
-        '</div>';
+function renderProjectionTable(results) {
+    var sType = getActiveType();
+    var showSata = sType === 'cole10';
+    var html = '<thead><tr><th>Year</th><th>BTC Price</th><th>BTC Held</th><th>Shares (M)</th><th>SATA Face</th><th>Cash</th><th>Drag %</th><th>CEBE</th><th>Price</th><th>Status</th></tr></thead><tbody>';
+    results.forEach(function(row) {
+        var statusIcon = row.status === 'green' ? '&#9989;' : row.status === 'amber' ? '&#9888;' : '&#128680;';
+        html += '<tr>' +
+            '<td>' + (row.year === 0 ? 'Now' : 'Y' + row.year + ' (' + row.calYear + ')') + '</td>' +
+            '<td>' + fmtPrice(row.yearBtcPrice) + '</td>' +
+            '<td>' + fmt(Math.round(row.btcH)) + '</td>' +
+            '<td>' + (row.shares / 1e6).toFixed(1) + '</td>' +
+            '<td>' + fmtB(row.totalPrefFace) + '</td>' +
+            '<td>' + fmtB(Math.max(0,row.cash)) + '</td>' +
+            '<td class="status-' + row.status + '">' + (row.drag * 100).toFixed(1) + '%</td>' +
+            '<td>' + fmtSats(row.cebeSats) + '</td>' +
+            '<td>$' + (row.modeledPrice >= 1 ? row.modeledPrice.toFixed(2) : row.modeledPrice.toFixed(4)) + '</td>' +
+            '<td>' + statusIcon + '</td>' +
+        '</tr>';
+    });
+    html += '</tbody>';
+    $('projTable').innerHTML = html;
+
+    // Events timeline
+    var events = results._events || [];
+    if (events.length > 0) {
+        $('projEvents').innerHTML = '<strong style="color:var(--text-secondary)">Events:</strong><br>' +
+            events.map(function(e) { return '<span style="color:var(--text-muted)">Y' + e.year + ':</span> ' + e.text; }).join('<br>');
+    } else {
+        $('projEvents').innerHTML = '<span style="color:var(--text-muted)">No material events during projection period.</span>';
+    }
+}
+
+function renderAssumptions() {
+    var co = COMPANY, sType = getActiveType();
+    var t = '';
+    if (sType === 'siege') {
+        t = '<strong>Siege:</strong> BTC $50,000 for entire horizon. mNAV 0.7\u00d7. Capital markets closed \u2014 cash shortfalls force BTC liquidation. SATA preferred dividend at ' + (co.sata_div_rate*100).toFixed(2) + '%. SBC dilution ~' + fmtB(co.sbc_annual_usd) + '/yr. Legacy debt ($10M) retires 2026. Tests: can the company survive a prolonged bear market?';
+    } else if (sType === 'powerlaw') {
+        t = '<strong>Power Law (Support Floor):</strong> BTC follows the power law support line. ~23% avg CAGR decelerating from 30% to 18%, reaching ~$770K by 2036 (<a href="https://charts.bitbo.io/long-term-power-law/" target="_blank" style="color:var(--orange-primary)">Santostasi/Burger model</a>). This is the mathematical FLOOR, not the regression midline ($2.2M) or resistance ($5.3M). mNAV conservative at 1.0x to 1.2x. Maintenance SATA issuance to sustain 15% amplification (capped at $500M/yr). Costs covered from cash, then ATM equity if needed.';
+    } else if (sType === 'cole10') {
+        t = '<strong>Cole 10-Year:</strong> BTC follows ~26% avg CAGR curve to ~$1M. Cole maintains 25% gross amplification floor via SATA issuance (<a href="https://stephanlivera.com/episode/710/" target="_blank" style="color:var(--orange-primary)">SLP710, Jan 2026</a>). When BTC appreciation compresses amplification below 25%, new SATA is issued and proceeds buy BTC. mNAV starts 1.0\u00d7, reaches 1.5\u00d7 by Y3. SATA capped at $2B/yr. Costs covered by ATM equity when cash depletes.';
+    } else {
+        t = '<strong>Custom projection:</strong> BTC ' + fmtPrice(btcPrice) + ', mNAV ' + mnavMultiple.toFixed(2) + '\u00d7. Capital structure frozen. SATA div ' + (co.sata_div_rate*100).toFixed(2) + '%. Legacy debt retires 2026.';
+    }
+    t += '<br><br><strong>Wrapper costs:</strong> SATA preferred dividend (variable, currently ' + (co.sata_div_rate*100).toFixed(2) + '%), SBC $8M/yr (annualized from employment agreements), exec comp $5.2M/yr, offset by $12M/yr AUM fee revenue.';
+    t += '<br><br><strong>Data:</strong> Holdings, shares, capital structure from Google Sheet. Live BTC from CoinGecko. All preferred/debt values from Q4 filings and Strive press releases.';
+    $('assumptions').innerHTML = t;
+}
+
+function buildHorizonBar() {
+    $('horizonBar').innerHTML = HORIZON_OPTIONS.map(function(h) {
+        return '<button class="toggle-btn ' + (h.years === horizonYears ? 'active' : '') + '" data-years="' + h.years + '">' + h.label + '</button>';
     }).join('');
+
+    document.querySelectorAll('#horizonBar .toggle-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            horizonYears = parseInt(btn.dataset.years);
+            $('horizonDisplay').textContent = horizonYears === 0 ? 'Now' : horizonYears + 'Y';
+            buildHorizonBar();
+            render();
+        });
+    });
+}
+
+function buildScenarioBar() {
+    var snapshots = SCENARIOS.filter(function(s){ return s.group === 'snapshot'; });
+    var projections = SCENARIOS.filter(function(s){ return s.group === 'projection'; });
+
+    function renderCards(arr) {
+        return arr.map(function(s) {
+            var priceDisplay = s.btc ? (s.btc >= 1e6 ? '$' + (s.btc/1e6) + 'M' : '$' + (s.btc/1e3) + 'K') : fmtPrice(liveBtcPrice || btcPrice);
+            var badge = s.horizon > 0 ? '<span class="horizon-badge future-badge">' + s.horizon + 'Y</span>' : '<span class="horizon-badge now-badge">NOW</span>';
+            var mnavText;
+            if (s.type === 'cole10') {
+                priceDisplay = '&rarr; $1M';
+                mnavText = 'SATA engine &middot; 10Y';
+            } else if (s.type === 'powerlaw') {
+                priceDisplay = '&rarr; $770K';
+                mnavText = 'Support floor &middot; 10Y';
+            } else {
+                var mnavVal = s.mnav !== null && s.mnav !== undefined ? s.mnav : 1.0;
+                mnavText = mnavVal.toFixed(1) + '&times; mNAV';
+                if (s.horizon > 0) mnavText += ' &middot; ' + s.horizon + 'Y';
+            }
+            return '<div class="scenario-card ' + (s.id === activeScenario ? 'active' : '') + '" data-scenario="' + s.id + '">' +
+                badge +
+                '<div class="scenario-icon">' + s.icon + '</div>' +
+                '<div class="scenario-name">' + s.name + '</div>' +
+                '<div class="scenario-price">' + priceDisplay + '</div>' +
+                '<div class="scenario-mnav">' + mnavText + '</div>' +
+            '</div>';
+        }).join('');
+    }
+
+    $('snapshotBar').innerHTML = renderCards(snapshots);
+    $('projectionBar').innerHTML = renderCards(projections);
 
     document.querySelectorAll('.scenario-card').forEach(card => {
         card.addEventListener('click', () => {
@@ -1343,7 +1856,12 @@ function buildScenarioBar() {
             if (!scenario) return;
             activeScenario = id;
             btcPrice = scenario.btc || (liveBtcPrice || 97000);
-            mnavMultiple = scenario.mnav;
+            mnavMultiple = scenario.mnav !== null && scenario.mnav !== undefined ? scenario.mnav : 1.0;
+            if (scenario.horizon !== undefined) {
+                horizonYears = scenario.horizon;
+                $('horizonDisplay').textContent = horizonYears === 0 ? 'Now' : horizonYears + 'Y';
+                buildHorizonBar();
+            }
             syncSliders();
             buildScenarioBar();
             updateMnavPresets();
@@ -1359,6 +1877,7 @@ function buildMnavPresets() {
 
     document.querySelectorAll('.mnav-btn').forEach(btn => {
         btn.addEventListener('click', () => {
+            if (isSlidersLocked()) return;
             mnavMultiple = parseFloat(btn.dataset.mnav);
             $('mnavSlider').value = mnavMultiple * 100;
             $('mnavDisplay').textContent = mnavMultiple.toFixed(2) + '\u00d7';
@@ -1377,10 +1896,17 @@ function updateMnavPresets() {
 }
 
 function syncSliders() {
+    var locked = isSlidersLocked();
     $('btcSlider').value = btcToSlider(btcPrice);
     $('btcPriceDisplay').textContent = fmtPrice(btcPrice);
     $('mnavSlider').value = mnavMultiple * 100;
     $('mnavDisplay').textContent = mnavMultiple.toFixed(2) + '\u00d7';
+    $('btcSlider').disabled = locked;
+    $('mnavSlider').disabled = locked;
+    $('btcSlider').style.opacity = locked ? '0.35' : '1';
+    $('mnavSlider').style.opacity = locked ? '0.35' : '1';
+    $('btcLockedMsg').style.display = locked ? 'block' : 'none';
+    $('mnavLockedMsg').style.display = locked ? 'block' : 'none';
     updateMnavPresets();
 }
 
@@ -1396,6 +1922,7 @@ function updateSliderFills() {
 
 // ─── SLIDER EVENTS ───
 $('btcSlider').addEventListener('input', (e) => {
+    if (isSlidersLocked()) return;
     btcPrice = sliderToBtc(parseInt(e.target.value));
     $('btcPriceDisplay').textContent = fmtPrice(btcPrice);
     activeScenario = '';
@@ -1404,6 +1931,7 @@ $('btcSlider').addEventListener('input', (e) => {
 });
 
 $('mnavSlider').addEventListener('input', (e) => {
+    if (isSlidersLocked()) return;
     mnavMultiple = parseInt(e.target.value) / 100;
     $('mnavDisplay').textContent = mnavMultiple.toFixed(2) + '\u00d7';
     activeScenario = '';
@@ -1421,7 +1949,7 @@ document.addEventListener('keydown', (e) => {
             const scenario = SCENARIOS[idx];
             activeScenario = scenario.id;
             btcPrice = scenario.btc || (liveBtcPrice || 97000);
-            mnavMultiple = scenario.mnav;
+            mnavMultiple = scenario.mnav !== null && scenario.mnav !== undefined ? scenario.mnav : 1.0;
             syncSliders();
             buildScenarioBar();
             updateMnavPresets();
