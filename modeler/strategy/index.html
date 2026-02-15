@@ -327,7 +327,8 @@ const DEFAULTS = {
     preferred_usd:8400e6, cash_usd:2250e6,
     strk_face_usd:3220e6, strf_face_usd:2640e6, strd_face_usd:1006e6,
     strc_face_usd:748e6, stre_face_eur:775e6, eurusd_rate:1.04,
-    software_income_usd:75e6, btc_price:97000, mstr_price:340,
+    software_income_usd:5e6, btc_price:97000, mstr_price:340,
+    sbc_annual_usd:85e6, cash_comp_annual_usd:6.3e6,
 };
 
 const SCENARIOS = [
@@ -409,6 +410,8 @@ function getInputs(){
         streFaceEur:getVal('stre_face_eur',DEFAULTS.stre_face_eur),
         eurusd:getVal('eurusd_rate',DEFAULTS.eurusd_rate),
         softwareIncome:getVal('software_income_usd',DEFAULTS.software_income_usd),
+        sbcAnnual:getVal('sbc_annual_usd',DEFAULTS.sbc_annual_usd),
+        cashCompAnnual:getVal('cash_comp_annual_usd',DEFAULTS.cash_comp_annual_usd),
         snapshotDate:sheetData?sheetData.snapshot_date||'\u2014':'\u2014',
     };
 }
@@ -439,6 +442,7 @@ function projectYears(years){
     var btcH=inp.btcHoldings, shares=inp.shares, cash=inp.cashUsd;
     var strkF=inp.strkFace, strfF=inp.strfFace, strdF=inp.strdFace, strcF=inp.strcFace, streF_eur=inp.streFaceEur;
     var eurusd=inp.eurusd, softIncome=inp.softwareIncome, strkConverted=false;
+    var sbcAnnual=inp.sbcAnnual, cashCompAnnual=inp.cashCompAnnual;
     var convertDebt=CONVERTS.map(function(c){return{id:c.id,maturity:c.maturity,face:c.face,convPrice:c.convPrice,convShares:c.convShares,outstanding:true}});
     var newPrefFace=0, newPrefDivAnnual=0;
     var results=[], allEvents=[];
@@ -527,13 +531,13 @@ function projectYears(years){
             }
         }
 
-        // 5. PAY DIVIDENDS
-        var status='green',btcSold=0,strcSkipped=false,strdSkipped=false;
+        // 5. PAY DIVIDENDS + OPERATING COSTS
+        var status='green',btcSold=0,strcSkipped=false,strdSkipped=false,yearSbcShares=0;
         if(y>0){
             var strfDiv=strfF*0.10, strcDiv=strcF*0.1125, streDiv=streF_eur*eurusd*0.10;
             var strkDiv=strkF*0.08, strdDiv=strdF*0.10, npDiv=newPrefDivAnnual;
             var totalDiv=strfDiv+strcDiv+streDiv+strkDiv+strdDiv+npDiv;
-            cash-=(totalDiv-softIncome);
+            cash-=(totalDiv+cashCompAnnual-softIncome);
             if(cash>=0){status='green'}
             else{cash+=strdDiv;strdSkipped=true;
                 if(cash>=0){status='amber'}
@@ -544,20 +548,29 @@ function projectYears(years){
             }
         }
 
+        // 5b. SBC DILUTION — shares issued to employees, doesn't buy BTC
+        if(y>0&&sbcAnnual>0){
+            var curDebtSbc=convertDebt.filter(function(c){return c.outstanding}).reduce(function(s,c){return s+c.face},0);
+            var pUsdSbc=strkF+strfF+strdF+strcF+streF_eur*eurusd+newPrefFace;
+            var nClSbc=curDebtSbc+pUsdSbc-cash;
+            var tmpSbc=calcCEBE(btcH,shares,nClSbc,yearBtcPrice,yearMnav);
+            if(tmpSbc.modeledPrice>0){yearSbcShares=sbcAnnual/tmpSbc.modeledPrice;shares+=yearSbcShares}
+        }
+
         // 6. YEAR-END STATE
         var remDebt=convertDebt.filter(function(c){return c.outstanding}).reduce(function(s,c){return s+c.face},0);
         var prefUsd=strkF+strfF+strdF+strcF+streF_eur*eurusd+newPrefFace;
         var netClaims=remDebt+prefUsd-cash;
         var m=calcCEBE(btcH,shares,netClaims,yearBtcPrice,yearMnav);
         var totDiv=strfF*0.10+strcF*0.1125+streF_eur*eurusd*0.10+strkF*0.08+strdF*0.10+newPrefDivAnnual;
-        var netDrain=totDiv-softIncome;
+        var netDrain=totDiv+cashCompAnnual-softIncome;
         var runway=netDrain>0?(cash>0?cash/netDrain:0):Infinity;
 
         results.push({year:y,calYear:calYear,btcH:btcH,shares:shares,cebeSats:m.cebeSats,drag:m.drag,
             navPerShare:m.navPerShare,modeledPrice:m.modeledPrice,cash:cash,btcSold:btcSold,status:status,
             amp:m.amp,breakEven:m.breakEven,cashRunway:runway,strcSkipped:strcSkipped,strdSkipped:strdSkipped,
             yearBtcPrice:yearBtcPrice,yearMnav:yearMnav,newBtcAcquired:newBtcAcq,newPrefIssued:yearNewPref,
-            yearDeployment:yearDeploy,totalDivObligation:totDiv,events:yearEvents,netClaimsUsd:netClaims,
+            yearDeployment:yearDeploy,totalDivObligation:totDiv,sbcSharesAdded:yearSbcShares,events:yearEvents,netClaimsUsd:netClaims,
             remainingDebt:remDebt,totalPrefFace:prefUsd});
         yearEvents.forEach(function(e){allEvents.push({year:y,type:e.type,cls:e.cls,icon:e.icon,text:e.text})});
     }
@@ -638,6 +651,16 @@ function renderNarrative(final,current,inp,marketPrice,proj){
     if(current.cashRunway<3&&current.cashRunway>0)items.push({cls:'amber',icon:'\u23F0',text:'<strong>Cash runway: '+current.cashRunway.toFixed(1)+' years.</strong> After depletion: skip non-cum (STRD, STRC) then sell BTC for cumulative obligations.'});
     else if(current.cashRunway>=3&&current.cashRunway<Infinity)items.push({cls:'neutral',icon:'\u{1F4B0}',text:'<strong>Cash runway: '+current.cashRunway.toFixed(1)+' years.</strong> Reserves cover preferred dividends before BTC needs selling.'});
 
+    // Wrapper fee
+    var totDivNarr=current.totalDivObligation||(inp.strfFace*0.10+inp.strcFace*0.1125+inp.streFaceEur*inp.eurusd*0.10+inp.strkFace*0.08+inp.strdFace*0.10);
+    var annCostNarr=totDivNarr+inp.sbcAnnual+inp.cashCompAnnual;
+    var netCostNarr=annCostNarr-inp.softwareIncome;
+    var reserveValNarr=current.btcH*endBtcP;
+    var wfNarr=reserveValNarr>0?netCostNarr/reserveValNarr:0;
+    if(wfNarr>.025)items.push({cls:'amber',icon:'\u{1F4CB}',text:'<strong>Wrapper fee: '+fmtPct(wfNarr)+' of BTC reserve.</strong> Annual cost of '+fmtB(netCostNarr)+' (divs '+fmtB(totDivNarr)+' + SBC '+fmtB(inp.sbcAnnual)+' + comp '+fmtB(inp.cashCompAnnual)+' \u2212 software '+fmtB(inp.softwareIncome)+'). Compresses as BTC appreciates.'});
+    else if(wfNarr>.01)items.push({cls:'neutral',icon:'\u{1F4CB}',text:'<strong>Wrapper fee: '+fmtPct(wfNarr)+'.</strong> '+fmtB(netCostNarr)+'/yr net annual cost against '+fmtB(reserveValNarr)+' BTC reserve. Moderate overhead.'});
+    else if(wfNarr>0)items.push({cls:'green',icon:'\u{1F4CB}',text:'<strong>Wrapper fee: '+fmtPct(wfNarr)+'.</strong> Low overhead relative to BTC reserve.'});
+
     // Engine events
     if(proj._events)proj._events.forEach(function(e){items.push({cls:e.cls,icon:e.icon,text:e.text})});
 
@@ -660,12 +683,17 @@ function renderNarrative(final,current,inp,marketPrice,proj){
 function renderMetrics(final,current,inp){
     var totDiv=final.totalDivObligation||(inp.strfFace*0.10+inp.strcFace*0.1125+inp.streFaceEur*inp.eurusd*0.10+inp.strkFace*0.08+inp.strdFace*0.10);
     var endBtcP=final.yearBtcPrice||btcPrice;
+    var totalAnnualCost=totDiv+inp.sbcAnnual+inp.cashCompAnnual;
+    var netAnnualCost=totalAnnualCost-inp.softwareIncome;
+    var btcReserveVal=final.btcH*endBtcP;
+    var wrapperFee=btcReserveVal>0?netAnnualCost/btcReserveVal:0;
     var metrics=[
         {label:'CEBE',value:fmtSats(final.cebeSats),sub:'sats/share',cls:final.cebeSats<=0?'danger':''},
         {label:'DRAG',value:fmtPct(final.drag),sub:fmtPct(1-final.drag)+' to common',cls:final.drag>.5?'danger':final.drag>.35?'warn':''},
         {label:'AMPLIFICATION',value:final.amp>100?'\u221e':final.amp.toFixed(2)+'\u00d7',sub:((final.amp-1)*100).toFixed(0)+'% amplified',cls:''},
         {label:'BREAK-EVEN',value:fmtPrice(final.breakEven),sub:'BTC floor',cls:endBtcP<=final.breakEven*1.1?'danger':endBtcP<=final.breakEven*1.5?'warn':''},
         {label:'NAV / SHARE',value:fmtPrice(final.navPerShare),sub:'\u00d7 '+(final.yearMnav||mnavMultiple).toFixed(2)+' mNAV',cls:''},
+        {label:'WRAPPER FEE',value:fmtPct(wrapperFee),sub:fmtB(netAnnualCost)+'/yr net',cls:wrapperFee>.03?'danger':wrapperFee>.02?'warn':''},
         {label:'CASH RUNWAY',value:current.cashRunway===Infinity?'\u221e':current.cashRunway.toFixed(1)+'yr',sub:fmtB(totDiv)+'/yr div',cls:current.cashRunway<2?'danger':current.cashRunway<4?'warn':'good'},
     ];
     if(horizonYears>0)metrics.push({label:'BTC HELD',value:fmt(Math.round(final.btcH)),sub:(final.btcH<inp.btcHoldings?'\u2193':'\u2191')+' from '+fmt(inp.btcHoldings),cls:final.btcH<inp.btcHoldings*.9?'danger':final.btcH>inp.btcHoldings?'good':''});
@@ -776,10 +804,10 @@ function renderCustomize(inp){
 
 function renderAssumptions(inp){
     var sType=getActiveType(), t='';
-    if(sType==='saylor')t='<strong>Saylor Model (Base Case):</strong> BTC follows Saylor\u2019s 29% avg CAGR, declining 45%\u219221% over 10 years (sourced from Bitcoin 2024 Keynote, Nashville \u2014 \u201C55% ARR decelerates toward 20%\u201D). ~$80B deployed via 42/42 Plan (50/50 equity/preferred initially, shifting 30/70). Preferred at blended ~10.5%. ATM at mNAV minus 0.1\u00d7. Software income '+fmtB(inp.softwareIncome)+'/yr flat. Converts refinanced at maturity if below conversion price (capital market access assumed). STRK converts when price exceeds $1,000.';
-    else if(sType==='siege')t='<strong>Siege:</strong> BTC $50,000 for entire horizon. No new capital raised. mNAV 0.7\u00d7. All converts mature as cash redemptions. Dividends paid until cash depleted, then non-cum skipped, then BTC sold.';
-    else if(sType==='singularity')t='<strong>Singularity (Bull Case):</strong> BTC follows Saylor\u2019s 37% avg CAGR, declining 55%\u219227% over 10 years (Bitcoin 2024 Keynote \u2014 \u201C$49M bull case, 22% of global wealth\u201D). Strategy executes full ~$80B capital plan. Converts refinanced at maturity when below conversion price (capital market access assumed). mNAV rises to 3.0\u00d7 as market prices in both BTC appreciation and stack growth. STRK converts when price exceeds $1,000.';
-    else t='<strong>Assumptions:</strong> Capital structure frozen at snapshot ('+inp.snapshotDate+'). BTC price static across projection. All preferred divs paid cash. Distress cascade: skip non-cum then sell BTC. Software income ~'+fmtB(inp.softwareIncome)+'/yr.';
+    if(sType==='saylor')t='<strong>Saylor Model (Base Case):</strong> BTC follows Saylor\u2019s 29% avg CAGR, declining 45%\u219221% over 10 years (sourced from Bitcoin 2024 Keynote, Nashville \u2014 \u201C55% ARR decelerates toward 20%\u201D). ~$80B deployed via 42/42 Plan (50/50 equity/preferred initially, shifting 30/70). Preferred at blended ~10.5%. ATM at mNAV minus 0.1\u00d7. Software income '+fmtB(inp.softwareIncome)+'/yr flat. SBC dilution ~'+fmtB(inp.sbcAnnual)+'/yr (shares issued, no BTC acquired). Cash comp ~'+fmtB(inp.cashCompAnnual)+'/yr drain. Converts refinanced at maturity if below conversion price (capital market access assumed). STRK converts when price exceeds $1,000.';
+    else if(sType==='siege')t='<strong>Siege:</strong> BTC $50,000 for entire horizon. No new capital raised. mNAV 0.7\u00d7. All converts mature as cash redemptions. Dividends paid until cash depleted, then non-cum skipped, then BTC sold. SBC dilution ~'+fmtB(inp.sbcAnnual)+'/yr. Cash comp ~'+fmtB(inp.cashCompAnnual)+'/yr drain.';
+    else if(sType==='singularity')t='<strong>Singularity (Bull Case):</strong> BTC follows Saylor\u2019s 37% avg CAGR, declining 55%\u219227% over 10 years (Bitcoin 2024 Keynote \u2014 \u201C$49M bull case, 22% of global wealth\u201D). Strategy executes full ~$80B capital plan. Converts refinanced at maturity when below conversion price (capital market access assumed). mNAV rises to 3.0\u00d7 as market prices in both BTC appreciation and stack growth. SBC dilution ~'+fmtB(inp.sbcAnnual)+'/yr. Cash comp ~'+fmtB(inp.cashCompAnnual)+'/yr drain. STRK converts when price exceeds $1,000.';
+    else t='<strong>Assumptions:</strong> Capital structure frozen at snapshot ('+inp.snapshotDate+'). BTC price static across projection. All preferred divs paid cash. Distress cascade: skip non-cum then sell BTC. Software income ~'+fmtB(inp.softwareIncome)+'/yr. SBC dilution ~'+fmtB(inp.sbcAnnual)+'/yr (pure share dilution). Cash comp ~'+fmtB(inp.cashCompAnnual)+'/yr drain.';
     t+='<br><br><strong>Data:</strong> Holdings, shares, capital structure from Google Sheet (post-8K updates). Live BTC from CoinGecko. Live MSTR from Finnhub. '+(sheetData&&sheetData.strk_face_usd?'Preferred from live sheet.':'Using pre-Q4 estimates.')+' Convert face values approximate pending 10-K.';
     $('assumptions').innerHTML=t;
 }
