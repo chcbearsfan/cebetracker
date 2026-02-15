@@ -1607,6 +1607,13 @@ function renderNarrative(r, co, d, projResults) {
         if (beMargin < 200) {
             items.push({ cls: 'amber', icon: '&#9888;', text: '<strong>Break-even safety: ' + beMargin.toFixed(0) + '%.</strong> BTC at ' + fmtPrice(useBtc) + ' is ' + beMargin.toFixed(0) + '% above break-even (' + fmtPrice(r.breakEven) + '). Margin is compressed.' });
         }
+
+        // SATA issuance / engine events (year-by-year)
+        if (projResults && projResults._events) {
+            projResults._events.forEach(function(e) {
+                items.push({ cls: e.cls, icon: e.icon, text: e.text });
+            });
+        }
     }
 
     $('narrativeBody').innerHTML = items.map(i =>
