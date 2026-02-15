@@ -72,6 +72,14 @@
         .scenario-mnav { font-size:10px; color:var(--text-muted); font-family:var(--mono); margin-top:4px; }
 
         /* HERO */
+        .claims-banner { background:rgba(249,115,22,0.06); border:1px solid var(--orange-border); border-radius:12px; padding:16px 20px; text-align:center; margin-bottom:24px; }
+        .claims-banner.low-drag { background:rgba(34,197,94,0.04); border-color:rgba(34,197,94,0.25); }
+        .claims-banner.high-drag { background:rgba(239,68,68,0.04); border-color:rgba(239,68,68,0.25); }
+        .claims-title { font-size:20px; font-weight:700; color:var(--orange-primary); margin-bottom:4px; font-family:var(--mono); }
+        .claims-banner.low-drag .claims-title { color:#22c55e; }
+        .claims-banner.high-drag .claims-title { color:#ef4444; }
+        .claims-sub { font-size:13px; color:#a1a1aa; }
+        .claims-formula { font-size:11px; color:#71717a; font-family:var(--mono); margin-top:6px; letter-spacing:0.3px; }
         .hero { text-align:center; padding:28px 20px; margin-bottom:20px; background:linear-gradient(180deg,rgba(249,115,22,0.04),transparent); border-radius:20px; border:1px solid rgba(249,115,22,0.1); }
         .hero-label { font-size:10px; letter-spacing:3px; color:var(--text-muted); margin-bottom:6px; font-weight:500; }
         .hero-price { font-size:64px; font-weight:700; font-family:var(--mono); line-height:1; margin-bottom:8px; transition:color .3s; }
@@ -215,13 +223,19 @@
             <span class="live-price" id="liveDataDate">&mdash;</span>
         </div>
     </div>
+    <!-- Drag Banner -->
+    <div class="claims-banner" id="claimsBanner">
+        <div class="claims-title" id="claimsDragDisplay">DRAG: —%</div>
+        <div class="claims-sub" id="claimsSub">Loading...</div>
+        <div class="claims-formula" id="claimsFormula"></div>
+    </div>
     <div class="scenarios-section">
         <div class="scenario-group">
             <div class="group-label"><span class="group-label-badge now">&#9889; NOW</span><span class="group-label-text">WHAT IF BTC WERE AT THIS PRICE TODAY</span><div class="group-label-line"></div></div>
             <div class="scenarios-row" id="snapshotBar"></div>
         </div>
         <div class="scenario-group">
-            <div class="group-label"><span class="group-label-badge future">&rarr; FORWARD</span><span class="group-label-text">10-YEAR PROJECTIONS &middot; CONVERTS &middot; CAPITAL PLAN</span><div class="group-label-line"></div></div>
+            <div class="group-label"><span class="group-label-badge future">&rarr; FORWARD</span><span class="group-label-text">10-YEAR PROJECTIONS &middot; CONVERTS &middot; CASH MAINTENANCE</span><div class="group-label-line"></div></div>
             <div class="scenarios-row" id="projectionBar"></div>
         </div>
     </div>
@@ -273,7 +287,7 @@
 <script>
 // ═══════════════════════════════════════════════════════════════
 // CEBE MSTR SHARE PRICE MODELER v3
-// Capital Plan Engine · Convert Bond Maturities · Siege/Saylor/Singularity
+// Capital Plan Engine · Convert Bond Maturities · Siege/Power Law/Saylor Plan
 // cebetracker.io/modeler
 // ═══════════════════════════════════════════════════════════════
 
@@ -299,20 +313,25 @@ const CONVERTS = [
     { id:'2032',  maturity:2032, face:800e6,   convPrice:204.33, convShares:3915000 },
 ];
 
-// Saylor Base Case: 29% avg CAGR, declining from ~45% to ~21% (Bitcoin 2024 Keynote, Nashville)
+// Saylor Plan: 29% avg CAGR, declining from ~45% to ~21% (Bitcoin 2024 Keynote, Nashville)
 // His 21-year model starts at ~55% ARR decelerating to ~20%. Our 10-year window picks up 2 years in.
 const SAYLOR_CAGR = [
     {year:1,cagr:.45},{year:2,cagr:.42},{year:3,cagr:.38},{year:4,cagr:.35},{year:5,cagr:.32},
     {year:6,cagr:.29},{year:7,cagr:.27},{year:8,cagr:.25},{year:9,cagr:.23},{year:10,cagr:.21},
 ];
-// Saylor Bull Case: 37% avg CAGR, declining from ~55% to ~27%
-const SINGULARITY_CAGR = [
-    {year:1,cagr:.55},{year:2,cagr:.52},{year:3,cagr:.48},{year:4,cagr:.44},{year:5,cagr:.40},
-    {year:6,cagr:.37},{year:7,cagr:.34},{year:8,cagr:.31},{year:9,cagr:.29},{year:10,cagr:.27},
+// Power Law Support Line: ~23% avg CAGR → ~$760K by 2036 (Santostasi/Burger model, floor)
+const POWERLAW_CAGR = [
+    {year:1,cagr:.30},{year:2,cagr:.27},{year:3,cagr:.25},{year:4,cagr:.24},{year:5,cagr:.23},
+    {year:6,cagr:.22},{year:7,cagr:.21},{year:8,cagr:.20},{year:9,cagr:.19},{year:10,cagr:.18},
 ];
 const SAYLOR_MNAV = [
     {year:0,mnav:1.0},{year:1,mnav:1.3},{year:2,mnav:1.5},{year:3,mnav:1.8},{year:4,mnav:1.6},
     {year:5,mnav:1.5},{year:6,mnav:1.5},{year:7,mnav:1.5},{year:8,mnav:1.5},{year:9,mnav:1.5},{year:10,mnav:1.5},
+];
+// Conservative mNAV for Power Law — no hype premium
+const POWERLAW_MNAV = [
+    {year:0,mnav:1.0},{year:1,mnav:1.0},{year:2,mnav:1.1},{year:3,mnav:1.1},{year:4,mnav:1.2},
+    {year:5,mnav:1.2},{year:6,mnav:1.2},{year:7,mnav:1.2},{year:8,mnav:1.2},{year:9,mnav:1.2},{year:10,mnav:1.2},
 ];
 const SAYLOR_DEPLOY = [
     {year:1,totalB:14,eqPct:.50,prefRate:.105},{year:2,totalB:14,eqPct:.50,prefRate:.105},
@@ -327,22 +346,17 @@ const DEFAULTS = {
     preferred_usd:8400e6, cash_usd:2250e6,
     strk_face_usd:3220e6, strf_face_usd:2640e6, strd_face_usd:1006e6,
     strc_face_usd:748e6, stre_face_eur:775e6, eurusd_rate:1.04,
-    software_income_usd:5e6, btc_price:97000, mstr_price:340,
-    sbc_annual_usd:85e6, cash_comp_annual_usd:6.3e6,
+    software_income_usd:5e6, btc_price:70000, mstr_price:134,
+    sbc_annual_usd:85e6, cash_comp_annual_usd:6.6e6,
 };
 
 const SCENARIOS = [
-    {id:'wipeout',      icon:'\u{1F480}',name:'Wipeout',      btc:25000, mnav:0.5,horizon:0, group:'snapshot',  type:'static'},
-    {id:'current',      icon:'\u{1F4CD}',name:'Current',      btc:null,  mnav:1.0,horizon:0, group:'snapshot',  type:'static'},
-    {id:'ath',          icon:'\u{1F451}',name:'Former ATH',   btc:126000,mnav:1.5,horizon:0, group:'snapshot',  type:'static'},
-    {id:'siege',        icon:'\u{1F3F0}',name:'Siege',        btc:50000, mnav:0.7,horizon:10,group:'projection',type:'siege'},
-    {id:'saylor',       icon:'\u{1F4D0}',name:'Saylor Model', btc:null,  mnav:null,horizon:10,group:'projection',type:'saylor'},
-    {id:'singularity',   icon:'\u{1F300}',name:'Singularity',  btc:null,  mnav:null,horizon:10,group:'projection',type:'singularity'},
-];
-
-const SINGULARITY_MNAV = [
-    {year:0,mnav:1.0},{year:1,mnav:1.5},{year:2,mnav:1.8},{year:3,mnav:2.0},{year:4,mnav:2.2},
-    {year:5,mnav:2.5},{year:6,mnav:2.5},{year:7,mnav:2.8},{year:8,mnav:3.0},{year:9,mnav:3.0},{year:10,mnav:3.0},
+    {id:'wipeout',      icon:'\u{1F480}',name:'Wipeout',          btc:25000, mnav:0.5,horizon:0, group:'snapshot',  type:'static'},
+    {id:'current',      icon:'\u{1F4CD}',name:'Current',          btc:null,  mnav:1.0,horizon:0, group:'snapshot',  type:'static'},
+    {id:'ath',          icon:'\u{1F451}',name:'Former ATH',       btc:126000,mnav:1.5,horizon:0, group:'snapshot',  type:'static'},
+    {id:'siege',        icon:'\u{1F3F0}',name:'Siege',            btc:50000, mnav:0.7,horizon:10,group:'projection',type:'siege'},
+    {id:'powerlaw',     icon:'\u{1F4C8}',name:'Power Law Support',btc:null,  mnav:null,horizon:10,group:'projection',type:'powerlaw'},
+    {id:'saylor',       icon:'\u{1F680}',name:'Saylor Plan',      btc:null,  mnav:null,horizon:10,group:'projection',type:'saylor'},
 ];
 
 const HORIZON_OPTIONS = [{label:'Now',years:0},{label:'1Y',years:1},{label:'3Y',years:3},{label:'5Y',years:5},{label:'10Y',years:10}];
@@ -362,7 +376,7 @@ var fmtPrice=function(p){if(p>=1e6)return '$'+(p/1e6).toFixed(1)+'M';if(p>=1000)
 var fmtPct=function(p,d){return(p*100).toFixed(d!==undefined?d:1)+'%'};
 var fmtSats=function(s){return fmt(Math.round(s))};
 function getActiveType(){var s=SCENARIOS.find(function(x){return x.id===activeScenario});return s?s.type:'static'}
-function isSlidersLocked(){var t=getActiveType();return t==='siege'||t==='saylor'||t==='singularity'}
+function isSlidersLocked(){var t=getActiveType();return t==='siege'||t==='saylor'||t==='powerlaw'}
 
 // ─── CSV ───
 function parseCSVLine(l){var r=[],c='',q=false;for(var i=0;i<l.length;i++){var ch=l[i];if(ch==='"')q=!q;else if(ch===','&&!q){r.push(c);c=''}else c+=ch}r.push(c);return r}
@@ -388,8 +402,12 @@ async function loadData(){
         $('app').style.display='block';
         buildScenarioBar();buildHorizonBar();buildMnavPresets();syncSliders();render();
     }catch(err){
-        console.error('Load failed:',err);
-        $('loadingScreen').innerHTML='<div style="text-align:center;color:#a1a1aa;font-size:13px"><p style="margin-bottom:12px">Failed to load data</p><p style="font-size:11px;color:#52525b">'+err.message+'</p><p style="margin-top:12px"><a href="/" style="color:#f97316">&larr; Back to cebetracker.io</a></p></div>';
+        console.error('Load failed, using defaults:',err);
+        btcPrice=DEFAULTS.btc_price;
+        SCENARIOS.find(function(s){return s.id==='current'}).btc=btcPrice;
+        $('loadingScreen').style.display='none';
+        $('app').style.display='block';
+        buildScenarioBar();buildHorizonBar();buildMnavPresets();syncSliders();render();
     }
 }
 async function fetchStockPrice(symbol){
@@ -446,6 +464,7 @@ function projectYears(years){
     var convertDebt=CONVERTS.map(function(c){return{id:c.id,maturity:c.maturity,face:c.face,convPrice:c.convPrice,convShares:c.convShares,outstanding:true}});
     var newPrefFace=0, newPrefDivAnnual=0;
     var results=[], allEvents=[];
+    var TARGET_RUNWAY_YEARS=2;
 
     for(var y=0;y<=years;y++){
         var calYear=START_YEAR+y, yearEvents=[];
@@ -453,12 +472,12 @@ function projectYears(years){
         // 1. BTC PRICE + mNAV for this year
         var yearBtcPrice, yearMnav;
         if(scenarioType==='siege'){yearBtcPrice=50000;yearMnav=0.7}
-        else if(scenarioType==='saylor'){
+        else if(scenarioType==='powerlaw'){
+            if(y===0){yearBtcPrice=startBtc;yearMnav=POWERLAW_MNAV[0].mnav}
+            else{var ce=POWERLAW_CAGR[Math.min(y-1,POWERLAW_CAGR.length-1)];var prevB=y===1?startBtc:results[y-1].yearBtcPrice;yearBtcPrice=prevB*(1+ce.cagr);yearMnav=POWERLAW_MNAV[Math.min(y,POWERLAW_MNAV.length-1)].mnav}
+        }else if(scenarioType==='saylor'){
             if(y===0){yearBtcPrice=startBtc;yearMnav=SAYLOR_MNAV[0].mnav}
             else{var ce=SAYLOR_CAGR[Math.min(y-1,SAYLOR_CAGR.length-1)];var prevB=y===1?startBtc:results[y-1].yearBtcPrice;yearBtcPrice=prevB*(1+ce.cagr);yearMnav=SAYLOR_MNAV[Math.min(y,SAYLOR_MNAV.length-1)].mnav}
-        }else if(scenarioType==='singularity'){
-            if(y===0){yearBtcPrice=startBtc;yearMnav=SINGULARITY_MNAV[0].mnav}
-            else{var ce=SINGULARITY_CAGR[Math.min(y-1,SINGULARITY_CAGR.length-1)];var prevB=y===1?startBtc:results[y-1].yearBtcPrice;yearBtcPrice=prevB*(1+ce.cagr);yearMnav=SINGULARITY_MNAV[Math.min(y,SINGULARITY_MNAV.length-1)].mnav}
         }else{yearBtcPrice=btcPrice;yearMnav=mnavMultiple}
 
         // 2. CONVERT BOND MATURITIES
@@ -471,8 +490,8 @@ function projectYears(years){
             if(tmp.modeledPrice>=conv.convPrice){
                 conv.outstanding=false; shares+=conv.convShares;
                 yearEvents.push({type:'convert',cls:'green',icon:'\u{1F504}',text:'<strong>'+conv.id+' converts converted.</strong> Stock ('+fmtPrice(tmp.modeledPrice)+') above conversion price ('+fmtPrice(conv.convPrice)+'). Removed '+fmtB(conv.face)+' debt, added '+fmt(conv.convShares)+' shares.'});
-            }else if(scenarioType==='saylor'||scenarioType==='singularity'){
-                // Refinance — Strategy has capital market access, rolls the debt
+            }else if(scenarioType==='saylor'||scenarioType==='powerlaw'){
+                // Capital markets open — refinance
                 yearEvents.push({type:'refinance',cls:'info',icon:'\u{1F504}',text:'<strong>'+conv.id+' converts refinanced.</strong> Stock ('+fmtPrice(tmp.modeledPrice)+') below conversion price ('+fmtPrice(conv.convPrice)+'). '+fmtB(conv.face)+' rolled into new convertible debt.'});
             }else{
                 conv.outstanding=false; cash-=conv.face;
@@ -482,7 +501,7 @@ function projectYears(years){
             }
         })}
 
-        // 3. CAPITAL PLAN (Saylor only)
+        // 3. CAPITAL PLAN (Saylor Plan only)
         var newBtcAcq=0, yearDeploy=0, yearNewPref=0;
         if(y>0&&scenarioType==='saylor'){
             var dep=SAYLOR_DEPLOY[Math.min(y-1,SAYLOR_DEPLOY.length-1)];
@@ -501,22 +520,22 @@ function projectYears(years){
             if(yearDeploy>0)yearEvents.push({type:'deploy',cls:'info',icon:'\u{1F4E6}',text:'<strong>Deployed '+fmtB(yearDeploy)+'.</strong> Acquired '+fmt(Math.round(newBtcAcq))+' BTC. Issued '+fmtB(yearNewPref)+' new preferred at '+fmtPct(dep.prefRate,1)+'. ATM at '+atmMnav.toFixed(1)+'\u00d7.'});
         }
 
-        // Singularity — full Saylor capital plan + BTC → $1M curve
-        if(y>0&&scenarioType==='singularity'){
-            var dep=SAYLOR_DEPLOY[Math.min(y-1,SAYLOR_DEPLOY.length-1)];
-            yearDeploy=dep.totalB*1e9;
-            var eqRaise=yearDeploy*dep.eqPct, prefRaise=yearDeploy*(1-dep.eqPct);
-            var curDebt=convertDebt.filter(function(c){return c.outstanding}).reduce(function(s,c){return s+c.face},0);
-            var pUsd=strkF+strfF+strdF+strcF+streF_eur*eurusd+newPrefFace;
-            var nCl=curDebt+pUsd-cash;
-            var navNow=Math.max(0,(btcH*yearBtcPrice)-nCl);
-            var navPS=shares>0?navNow/shares:0;
-            var atmMnav=Math.max(0.5,yearMnav-0.1);
-            var atmPrice=navPS*atmMnav;
-            if(atmPrice>0){var newSh=eqRaise/atmPrice;shares+=newSh}
-            yearNewPref=prefRaise; newPrefFace+=prefRaise; newPrefDivAnnual+=prefRaise*dep.prefRate;
-            if(yearBtcPrice>0){newBtcAcq=yearDeploy/yearBtcPrice;btcH+=newBtcAcq}
-            if(yearDeploy>0)yearEvents.push({type:'deploy',cls:'info',icon:'\u{1F4E6}',text:'<strong>Deployed '+fmtB(yearDeploy)+'.</strong> Acquired '+fmt(Math.round(newBtcAcq))+' BTC. Issued '+fmtB(yearNewPref)+' new preferred at '+fmtPct(dep.prefRate,1)+'. ATM at '+atmMnav.toFixed(1)+'\u00d7.'});
+        // 3b. MAINTENANCE CAPITAL (Power Law only - modest $3B/yr vs $14B Saylor)
+        if(y>0&&scenarioType==='powerlaw'){
+            var plDeploy=3e9, plEqPct=0.50, plPrefRate=0.10;
+            var plEqRaise=plDeploy*plEqPct, plPrefRaise=plDeploy*(1-plEqPct);
+            var curDebtPL=convertDebt.filter(function(c){return c.outstanding}).reduce(function(s,c){return s+c.face},0);
+            var pUsdPL=strkF+strfF+strdF+strcF+streF_eur*eurusd+newPrefFace;
+            var nClPL=curDebtPL+pUsdPL-cash;
+            var navNowPL=Math.max(0,(btcH*yearBtcPrice)-nClPL);
+            var navPsPL=shares>0?navNowPL/shares:0;
+            var atmMnavPL=Math.max(0.5,yearMnav-0.1);
+            var atmPricePL=navPsPL*atmMnavPL;
+            if(atmPricePL>0){var newShPL=plEqRaise/atmPricePL;shares+=newShPL}
+            yearNewPref=plPrefRaise; newPrefFace+=plPrefRaise; newPrefDivAnnual+=plPrefRaise*plPrefRate;
+            yearDeploy=plDeploy;
+            if(yearBtcPrice>0){newBtcAcq=plDeploy/yearBtcPrice;btcH+=newBtcAcq}
+            if(plDeploy>0)yearEvents.push({type:'deploy',cls:'info',icon:'\u{1F4E6}',text:'<strong>Maintenance deploy '+fmtB(plDeploy)+'.</strong> Acquired '+fmt(Math.round(newBtcAcq))+' BTC. Issued '+fmtB(plPrefRaise)+' new preferred at '+fmtPct(plPrefRate,1)+'. ATM at '+atmMnavPL.toFixed(1)+'\u00d7.'});
         }
 
         // 4. STRK CONVERSION CHECK
@@ -532,23 +551,64 @@ function projectYears(years){
         }
 
         // 5. PAY DIVIDENDS + OPERATING COSTS
-        var status='green',btcSold=0,strcSkipped=false,strdSkipped=false,yearSbcShares=0;
+        var status='green',btcSold=0,strcSkipped=false,strdSkipped=false,yearSbcShares=0,atmSharesForCash=0;
         if(y>0){
             var strfDiv=strfF*0.10, strcDiv=strcF*0.1125, streDiv=streF_eur*eurusd*0.10;
             var strkDiv=strkF*0.08, strdDiv=strdF*0.10, npDiv=newPrefDivAnnual;
             var totalDiv=strfDiv+strcDiv+streDiv+strkDiv+strdDiv+npDiv;
             cash-=(totalDiv+cashCompAnnual-softIncome);
-            if(cash>=0){status='green'}
-            else{cash+=strdDiv;strdSkipped=true;
-                if(cash>=0){status='amber'}
-                else{cash+=strcDiv;strcSkipped=true;
+
+            if(scenarioType==='siege'){
+                // Siege: skip non-cum dividends, then sell BTC
+                if(cash<0){cash+=strdDiv;strdSkipped=true;
                     if(cash>=0){status='amber'}
-                    else{var deficit=Math.abs(cash);btcSold=yearBtcPrice>0?deficit/yearBtcPrice:0;btcH=Math.max(0,btcH-btcSold);cash=0;status='red'}
+                    else{cash+=strcDiv;strcSkipped=true;
+                        if(cash>=0){status='amber'}
+                        else{var deficit=Math.abs(cash);btcSold=yearBtcPrice>0?deficit/yearBtcPrice:0;btcH=Math.max(0,btcH-btcSold);cash=0;status='red';
+                            yearEvents.push({type:'btcsale',cls:'red',icon:'\u26A0\uFE0F',text:'<strong>BTC liquidated.</strong> Sold '+fmt(Math.round(btcSold))+' BTC ('+fmtB(deficit)+') to cover cumulative dividend obligations. Capital markets assumed closed.'});
+                        }
+                    }
+                }
+            }
+            // Power Law / Saylor: Cash maintenance handled in step 6
+        }
+
+        // 6. CASH RESERVE MAINTENANCE (non-siege only)
+        if(y>0&&scenarioType!=='siege'){
+            var totDivNow=(strfF*0.10)+(strcF*0.1125)+(streF_eur*eurusd*0.10)+(strkF*0.08)+(strdF*0.10)+newPrefDivAnnual;
+            var currentAnnDrain=totDivNow+cashCompAnnual-softIncome;
+            var targetCash=Math.max(0,currentAnnDrain*TARGET_RUNWAY_YEARS);
+
+            if(cash<0){
+                var atmNeeded=Math.abs(cash)+targetCash;
+                var curDebtM=convertDebt.filter(function(c){return c.outstanding}).reduce(function(s,c){return s+c.face},0);
+                var pUsdM=strkF+strfF+strdF+strcF+streF_eur*eurusd+newPrefFace;
+                var navNow=Math.max(0,(btcH*yearBtcPrice)-(curDebtM+pUsdM));
+                var navPS=shares>0?navNow/shares:0;
+                var atmPrice=navPS*yearMnav;
+                if(atmPrice>0){
+                    atmSharesForCash=atmNeeded/atmPrice;shares+=atmSharesForCash;cash=targetCash;status='amber';
+                    yearEvents.push({type:'atm',cls:'amber',icon:'\u{1F4B3}',text:'<strong>ATM to maintain reserves.</strong> Issued '+fmt(Math.round(atmSharesForCash))+' shares ('+fmtB(atmNeeded)+') to cover obligations and maintain '+TARGET_RUNWAY_YEARS+'-year cash reserve.'});
+                }else{
+                    // Fallback: skip non-cum dividends + sell BTC
+                    cash+=strdF*0.10;strdSkipped=true;cash+=strcF*0.1125;strcSkipped=true;
+                    if(cash<0){var deficit=Math.abs(cash);btcSold=yearBtcPrice>0?deficit/yearBtcPrice:0;btcH=Math.max(0,btcH-btcSold);cash=0;status='red';}else{status='amber';}
+                }
+            }else if(cash<targetCash){
+                var topUp=targetCash-cash;
+                var curDebtM=convertDebt.filter(function(c){return c.outstanding}).reduce(function(s,c){return s+c.face},0);
+                var pUsdM=strkF+strfF+strdF+strcF+streF_eur*eurusd+newPrefFace;
+                var navNow=Math.max(0,(btcH*yearBtcPrice)-(curDebtM+pUsdM-cash));
+                var navPS=shares>0?navNow/shares:0;
+                var atmPrice=navPS*yearMnav;
+                if(atmPrice>0&&topUp>1e6){
+                    atmSharesForCash=topUp/atmPrice;shares+=atmSharesForCash;cash+=topUp;
+                    yearEvents.push({type:'atm',cls:'info',icon:'\u{1F4B3}',text:'<strong>ATM reserve top-up.</strong> Issued '+fmt(Math.round(atmSharesForCash))+' shares ('+fmtB(topUp)+') to maintain '+TARGET_RUNWAY_YEARS+'-year cash reserve.'});
                 }
             }
         }
 
-        // 5b. SBC DILUTION — shares issued to employees, doesn't buy BTC
+        // 7. SBC DILUTION
         if(y>0&&sbcAnnual>0){
             var curDebtSbc=convertDebt.filter(function(c){return c.outstanding}).reduce(function(s,c){return s+c.face},0);
             var pUsdSbc=strkF+strfF+strdF+strcF+streF_eur*eurusd+newPrefFace;
@@ -557,7 +617,7 @@ function projectYears(years){
             if(tmpSbc.modeledPrice>0){yearSbcShares=sbcAnnual/tmpSbc.modeledPrice;shares+=yearSbcShares}
         }
 
-        // 6. YEAR-END STATE
+        // 8. YEAR-END STATE
         var remDebt=convertDebt.filter(function(c){return c.outstanding}).reduce(function(s,c){return s+c.face},0);
         var prefUsd=strkF+strfF+strdF+strcF+streF_eur*eurusd+newPrefFace;
         var netClaims=remDebt+prefUsd-cash;
@@ -571,7 +631,7 @@ function projectYears(years){
             amp:m.amp,breakEven:m.breakEven,cashRunway:runway,strcSkipped:strcSkipped,strdSkipped:strdSkipped,
             yearBtcPrice:yearBtcPrice,yearMnav:yearMnav,newBtcAcquired:newBtcAcq,newPrefIssued:yearNewPref,
             yearDeployment:yearDeploy,totalDivObligation:totDiv,sbcSharesAdded:yearSbcShares,events:yearEvents,netClaimsUsd:netClaims,
-            remainingDebt:remDebt,totalPrefFace:prefUsd});
+            remainingDebt:remDebt,totalPrefFace:prefUsd,atmSharesForCash:atmSharesForCash});
         yearEvents.forEach(function(e){allEvents.push({year:y,type:e.type,cls:e.cls,icon:e.icon,text:e.text})});
     }
     results._events=allEvents;
@@ -593,13 +653,26 @@ function quickCalc(bp,mn){
 function render(){
     var inp=getInputs(),proj=projectYears(horizonYears);
     var current=proj[0],final=proj[proj.length-1],marketPrice=liveMstrPrice||DEFAULTS.mstr_price;
-    renderHero(final,current,marketPrice);renderNarrative(final,current,inp,marketPrice,proj);
+    renderClaimsBanner(final,inp);renderHero(final,current,marketPrice);renderNarrative(final,current,inp,marketPrice,proj);
     renderMetrics(final,current,inp);renderWaterfall(final,inp);renderProjectionTable(proj);
     renderSensitivityMatrix();renderCustomize(inp);renderAssumptions(inp);updateSliderLocking();
     $('liveBtcDisplay').textContent='BTC '+fmtPrice(liveBtcPrice||btcPrice);
     $('liveMstrDisplay').textContent='MSTR '+fmtPrice(marketPrice);
     $('liveDataDate').textContent=inp.snapshotDate!=='\u2014'?'Data: '+inp.snapshotDate:'';
     updateSliderFills();
+}
+
+function renderClaimsBanner(final,inp){
+    var dragPct=(final.drag*100).toFixed(1);
+    var ownPct=((1-final.drag)*100).toFixed(1);
+    var btcH=Math.round(final.btcH);
+    var claimsBtc=Math.round(final.drag*btcH);
+    var sharesM=(final.shares/1e6).toFixed(1);
+    $('claimsDragDisplay').textContent='DRAG: '+dragPct+'%';
+    $('claimsSub').innerHTML='Common equity owns '+ownPct+'% of '+fmt(btcH)+' BTC &middot; Break-even: '+fmtPrice(final.breakEven);
+    $('claimsFormula').innerHTML='CEBE = ('+fmt(btcH)+' \u2212 '+fmt(claimsBtc)+') \u00f7 '+sharesM+'M = '+fmt(final.cebeSats)+' sats/share';
+    var banner=$('claimsBanner');
+    banner.className='claims-banner'+(final.drag<0.15?' low-drag':final.drag>0.5?' high-drag':'');
 }
 
 function renderHero(final,current,marketPrice){
@@ -614,8 +687,8 @@ function renderHero(final,current,marketPrice){
     var ctx='';
     if(horizonYears===0)ctx='instant snapshot';
     else if(sType==='siege')ctx=horizonYears+'-year stress test \u00b7 $50K BTC flat \u00b7 converts + dividends';
-    else if(sType==='saylor')ctx=horizonYears+'-year projection \u00b7 Saylor base case (29% avg CAGR) \u00b7 capital plan active';
-    else if(sType==='singularity')ctx=horizonYears+'-year projection \u00b7 $80B capital plan \u00b7 Saylor bull case (37% avg CAGR)';
+    else if(sType==='saylor')ctx=horizonYears+'-year projection \u00b7 Saylor Plan (29% avg CAGR) \u00b7 $80B capital deployment';
+    else if(sType==='powerlaw')ctx=horizonYears+'-year projection \u00b7 Power Law Support (~23% CAGR) \u00b7 $3B/yr maintenance';
     else ctx=horizonYears>0?horizonYears+'-year projection with dividend cascade':'instant snapshot';
     $('heroContext').textContent=ctx;
     // Implied mNAV
@@ -668,7 +741,13 @@ function renderNarrative(final,current,inp,marketPrice,proj){
     if(horizonYears>0&&final.btcH<inp.btcHoldings){var ts=inp.btcHoldings-final.btcH;items.push({cls:'red',icon:'\u{1F525}',text:'<strong>Total BTC liquidated: '+fmt(Math.round(ts))+' ('+((ts/inp.btcHoldings)*100).toFixed(1)+'%).</strong> Holdings: '+fmt(inp.btcHoldings)+' \u2192 '+fmt(Math.round(final.btcH))+'.'});}
 
     // Saylor spread insight
-    if((sType==='saylor'||sType==='singularity')&&horizonYears>=3){var sd=proj[0].drag,ed=final.drag;if(ed<sd)items.push({cls:'green',icon:'\u{1F4C8}',text:'<strong>The spread is working.</strong> Despite new preferred issuance, drag compressed '+fmtPct(sd)+' \u2192 '+fmtPct(ed)+'. BTC growth outpacing cost of capital.'});}
+    if(sType==='saylor'&&horizonYears>=3){var sd=proj[0].drag,ed=final.drag;if(ed<sd)items.push({cls:'green',icon:'\u{1F4C8}',text:'<strong>The spread is working.</strong> Despite new preferred issuance, drag compressed '+fmtPct(sd)+' \u2192 '+fmtPct(ed)+'. BTC growth outpacing cost of capital.'});}
+
+    // Power Law cash maintenance + capital plan insight
+    if(sType==='powerlaw'&&horizonYears>=3){
+        if(final.cash>0)items.push({cls:'green',icon:'\u{1F4B0}',text:'<strong>Cash reserves maintained: '+fmtB(final.cash)+'.</strong> '+final.cashRunway.toFixed(1)+' years of coverage. Maintenance capital plan ($3B/yr) keeps leverage working while BTC appreciation drives compression.'});
+        var sd=proj[0].drag,ed=final.drag;if(ed<sd)items.push({cls:'green',icon:'\u{1F4C8}',text:'<strong>The spread is working.</strong> Despite maintenance preferred issuance, drag compressed '+fmtPct(sd)+' to '+fmtPct(ed)+'. BTC growth outpacing cost of capital.'});
+    }
 
     // Siege survival
     if(sType==='siege'&&horizonYears>=5){if(final.btcH>0&&final.cebeSats>0)items.push({cls:'amber',icon:'\u{1F3F0}',text:'<strong>After '+horizonYears+' years at $50K BTC:</strong> Holdings reduced to '+fmt(Math.round(final.btcH))+' BTC. Drag '+fmtPct(final.drag)+'. Strategy survived \u2014 no forced liquidation. Common equity holds '+fmtPct(1-final.drag)+' of remaining BTC.'});
@@ -715,11 +794,11 @@ function renderWaterfall(final,inp){
 
 function renderProjectionTable(proj){
     var sec=$('projectionSection');if(horizonYears===0){sec.style.display='none';return}sec.style.display='block';
-    var sType=getActiveType(), isF=sType==='siege'||sType==='saylor'||sType==='singularity';
+    var sType=getActiveType(), isF=sType==='siege'||sType==='saylor'||sType==='powerlaw';
     var h='<tr><th style="text-align:center">YEAR</th>';
     if(isF)h+='<th>BTC PRICE</th>';
     h+='<th>BTC HELD</th>';
-    var hasCapPlan=sType==='saylor'||sType==='singularity';
+    var hasCapPlan=sType==='saylor'||sType==='powerlaw';
     if(hasCapPlan)h+='<th>NEW BTC</th>';
     h+='<th>SHARES</th><th>CEBE</th><th>DRAG</th><th>NAV/SH</th>';
     if(isF)h+='<th>mNAV</th>';
@@ -804,9 +883,9 @@ function renderCustomize(inp){
 
 function renderAssumptions(inp){
     var sType=getActiveType(), t='';
-    if(sType==='saylor')t='<strong>Saylor Model (Base Case):</strong> BTC follows Saylor\u2019s 29% avg CAGR, declining 45%\u219221% over 10 years (sourced from Bitcoin 2024 Keynote, Nashville \u2014 \u201C55% ARR decelerates toward 20%\u201D). ~$80B deployed via 42/42 Plan (50/50 equity/preferred initially, shifting 30/70). Preferred at blended ~10.5%. ATM at mNAV minus 0.1\u00d7. Software income '+fmtB(inp.softwareIncome)+'/yr flat. SBC dilution ~'+fmtB(inp.sbcAnnual)+'/yr (shares issued, no BTC acquired). Cash comp ~'+fmtB(inp.cashCompAnnual)+'/yr drain. Converts refinanced at maturity if below conversion price (capital market access assumed). STRK converts when price exceeds $1,000.';
-    else if(sType==='siege')t='<strong>Siege:</strong> BTC $50,000 for entire horizon. No new capital raised. mNAV 0.7\u00d7. All converts mature as cash redemptions. Dividends paid until cash depleted, then non-cum skipped, then BTC sold. SBC dilution ~'+fmtB(inp.sbcAnnual)+'/yr. Cash comp ~'+fmtB(inp.cashCompAnnual)+'/yr drain.';
-    else if(sType==='singularity')t='<strong>Singularity (Bull Case):</strong> BTC follows Saylor\u2019s 37% avg CAGR, declining 55%\u219227% over 10 years (Bitcoin 2024 Keynote \u2014 \u201C$49M bull case, 22% of global wealth\u201D). Strategy executes full ~$80B capital plan. Converts refinanced at maturity when below conversion price (capital market access assumed). mNAV rises to 3.0\u00d7 as market prices in both BTC appreciation and stack growth. SBC dilution ~'+fmtB(inp.sbcAnnual)+'/yr. Cash comp ~'+fmtB(inp.cashCompAnnual)+'/yr drain. STRK converts when price exceeds $1,000.';
+    if(sType==='saylor')t='<strong>Saylor Plan (Bull Case):</strong> BTC follows Saylor\u2019s 29% avg CAGR, declining 45%\u219221% over 10 years (sourced from Bitcoin 2024 Keynote, Nashville \u2014 \u201C55% ARR decelerates toward 20%\u201D). ~$80B deployed via 42/42 Plan (50/50 equity/preferred initially, shifting 30/70). Preferred at blended ~10.5%. ATM at mNAV minus 0.1\u00d7. Software income '+fmtB(inp.softwareIncome)+'/yr flat. SBC dilution ~'+fmtB(inp.sbcAnnual)+'/yr (shares issued, no BTC acquired). Cash comp ~'+fmtB(inp.cashCompAnnual)+'/yr drain. Converts refinanced at maturity if below conversion price (capital market access assumed). STRK converts when price exceeds $1,000. Cash reserves maintained at 2-year coverage via ATM.';
+    else if(sType==='siege')t='<strong>Siege:</strong> BTC $50,000 for entire horizon. No new capital raised. mNAV 0.7\u00d7. All converts mature as cash redemptions. Dividends paid until cash depleted, then non-cum skipped, then BTC sold. SBC dilution ~'+fmtB(inp.sbcAnnual)+'/yr. Cash comp ~'+fmtB(inp.cashCompAnnual)+'/yr drain. Capital markets assumed closed.';
+    else if(sType==='powerlaw')t='<strong>Power Law Support (Base Case):</strong> BTC follows the power law support line. ~23% avg CAGR decelerating from 30% to 18%, reaching ~$760K by 2036 (<a href="https://charts.bitbo.io/long-term-power-law/" target="_blank" style="color:var(--orange-primary)">Santostasi/Burger model</a>). This is the mathematical FLOOR, not the regression midline ($2.2M) or resistance ($5.3M). Maintenance capital deployment of $3B/yr (50/50 equity/preferred at 10%). mNAV conservative at 1.0x to 1.2x. Cash reserves maintained at 2-year coverage via ATM. Converts refinanced at maturity (capital market access assumed). SBC dilution ~'+fmtB(inp.sbcAnnual)+'/yr. Cash comp ~'+fmtB(inp.cashCompAnnual)+'/yr drain.';
     else t='<strong>Assumptions:</strong> Capital structure frozen at snapshot ('+inp.snapshotDate+'). BTC price static across projection. All preferred divs paid cash. Distress cascade: skip non-cum then sell BTC. Software income ~'+fmtB(inp.softwareIncome)+'/yr. SBC dilution ~'+fmtB(inp.sbcAnnual)+'/yr (pure share dilution). Cash comp ~'+fmtB(inp.cashCompAnnual)+'/yr drain.';
     t+='<br><br><strong>Data:</strong> Holdings, shares, capital structure from Google Sheet (post-8K updates). Live BTC from CoinGecko. Live MSTR from Finnhub. '+(sheetData&&sheetData.strk_face_usd?'Preferred from live sheet.':'Using pre-Q4 estimates.')+' Convert face values approximate pending 10-K.';
     $('assumptions').innerHTML=t;
@@ -823,11 +902,11 @@ function buildScenarioBar(){
         var bClass=isP?'future-badge':'now-badge';
         var cClass='scenario-card'+(isP?' projection':'')+(s.id===activeScenario?' active':'');
         var pDisp;
-        if(s.type==='saylor')pDisp='Base CAGR';
-        else if(s.type==='singularity')pDisp='Bull CAGR';
+        if(s.type==='saylor')pDisp='\u2192 $1M';
+        else if(s.type==='powerlaw')pDisp='\u2192 $760K';
         else if(s.btc)pDisp=s.btc>=1e6?'$'+(s.btc/1e6)+'M':s.btc>=1000?'$'+(s.btc/1000)+'K':'$'+s.btc;
         else pDisp=fmtPrice(btcPrice);
-        var mDisp=s.type==='saylor'?'1.0-1.8\u00d7':(s.type==='singularity'?'1.0-3.0\u00d7':((s.mnav||1).toFixed(1)+'\u00d7 mNAV'));
+        var mDisp=s.type==='saylor'?'Deploy engine \u00b7 10Y':(s.type==='powerlaw'?'Support floor \u00b7 10Y':((s.mnav||1).toFixed(1)+'\u00d7 mNAV'));
         return'<div class="'+cClass+'" data-scenario="'+s.id+'"><span class="horizon-badge '+bClass+'">'+hLabel+'</span><div class="scenario-icon">'+s.icon+'</div><div class="scenario-name">'+s.name+'</div><div class="scenario-price">'+pDisp+'</div><div class="scenario-mnav">'+mDisp+'</div></div>';
     }
     $('snapshotBar').innerHTML=snaps.map(renderCard).join('');
@@ -836,7 +915,7 @@ function buildScenarioBar(){
         card.addEventListener('click',function(){
             var id=this.dataset.scenario,sc=SCENARIOS.find(function(s){return s.id===id});if(!sc)return;
             activeScenario=id;
-            if(sc.type==='saylor'||sc.type==='singularity'){btcPrice=liveBtcPrice||DEFAULTS.btc_price;mnavMultiple=1.0}
+            if(sc.type==='saylor'||sc.type==='powerlaw'){btcPrice=liveBtcPrice||DEFAULTS.btc_price;mnavMultiple=1.0}
             else{btcPrice=sc.btc||(liveBtcPrice||DEFAULTS.btc_price);mnavMultiple=sc.mnav||1.0}
             horizonYears=sc.horizon;
             syncSliders();buildScenarioBar();updateHorizonBar();updateMnavPresets();render();
@@ -877,7 +956,7 @@ $('mnavSlider').addEventListener('input',function(e){if(isSlidersLocked())return
 document.addEventListener('keydown',function(e){
     if(e.target.tagName==='INPUT')return;
     if(e.key>='1'&&e.key<='6'){var idx=parseInt(e.key)-1;if(SCENARIOS[idx]){var sc=SCENARIOS[idx];activeScenario=sc.id;
-        if(sc.type==='saylor'||sc.type==='singularity'){btcPrice=liveBtcPrice||DEFAULTS.btc_price;mnavMultiple=1.0}else{btcPrice=sc.btc||(liveBtcPrice||DEFAULTS.btc_price);mnavMultiple=sc.mnav||1.0}
+        if(sc.type==='saylor'||sc.type==='powerlaw'){btcPrice=liveBtcPrice||DEFAULTS.btc_price;mnavMultiple=1.0}else{btcPrice=sc.btc||(liveBtcPrice||DEFAULTS.btc_price);mnavMultiple=sc.mnav||1.0}
         horizonYears=sc.horizon;syncSliders();buildScenarioBar();updateHorizonBar();updateMnavPresets();render()}}
 });
 
