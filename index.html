@@ -1501,12 +1501,27 @@
                 ]
             },
             MTPLF: {
-                lastUpdated: null,
-                btcReserveForCalc: null,
-                items: [],
-                offsets: [],
-                sources: [],
-                pendingBackfill: ['Metaplanet reports under Japanese GAAP via TDnet. Encumbrance data collection in progress.']
+                lastUpdated: '2026-02-14',
+                btcReserveForCalc: 3405000000, // 35,102 BTC × $97K
+                items: [
+                    { category: 'operations', label: 'Operating Expenses (COGS + SGA)', sublabel: '¥2,617M — hotel + BTC segment + corporate', amount: 17200000, pctOfReserve: null, verified: true, note: 'FY2025 決算短信. Includes hotel segment costs (¥267M COGS), BTC segment costs (¥1,277M COGS), corporate SGA. Converted at ¥152/$.' },
+                    { category: 'dividends', label: 'MERCURY Class B Dividend', sublabel: '¥49/share × 23.61M shares (cash, JPY)', amount: 59000, pctOfReserve: null, verified: true, note: 'FY2025: ¥9M (only 2 days — issued Dec 29, 2025). Full year forward: ~¥1,157M ($7.6M). Converted at ¥152/$.' },
+                    { category: 'interest', label: 'Credit Facility Interest', sublabel: '$355M at ~SOFR+2.25% (rate EST)', amount: 7000, pctOfReserve: null, verified: false, note: 'FY2025: ¥1M (drawn late in year). Full year forward: ~¥3,140M ($20.7M). Rate not disclosed — estimated from market comparables. Converted at ¥152/$.' },
+                    { category: 'sbc', label: 'Share Issuance Amortization', sublabel: '¥418M — warrant/equity issuance costs', amount: 2750000, pctOfReserve: null, verified: true, note: 'FY2025 決算短信. Non-cash expense from equity raises. Converted at ¥152/$.' },
+                ],
+                offsets: [
+                    { label: 'BTC Income (Options/Derivatives)', sublabel: '¥8,468M — covered calls, puts, lending', amount: 55700000, verified: true, note: 'FY2025 決算短信. Structural revenue from derivative strategies on BTC holdings. Generates income regardless of BTC price direction. Converted at ¥152/$.' },
+                    { label: 'Hotel Segment Revenue', sublabel: '¥436M — Royal Oak Hotel operations', amount: 2900000, verified: true, note: 'FY2025 決算短信. Legacy hotel business contributes positive revenue. Converted at ¥152/$.' },
+                ],
+                sources: [
+                    'FY2025 決算短信 (Feb 14, 2026) — all P&L line items',
+                    'Credit facility draw notice (Jan 30, 2026) — $355M USD',
+                    'MERCURY Class B prospectus — ¥49/share annual dividend',
+                ],
+                pendingBackfill: [
+                    'Securities report due ~March 25, 2026 — credit facility interest rate, MERCURY par value, detailed SBC/comp breakdown.',
+                    'All amounts converted JPY→USD at ¥152/$. Wrapper fee calculated on USD-equivalent basis.',
+                ]
             },
             TSWCF: {
                 lastUpdated: null,
@@ -1790,6 +1805,7 @@
             }
             
             // Group items by category
+            const operationsItems = enc.items.filter(i => i.category === 'operations');
             const dividendItems = enc.items.filter(i => i.category === 'dividends');
             const interestItems = enc.items.filter(i => i.category === 'interest');
             const sbcItems = enc.items.filter(i => i.category === 'sbc');
@@ -1798,13 +1814,27 @@
             let html = '';
             
             // Wrapper Fee Hero
+            const isNegative = netCost < 0;
+            const heroColor = isNegative ? 'color:#22c55e' : wrapperFee > 3 ? 'color:#ef4444' : '';
+            const heroLabel = isNegative ? 'Annual Surplus — Self-Funding Structure' : 'Annual Cost to Common Equity';
+            const heroCostDisplay = isNegative 
+                ? `${formatCurrency(Math.abs(netCost))} surplus / yr on ${formatCurrency(btcReserve)} BTC reserve`
+                : `${formatCurrency(netCost)} / yr on ${formatCurrency(btcReserve)} BTC reserve`;
             html += `
                 <div class="wrapper-fee-hero">
-                    <div class="wrapper-fee-value">${wrapperFee.toFixed(2)}%</div>
-                    <div class="wrapper-fee-label">Annual Cost to Common Equity</div>
-                    <div class="wrapper-fee-sublabel">${formatCurrency(netCost)} / yr on ${formatCurrency(btcReserve)} BTC reserve</div>
+                    <div class="wrapper-fee-value" style="${heroColor}">${wrapperFee.toFixed(2)}%</div>
+                    <div class="wrapper-fee-label">${heroLabel}</div>
+                    <div class="wrapper-fee-sublabel">${heroCostDisplay}</div>
                 </div>
             `;
+            
+            // Operations Costs
+            if (operationsItems.length > 0) {
+                html += `<div class="cost-section">
+                    <div class="cost-section-title">⚙️ Operating Expenses</div>
+                    ${operationsItems.map(costRow).join('')}
+                </div>`;
+            }
             
             // Dividend Costs
             if (dividendItems.length > 0) {
@@ -1860,12 +1890,17 @@
             
             // Net Cost line
             const netPct = ((netCost / btcReserve) * 100).toFixed(2);
+            const netColor = netCost < 0 ? 'color:#22c55e' : 'color:var(--orange-primary)';
+            const netLabel = netCost < 0 ? 'Net Annual Surplus (Wrapper Fee)' : 'Net Annual Cost (Wrapper Fee)';
+            const netDisplay = netCost < 0 
+                ? `-${formatCurrency(Math.abs(netCost))}` 
+                : formatCurrency(netCost);
             html += `
                 <div class="cost-row net-row">
-                    <div class="cost-label"><span>Net Annual Cost (Wrapper Fee)</span></div>
+                    <div class="cost-label"><span>${netLabel}</span></div>
                     <div class="cost-value-group">
-                        <span class="cost-pct" style="color:var(--orange-primary)">${netPct}%</span>
-                        <span class="cost-value" style="color:var(--orange-primary)">${formatCurrency(netCost)}</span>
+                        <span class="cost-pct" style="${netColor}">${netPct}%</span>
+                        <span class="cost-value" style="${netColor}">${netDisplay}</span>
                     </div>
                 </div>
             `;
