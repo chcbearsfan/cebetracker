@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>CEBE Modeler | Metaplanet Share Price Analysis</title>
-    <meta name="description" content="Model Metaplanet (3350/MTPLF) share price through the CEBE framework. JPY/USD dynamics, drag compression, zero-coupon bond structure, and dual sensitivity matrices.">
+    <meta name="description" content="Model Metaplanet (3350/MTPLF) share price through the CEBE framework. JPY/USD dynamics, credit facility, MERCURY preferred, BTC Income offset, 555 Capital Plan projections.">
     <meta name="application-name" content="CEBE">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -23,6 +23,7 @@
             --red: #ef4444; --red-muted: rgba(239,68,68,0.15);
             --yellow: #eab308; --yellow-muted: rgba(234,179,8,0.15);
             --blue: #38bdf8; --blue-muted: rgba(56,189,248,0.08);
+            --fx-red: #ef4444; --fx-glow: rgba(239,68,68,0.12); --fx-border: rgba(239,68,68,0.25);
             --border-subtle: rgba(255,255,255,0.06); --mono: 'JetBrains Mono', monospace;
         }
         * { margin:0; padding:0; box-sizing:border-box; }
@@ -70,25 +71,31 @@
         .scenario-name { font-size:12px; font-weight:600; letter-spacing:.5px; margin-bottom:4px; }
         .scenario-price { font-size:15px; font-weight:700; font-family:var(--mono); color:var(--orange-light); }
         .scenario-mnav { font-size:10px; color:var(--text-muted); font-family:var(--mono); margin-top:4px; }
-        .scenario-fx { font-size:10px; color:var(--red); font-family:var(--mono); margin-top:2px; }
-        .scenario-usd { font-size:10px; color:var(--text-secondary); font-family:var(--mono); margin-top:3px; font-weight:600; }
 
         /* HERO */
+        .claims-banner { background:rgba(249,115,22,0.06); border:1px solid var(--orange-border); border-radius:12px; padding:16px 20px; text-align:center; margin-bottom:24px; }
+        .claims-banner.low-drag { background:rgba(34,197,94,0.04); border-color:rgba(34,197,94,0.25); }
+        .claims-banner.high-drag { background:rgba(239,68,68,0.04); border-color:rgba(239,68,68,0.25); }
+        .claims-title { font-size:20px; font-weight:700; color:var(--orange-primary); margin-bottom:4px; font-family:var(--mono); }
+        .claims-banner.low-drag .claims-title { color:#22c55e; }
+        .claims-banner.high-drag .claims-title { color:#ef4444; }
+        .claims-sub { font-size:13px; color:#a1a1aa; }
+        .claims-formula { font-size:11px; color:#71717a; font-family:var(--mono); margin-top:6px; letter-spacing:0.3px; }
         .hero { text-align:center; padding:28px 20px; margin-bottom:20px; background:linear-gradient(180deg,rgba(249,115,22,0.04),transparent); border-radius:20px; border:1px solid rgba(249,115,22,0.1); }
         .hero-label { font-size:10px; letter-spacing:3px; color:var(--text-muted); margin-bottom:6px; font-weight:500; }
         .hero-price { font-size:64px; font-weight:700; font-family:var(--mono); line-height:1; margin-bottom:8px; transition:color .3s; }
         .hero-price.positive{color:var(--green)} .hero-price.negative{color:var(--red)} .hero-price.neutral{color:var(--text-primary)}
-        .hero-usd { font-size:16px; font-family:var(--mono); color:var(--text-secondary); margin-bottom:6px; }
+        .hero-usd { font-size:18px; font-weight:500; font-family:var(--mono); color:var(--text-secondary); margin-bottom:6px; }
         .hero-change { font-size:16px; font-weight:600; font-family:var(--mono); margin-bottom:4px; }
         .hero-change.up{color:var(--green)} .hero-change.down{color:var(--red)}
         .hero-vs { font-size:11px; color:var(--text-muted); }
         .hero-context { margin-top:4px; font-size:10px; color:var(--text-muted); font-family:var(--mono); letter-spacing:.5px; }
-        .hero-fx { margin-top:8px; font-size:10px; font-weight:600; font-family:var(--mono); padding:4px 10px; border-radius:6px; display:inline-block; letter-spacing:.5px; }
-        .hero-fx.compress { background:var(--green-muted); border:1px solid rgba(34,197,94,0.3); color:var(--green); }
-        .hero-fx.expand { background:var(--red-muted); border:1px solid rgba(239,68,68,0.3); color:var(--red); }
-        .hero-fx.fx-neutral { background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); color:var(--text-muted); }
         .hero-implied { margin-top:10px; font-size:12px; font-family:var(--mono); color:var(--text-secondary); padding:6px 14px; border-radius:20px; background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); display:inline-block; }
         .hero-implied em { font-style:normal; color:var(--orange-primary); font-weight:600; }
+        .fx-badge-hero { display:inline-block; font-size:11px; font-family:var(--mono); font-weight:600; padding:4px 10px; border-radius:6px; margin-top:8px; }
+        .fx-badge-hero.compress { background:var(--green-muted); color:var(--green); border:1px solid rgba(34,197,94,0.25); }
+        .fx-badge-hero.expand { background:var(--red-muted); color:var(--red); border:1px solid rgba(239,68,68,0.25); }
+        .fx-badge-hero.neutral { background:rgba(255,255,255,0.03); color:var(--text-muted); border:1px solid var(--border-subtle); }
 
         /* NARRATIVE */
         .narrative { background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:14px; padding:20px; margin-bottom:20px; }
@@ -100,6 +107,7 @@
         .narr-item.amber { background:var(--yellow-muted); border:1px solid rgba(234,179,8,0.2); color:#fde68a; }
         .narr-item.info { background:var(--blue-muted); border:1px solid rgba(56,189,248,0.2); color:#7dd3fc; }
         .narr-item.neutral { background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); color:var(--text-secondary); }
+        .narr-item.est { background:rgba(168,85,247,0.06); border:1px solid rgba(168,85,247,0.2); color:#c4b5fd; }
         .narr-icon { font-size:16px; flex-shrink:0; margin-top:1px; }
         .narr-text strong { color:var(--text-primary); }
 
@@ -124,18 +132,25 @@
         @media(max-width:500px){ .controls-grid{grid-template-columns:1fr} }
         .control-card { background:var(--bg-secondary); border:1px solid var(--border-subtle); border-radius:10px; padding:14px; }
         .control-card.full-width { grid-column:1/-1; }
-        .control-card.fx-card { border-color:rgba(239,68,68,0.25); background:rgba(239,68,68,0.03); }
+        .control-card.fx-card { border-color:var(--fx-border); background:rgba(239,68,68,0.03); }
         .control-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
         .control-label { font-size:10px; letter-spacing:1.5px; color:var(--text-muted); font-weight:600; }
-        .control-label.fx-label { color:var(--red); }
+        .control-label.fx-label { color:var(--fx-red); }
         .control-value { font-size:18px; font-weight:700; font-family:var(--mono); color:var(--orange-light); }
-        .control-value.fx-value { color:var(--red); }
+        .control-value.fx-value { color:var(--fx-red); }
+        .control-locked { font-size:9px; color:var(--text-muted); font-style:italic; margin-top:6px; }
         input[type=range] { -webkit-appearance:none; width:100%; height:6px; border-radius:3px; background:#333; outline:none; cursor:pointer; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:var(--orange-primary); box-shadow:0 0 10px rgba(249,115,22,0.4); cursor:grab; }
         input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%; background:var(--orange-primary); border:none; box-shadow:0 0 10px rgba(249,115,22,0.4); cursor:grab; }
-        input[type=range].fx-range::-webkit-slider-thumb { background:var(--red); box-shadow:0 0 10px rgba(239,68,68,0.4); }
-        input[type=range].fx-range::-moz-range-thumb { background:var(--red); box-shadow:0 0 10px rgba(239,68,68,0.4); }
+        input[type=range].fx-slider::-webkit-slider-thumb { background:var(--fx-red); box-shadow:0 0 10px rgba(239,68,68,0.4); }
+        input[type=range].fx-slider::-moz-range-thumb { background:var(--fx-red); box-shadow:0 0 10px rgba(239,68,68,0.4); }
+        input[type=range]:disabled { opacity:.3; cursor:not-allowed; }
+        input[type=range]:disabled::-webkit-slider-thumb { cursor:not-allowed; background:#555; box-shadow:none; }
         .slider-labels { display:flex; justify-content:space-between; font-size:9px; color:#444; font-family:var(--mono); margin-top:4px; }
+        .toggle-row { display:flex; gap:6px; flex-wrap:wrap; }
+        .toggle-btn { padding:6px 14px; border-radius:8px; border:1.5px solid var(--border-subtle); background:transparent; color:var(--text-muted); font-size:12px; font-weight:600; font-family:var(--mono); cursor:pointer; transition:all .2s; }
+        .toggle-btn:hover { border-color:rgba(255,255,255,0.12); color:var(--text-secondary); }
+        .toggle-btn.active { border-color:var(--orange-primary); color:var(--orange-primary); background:var(--orange-glow); }
         .mnav-presets { display:flex; gap:4px; margin-top:8px; }
         .mnav-btn { flex:1; padding:4px 0; border-radius:6px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-muted); font-size:10px; font-family:var(--mono); cursor:pointer; transition:all .2s; }
         .mnav-btn:hover,.mnav-btn.active { border-color:var(--orange-primary); color:var(--orange-primary); background:var(--orange-glow); }
@@ -154,6 +169,19 @@
         .wf-value { font-size:12px; font-weight:700; font-family:var(--mono); }
         .wf-arrow { flex:0 0 auto; font-size:14px; color:var(--text-muted); }
 
+        /* TABLE */
+        .table-wrap { overflow-x:auto; border-radius:10px; border:1px solid var(--border-subtle); background:var(--bg-secondary); scrollbar-width:thin; scrollbar-color:#333 transparent; -webkit-overflow-scrolling:touch; }
+        .table-wrap table { min-width:700px; }
+        table { width:100%; border-collapse:collapse; font-size:12px; white-space:nowrap; }
+        thead th { padding:10px 12px; text-align:right; font-size:8px; font-weight:600; letter-spacing:1.5px; color:var(--text-muted); border-bottom:1px solid var(--border-subtle); background:rgba(255,255,255,0.02); position:sticky; top:0; }
+        thead th:first-child{text-align:center}
+        tbody td { padding:8px 12px; text-align:right; font-family:var(--mono); font-size:12px; border-bottom:1px solid rgba(255,255,255,0.03); }
+        tbody td:first-child { text-align:center; font-weight:600; color:var(--text-secondary); }
+        tbody tr:hover{background:rgba(255,255,255,0.02)}
+        tbody tr.event-row{background:rgba(249,115,22,0.03)}
+        .cell-red{color:var(--red)!important} .cell-green{color:var(--green)!important} .cell-amber{color:var(--yellow)!important}
+        .cell-muted{color:var(--text-muted)!important} .cell-bold{font-weight:700!important} .cell-blue{color:var(--blue)!important}
+
         /* MATRIX */
         .matrix-table { width:100%; border-collapse:collapse; }
         .matrix-table th { padding:8px 10px; font-size:9px; font-weight:600; letter-spacing:1px; color:var(--text-muted); border-bottom:1px solid var(--border-subtle); background:rgba(255,255,255,0.02); }
@@ -162,16 +190,27 @@
         .matrix-table th:first-child{text-align:right}
         .matrix-cell-green{color:var(--green);background:rgba(34,197,94,0.06)} .matrix-cell-lightgreen{color:#86efac;background:rgba(34,197,94,0.03)}
         .matrix-cell-red{color:var(--red);background:rgba(239,68,68,0.06)} .matrix-cell-lightred{color:#fca5a5;background:rgba(239,68,68,0.03)}
-        .matrix-cell-gold{color:#fbbf24;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2)}
         .matrix-cell-current{outline:2px solid var(--orange-primary);outline-offset:-2px;border-radius:4px}
 
-        /* BOND TABLE */
-        .bond-stack { width:100%; border-collapse:collapse; font-size:12px; }
-        .bond-stack th { padding:8px 10px; text-align:left; font-size:9px; font-weight:600; letter-spacing:1px; color:var(--text-muted); border-bottom:1px solid var(--border-subtle); }
-        .bond-stack td { padding:8px 10px; font-family:var(--mono); font-size:12px; border-bottom:1px solid rgba(255,255,255,0.03); }
-        .bond-stack td:first-child { font-weight:600; color:var(--text-secondary); }
-        .badge-zero { font-size:9px; padding:2px 6px; border-radius:4px; background:var(--green-muted); color:var(--green); font-weight:600; }
+        /* CLAIMS STACK TABLE */
+        .pref-stack { width:100%; border-collapse:collapse; font-size:12px; }
+        .pref-stack th { padding:8px 10px; text-align:left; font-size:9px; font-weight:600; letter-spacing:1px; color:var(--text-muted); border-bottom:1px solid var(--border-subtle); }
+        .pref-stack td { padding:8px 10px; font-family:var(--mono); font-size:12px; border-bottom:1px solid rgba(255,255,255,0.03); }
+        .pref-stack td:first-child { font-weight:600; color:var(--text-secondary); }
+        .badge-zero { font-size:9px; padding:2px 6px; border-radius:4px; background:rgba(34,197,94,0.12); color:#86efac; font-weight:600; }
         .badge-jpy { font-size:9px; padding:2px 6px; border-radius:4px; background:rgba(239,68,68,0.12); color:#fca5a5; font-weight:600; }
+        .badge-usd { font-size:9px; padding:2px 6px; border-radius:4px; background:rgba(56,189,248,0.12); color:#7dd3fc; font-weight:600; }
+        .badge-est { font-size:9px; padding:2px 6px; border-radius:4px; background:rgba(168,85,247,0.12); color:#c4b5fd; font-weight:600; }
+        .badge-cash { font-size:9px; padding:2px 6px; border-radius:4px; background:rgba(239,68,68,0.12); color:#fca5a5; font-weight:600; }
+
+        /* WRAPPER FEE */
+        .wrapper-line { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border-subtle); font-size:12px; }
+        .wrapper-line:last-child { border-bottom:none; }
+        .wrapper-line .wl-label { color:var(--text-secondary); }
+        .wrapper-line .wl-value { font-family:var(--mono); font-weight:600; }
+        .wrapper-line.cost .wl-value { color:var(--red); }
+        .wrapper-line.offset .wl-value { color:var(--green); }
+        .wrapper-line.total { border-top:2px solid var(--orange-primary); padding-top:12px; margin-top:4px; }
 
         /* ASSUMPTIONS & FOOTER */
         .assumptions { padding:14px 16px; background:rgba(255,255,255,0.02); border:1px solid var(--border-subtle); border-radius:10px; font-size:11px; color:var(--text-muted); line-height:1.6; margin-top:16px; }
@@ -189,17 +228,15 @@
         @media(max-width:768px){ .hero-price{font-size:48px} }
         @media(max-width:480px){ .hero-price{font-size:40px} .control-value{font-size:16px} .logo{font-size:24px;letter-spacing:10px;padding-left:10px} }
     </style>
-    <script defer src="/_vercel/insights/script.js"></script>
-    <script defer src="/_vercel/speed-insights/script.js"></script>
 </head>
 <body>
-<div class="loading-screen" id="loadingScreen"><div class="loading-spinner"></div><div class="loading-text">LOADING LIVE DATA</div></div>
+<div class="loading-screen" id="loadingScreen"><div class="loading-spinner"></div><div class="loading-text">LOADING METAPLANET DATA</div></div>
 <div class="container" id="app" style="display:none">
     <div class="header">
         <a href="/modeler" class="nav-back">&larr; modelers</a>
         <div class="logo-container"><div class="logo-glow"></div><div class="logo"><span>CEBE</span></div><p class="logo-whisper">tracker</p></div>
         <div class="logo-badge">&#127471;&#127477; METAPLANET MODELER</div>
-        <div class="header-sub">Pick a scenario. See what your MTPLF is worth.</div>
+        <div class="header-sub">Pick a scenario. See what your Metaplanet is worth.</div>
         <div class="live-strip" id="liveStrip">
             <span><span class="live-dot"></span> Live Data</span>
             <span class="live-price" id="liveBtcDisplay">BTC $&mdash;</span>
@@ -207,25 +244,30 @@
             <span class="live-price" id="liveDataDate">&mdash;</span>
         </div>
     </div>
+    <!-- Drag Banner -->
+    <div class="claims-banner" id="claimsBanner">
+        <div class="claims-title" id="claimsDragDisplay">DRAG: &mdash;%</div>
+        <div class="claims-sub" id="claimsSub">Loading...</div>
+        <div class="claims-formula" id="claimsFormula"></div>
+    </div>
     <div class="scenarios-section">
         <div class="scenario-group">
             <div class="group-label"><span class="group-label-badge now">&#9889; NOW</span><span class="group-label-text">WHAT IF BTC WERE AT THIS PRICE TODAY</span><div class="group-label-line"></div></div>
             <div class="scenarios-row" id="snapshotBar"></div>
         </div>
         <div class="scenario-group">
-            <div class="group-label"><span class="group-label-badge future">&rarr; SCENARIOS</span><span class="group-label-text">FX DYNAMICS &middot; BOJ &middot; GEROVICH MODEL</span><div class="group-label-line"></div></div>
+            <div class="group-label"><span class="group-label-badge future">&rarr; FORWARD</span><span class="group-label-text">10-YEAR PROJECTIONS &middot; CREDIT FACILITY &middot; 555 PLAN</span><div class="group-label-line"></div></div>
             <div class="scenarios-row" id="projectionBar"></div>
         </div>
     </div>
     <div class="hero">
         <div class="hero-label">MODELED METAPLANET SHARE PRICE</div>
         <div class="hero-price neutral" id="heroPrice">&yen;&mdash;</div>
-        <div class="hero-usd" id="heroUsd"></div>
+        <div class="hero-usd" id="heroUsd">($&mdash;)</div>
         <div class="hero-change" id="heroChange">&mdash;</div>
         <div class="hero-vs" id="heroVs">vs current market price</div>
         <div class="hero-context" id="heroContext"></div>
-        <div class="hero-fx fx-neutral" id="heroFx" style="display:none"></div>
-        <div class="hero-implied" id="heroImplied" style="display:none">Market implies <em id="impliedMnavVal">&mdash;</em> mNAV <span style="opacity:0.5;font-size:10px">(NAV basis)</span></div>
+        <div id="heroFxBadge"></div>
     </div>
     <div class="narrative" id="narrativePanel"><div class="narrative-title" id="narrativeTitle">&#128269; What happens here</div><div class="narrative-body" id="narrativeBody"></div></div>
     <div class="metrics-grid" id="metricsGrid"></div>
@@ -235,73 +277,111 @@
             <div class="controls-grid">
                 <div class="control-card">
                     <div class="control-header"><span class="control-label">BTC PRICE</span><span class="control-value" id="btcPriceDisplay">$&mdash;</span></div>
-                    <input type="range" id="btcSlider" min="20000" max="1000000" step="1000" value="100000">
-                    <div class="slider-labels"><span>$20K</span><span>$500K</span><span>$1M</span></div>
+                    <input type="range" id="btcSlider" min="10000" max="1000000" step="1000" value="97000">
+                    <div class="slider-labels"><span>$10K</span><span>$500K</span><span>$1M</span></div>
+                    <div class="control-locked" id="btcLockedMsg" style="display:none">&#128274; Controlled by scenario CAGR curve</div>
                 </div>
                 <div class="control-card">
                     <div class="control-header"><span class="control-label">mNAV MULTIPLE</span><span class="control-value" id="mnavDisplay">1.00&times;</span></div>
                     <input type="range" id="mnavSlider" min="30" max="400" value="100">
                     <div class="mnav-presets" id="mnavPresets"></div>
+                    <div class="control-locked" id="mnavLockedMsg" style="display:none">&#128274; Controlled by scenario mNAV curve</div>
                 </div>
                 <div class="control-card full-width fx-card">
-                    <div class="control-header"><span class="control-label fx-label">&#127471;&#127477; JPY/USD EXCHANGE RATE</span><span class="control-value fx-value" id="fxDisplay">&yen;153</span></div>
-                    <input type="range" class="fx-range" id="fxSlider" min="120" max="200" step="1" value="153">
-                    <div class="slider-labels"><span>&yen;120 (strong)</span><span>&yen;153</span><span>&yen;200 (weak)</span></div>
+                    <div class="control-header"><span class="control-label fx-label">JPY/USD EXCHANGE RATE</span><span class="control-value fx-value" id="fxDisplay">&yen;152</span></div>
+                    <input type="range" id="fxSlider" min="100" max="220" step="1" value="152" class="fx-slider">
+                    <div class="slider-labels"><span>&yen;100 (strong yen)</span><span>&yen;220 (weak yen)</span></div>
+                </div>
+                <div class="control-card full-width">
+                    <div class="control-header"><span class="control-label">TIME HORIZON</span><span class="control-value" id="horizonDisplay">Now</span></div>
+                    <div class="toggle-row" id="horizonBar"></div>
+                </div>
+                <div class="control-card full-width">
+                    <div class="control-header"><span class="control-label">SHARE COUNT</span><span class="control-value" id="shareDisplay" style="font-size:13px">Basic</span></div>
+                    <div class="toggle-row" id="shareBar">
+                        <button class="toggle-btn active" data-basis="basic" onclick="setShareBasis('basic')">Basic (1.17B)</button>
+                        <button class="toggle-btn" data-basis="diluted" onclick="setShareBasis('diluted')">Fully Diluted (1.48B)</button>
+                    </div>
                 </div>
             </div>
         </div>
     </details>
     <details class="collapse-section"><summary>&#128256; Value Waterfall</summary><div class="collapse-body" style="padding:0"><div class="waterfall" id="waterfall"></div></div></details>
-    <details class="collapse-section"><summary>&#127919; Price Sensitivity &mdash; BTC &times; mNAV</summary><div class="collapse-body" style="padding:0"><div class="table-wrap" style="overflow-x:auto;border-radius:10px"><table class="matrix-table" id="priceMatrix"></table></div></div></details>
-    <details class="collapse-section"><summary>&#127471;&#127477; Drag Matrix &mdash; BTC &times; JPY/USD</summary><div class="collapse-body" style="padding:0"><div class="table-wrap" style="overflow-x:auto;border-radius:10px"><table class="matrix-table" id="dragMatrix"></table></div></div></details>
-    <details class="collapse-section"><summary>&#9881; Capital Structure &amp; Bond Stack</summary><div class="collapse-body" id="customizeBody"></div></details>
+    <details class="collapse-section" id="projectionSection" style="display:none"><summary>&#128197; Year-by-Year Projection</summary><div class="collapse-body" style="padding:0"><div class="table-wrap"><table id="projectionTable"><thead id="projHead"></thead><tbody id="projBody"></tbody></table></div></div></details>
+    <details class="collapse-section"><summary>&#127919; Price Sensitivity &mdash; BTC &times; mNAV</summary><div class="collapse-body" style="padding:0"><div class="table-wrap"><table class="matrix-table" id="priceMatrix"></table></div></div></details>
+    <details class="collapse-section"><summary>&#127760; Drag Sensitivity &mdash; BTC &times; JPY/USD</summary><div class="collapse-body" style="padding:0"><div class="table-wrap"><table class="matrix-table" id="dragMatrix"></table></div></div></details>
+    <details class="collapse-section"><summary>&#9881; Capital Structure &amp; Claims Stack</summary><div class="collapse-body" id="capStructureBody"></div></details>
+    <details class="collapse-section"><summary>&#128200; Wrapper Fee (Annual Cost of Structure)</summary><div class="collapse-body" id="wrapperFeeBody"></div></details>
     <div class="assumptions" id="assumptions"></div>
     <div class="footer">
         <p>CEBE Framework by <a href="https://x.com/chcbearsfan" target="_blank">&#64;chcbearsfan</a> &middot; <a href="/">cebetracker.io</a> &middot; <a href="https://x.com/chcbearsfan/status/2014767364819063207" target="_blank">Read the Framework</a></p>
-        <p style="margin-top:4px">Not financial advice &middot; Data updates after each filing</p>
-        <p class="footer-formula">CEBE = (Total BTC &minus; &yen; Claims &divide; JPY&middot;USD &divide; BTC Price) &divide; Shares</p>
+        <p style="margin-top:4px">Not financial advice &middot; Data from FY2025 &#27770;&#31639;&#30701;&#20449;</p>
+        <p class="footer-formula">Share Price = CEBE &times; BTC Price &times; mNAV</p>
     </div>
 </div>
 </body>
 <script>
 // ═══════════════════════════════════════════════════════════════
-// CEBE METAPLANET SHARE PRICE MODELER v1
-// Double Compression Engine · JPY/USD First-Class Variable
-// Zero-Coupon Bond Structure · Dual Sensitivity Matrices
+// CEBE METAPLANET SHARE PRICE MODELER v2
+// Credit Facility + MERCURY Preferred + BTC Income + 555 Plan
+// Verified: FY2025 決算短信 (Feb 14, 2026)
 // cebetracker.io/modeler/metaplanet
 // ═══════════════════════════════════════════════════════════════
 
-var SHEET_ID='1BNsCWGVU08PDinDcfzJccqcuj9_KrK1VZGETErzBZvg';
-var SNAPSHOTS_GID='771405586';
+const SHEET_ID='1BNsCWGVU08PDinDcfzJccqcuj9_KrK1VZGETErzBZvg';
+const SNAPSHOTS_GID='771405586';
+const START_YEAR=2026;
 
-// Hardcoded capital structure from filings
-var DEFAULTS={
+// ─── VERIFIED DEFAULTS (FY2025 決算短信) ───
+const DEFAULTS={
     btc_holdings:35102,
-    shares_outstanding:1140000000,
-    debt_jpy:54.3e9,   // ~¥54.3B total zero-coupon JPY bonds (~$355M at ¥153)
-    cash_usd:30e6,     // Approximate cash offset
-    jpyusd:153,
-    btc_price:68000,
-    mtplf_price_jpy:340,
+    shares_basic:1166803340,
+    shares_diluted:1484156925,
+    credit_facility_usd:355e6,
+    credit_rate:0.059,           // EST: SOFR+2.25%
+    mercury_face_jpy:11.805e9,   // EST: ¥500 par × 23.61M shares
+    mercury_div_per_share:49,    // ¥49/share annual
+    mercury_shares:23610000,
+    cash_jpy:2552e6,
+    usdc_jpy:14892e6,
+    btc_income_jpy:8468e6,       // BTC segment revenue FY2025
+    hotel_revenue_jpy:436e6,     // Hotel segment revenue FY2025
+    opex_jpy:2617e6,             // COGS+SGA FY2025
+    share_amort_jpy:418e6,
+    interest_paid_jpy:1e6,
+    mercury_div_actual_jpy:9e6,  // FY2025 (2 days only)
+    jpyusd:152, btc_price:97000, mtplf_price_jpy:700,
 };
 
-var SCENARIOS=[
-    {id:'wipeout',  icon:'\u{1F480}',name:'Wipeout',    btc:25000,   mnav:0.5, fx:140, group:'snapshot'},
-    {id:'current',  icon:'\u{1F4CD}',name:'Current',    btc:null,    mnav:1.0, fx:null,group:'snapshot'},
-    {id:'ath',      icon:'\u{1F451}',name:'Former ATH', btc:126000,  mnav:1.5, fx:160, group:'snapshot'},
-    {id:'boj',      icon:'\u{1F3E6}',name:'BOJ Shock',  btc:50000,   mnav:0.6, fx:130, group:'projection'},
-    {id:'gerovich', icon:'\u{1F4D0}',name:'Gerovich',   btc:200000,  mnav:2.0, fx:170, group:'projection'},
-    {id:'terminal', icon:'\u{1F300}',name:'Terminal',    btc:1000000, mnav:3.0, fx:180, group:'projection'},
+const FWD_WRAPPER={
+    opex_jpy:3200e6, mercury_div_jpy:1157e6, credit_interest_jpy:3140e6,
+    share_amort_jpy:600e6, btc_income_jpy:11400e6, hotel_revenue_jpy:500e6,
+};
+
+const POWERLAW_CAGR=[
+    {year:1,cagr:.30},{year:2,cagr:.27},{year:3,cagr:.25},{year:4,cagr:.24},{year:5,cagr:.23},
+    {year:6,cagr:.22},{year:7,cagr:.21},{year:8,cagr:.20},{year:9,cagr:.19},{year:10,cagr:.18},
+];
+const PLAN555_TARGETS=[{year:1,btc:100000},{year:2,btc:210000},{year:3,btc:250000},{year:4,btc:280000},{year:5,btc:300000}];
+
+const SCENARIOS=[
+    {id:'wipeout',      icon:'\u{1F480}',name:'Wipeout',           btc:25000, mnav:0.5,fx:140, horizon:0, group:'snapshot',  type:'static'},
+    {id:'capitulation', icon:'\u{1F43B}',name:'Capitulation',      btc:50000, mnav:0.7,fx:145, horizon:0, group:'snapshot',  type:'static'},
+    {id:'current',      icon:'\u{1F4CD}',name:'Current',           btc:null,  mnav:1.0,fx:null,horizon:0, group:'snapshot',  type:'static'},
+    {id:'siege',        icon:'\u{1F3F0}',name:'Siege',             btc:50000, mnav:0.7,fx:135, horizon:10,group:'projection',type:'siege'},
+    {id:'powerlaw',     icon:'\u{1F4C8}',name:'Power Law Support', btc:null,  mnav:null,fx:null,horizon:10,group:'projection',type:'powerlaw'},
+    {id:'plan555',      icon:'\u{1F3AF}',name:'555 Plan',          btc:null,  mnav:null,fx:null,horizon:10,group:'projection',type:'plan555'},
 ];
 
-var MNAV_PRESETS=[0.5,0.75,1.0,1.5,2.0,3.0];
-var MATRIX_BTC=[25000,50000,75000,100000,150000,200000,300000,500000,1000000];
-var MATRIX_MNAVS=[0.5,0.75,1.0,1.5,2.0,3.0];
-var MATRIX_FX=[130,140,145,153,160,170,180,200];
+const HORIZON_OPTIONS=[{label:'Now',years:0},{label:'1Y',years:1},{label:'3Y',years:3},{label:'5Y',years:5},{label:'10Y',years:10}];
+const MNAV_PRESETS=[0.5,0.75,1.0,1.5,2.0,3.0];
+const MATRIX_BTC=[25000,50000,75000,100000,150000,200000,300000,500000,1000000];
+const MATRIX_MNAVS=[0.5,0.75,1.0,1.5,2.0,3.0];
+const MATRIX_FX=[120,130,140,150,160,170,180,200];
 
 // ─── STATE ───
-var sheetData=null, liveBtcPrice=null, liveFxRate=null;
-var btcPrice=DEFAULTS.btc_price, mnavMultiple=1.0, fxRate=DEFAULTS.jpyusd, activeScenario='current';
+var sheetData=null,liveBtcPrice=null,liveFxRate=null;
+var btcPrice=DEFAULTS.btc_price,mnavMultiple=1.0,fxRate=DEFAULTS.jpyusd,horizonYears=0,activeScenario='current',shareBasis='basic';
 
 // ─── HELPERS ───
 var $=function(id){return document.getElementById(id)};
@@ -309,9 +389,11 @@ var fmt=function(n){return Math.round(n).toLocaleString('en-US')};
 var fmtB=function(n){return n>=1e9?'$'+(n/1e9).toFixed(1)+'B':n>=1e6?'$'+(n/1e6).toFixed(0)+'M':'$'+fmt(n)};
 var fmtByen=function(n){return n>=1e12?'\u00a5'+(n/1e12).toFixed(1)+'T':n>=1e9?'\u00a5'+(n/1e9).toFixed(1)+'B':n>=1e6?'\u00a5'+(n/1e6).toFixed(0)+'M':'\u00a5'+fmt(n)};
 var fmtPrice=function(p){if(p>=1e6)return '$'+(p/1e6).toFixed(1)+'M';if(p>=1000)return '$'+fmt(p);if(p>=1)return '$'+p.toFixed(2);return '$0.00'};
+var fmtYen=function(y){return y>=10000?'\u00a5'+fmt(Math.round(y)):y>=1?'\u00a5'+Math.round(y):'\u00a5'+y.toFixed(2)};
 var fmtPct=function(p,d){return(p*100).toFixed(d!==undefined?d:1)+'%'};
 var fmtSats=function(s){return fmt(Math.round(s))};
-var fmtYen=function(y){if(y>=1e6)return '\u00a5'+(y/1e6).toFixed(1)+'M';if(y>=10000)return '\u00a5'+fmt(Math.round(y));if(y>=1)return '\u00a5'+Math.round(y);return '\u00a5'+y.toFixed(2)};
+function getActiveType(){var s=SCENARIOS.find(function(x){return x.id===activeScenario});return s?s.type:'static'}
+function isSlidersLocked(){var t=getActiveType();return t==='siege'||t==='plan555'||t==='powerlaw'}
 
 // ─── CSV ───
 function parseCSVLine(l){var r=[],c='',q=false;for(var i=0;i<l.length;i++){var ch=l[i];if(ch==='"')q=!q;else if(ch===','&&!q){r.push(c);c=''}else c+=ch}r.push(c);return r}
@@ -329,228 +411,346 @@ async function loadData(){
             liveBtcPrice=btcRes.bitcoin.usd;
             if(btcRes.bitcoin.jpy&&btcRes.bitcoin.usd)liveFxRate=Math.round(btcRes.bitcoin.jpy/btcRes.bitcoin.usd);
         }
-        if(sheetText){
-            var rows=parseCSV(sheetText),best=null;
-            rows.forEach(function(r){if(r.ticker==='MTPLF'&&(!r.status||r.status.toLowerCase()==='live')){if(!best||r.snapshot_date>best.snapshot_date)best=r}});
-            if(best)sheetData=best;
-        }
-        btcPrice=liveBtcPrice||getVal('btc_price',DEFAULTS.btc_price);
+        if(sheetText){var rows=parseCSV(sheetText),best=null;rows.forEach(function(r){if(r.ticker==='MTPLF'&&(!r.status||r.status.toLowerCase()==='live')){if(!best||r.snapshot_date>best.snapshot_date)best=r}});if(best)sheetData=best}
+        btcPrice=liveBtcPrice||DEFAULTS.btc_price;
         fxRate=liveFxRate||DEFAULTS.jpyusd;
-        SCENARIOS[1].btc=btcPrice; SCENARIOS[1].fx=fxRate;
-        $('loadingScreen').style.display='none';$('app').style.display='block';
-        buildScenarioBar();buildMnavPresets();syncSliders();render();
-    }catch(err){
-        console.error('Load failed:',err);
-        $('loadingScreen').innerHTML='<div style="text-align:center;color:#a1a1aa;font-size:13px"><p style="margin-bottom:12px">Failed to load data</p><p style="font-size:11px;color:#52525b">'+err.message+'</p><p style="margin-top:12px"><a href="/" style="color:#f97316">&larr; Back to cebetracker.io</a></p></div>';
-    }
-}
-function getVal(field,fallback){if(sheetData&&sheetData[field]!==undefined&&sheetData[field]!==''){var v=parseFloat(sheetData[field]);if(!isNaN(v))return v}return fallback}
-function getInputs(){
-    return{
-        btcH:getVal('btc_holdings',DEFAULTS.btc_holdings),
-        shares:getVal('shares_outstanding',DEFAULTS.shares_outstanding),
-        debtJpy:DEFAULTS.debt_jpy,
-        cashUsd:getVal('cash_usd',DEFAULTS.cash_usd),
-        snapshotDate:sheetData?sheetData.snapshot_date||'\u2014':'\u2014',
-    };
+        SCENARIOS.find(function(s){return s.id==='current'}).btc=btcPrice;
+        SCENARIOS.find(function(s){return s.id==='current'}).fx=fxRate;
+    }catch(err){console.error('Load failed:',err);btcPrice=DEFAULTS.btc_price;fxRate=DEFAULTS.jpyusd}
+    $('loadingScreen').style.display='none';$('app').style.display='block';
+    buildScenarioBar();buildHorizonBar();buildMnavPresets();syncSliders();render();
 }
 
+function getVal(f,fb){if(sheetData&&sheetData[f]!==undefined&&sheetData[f]!==''){var v=parseFloat(sheetData[f]);if(!isNaN(v))return v}return fb}
+function getShares(){return shareBasis==='diluted'?getVal('shares_diluted',DEFAULTS.shares_diluted):getVal('shares_basic',DEFAULTS.shares_basic)}
+
 // ═══════════════════════════════════════════════════
-// CEBE MATH ENGINE (with FX)
+// CEBE MATH ENGINE
 // ═══════════════════════════════════════════════════
-function calcCEBE(btcH,shares,debtJpy,cashUsd,bp,fx,mn){
-    var p=bp||btcPrice, f=fx||fxRate, m=mn!==undefined?mn:mnavMultiple;
-    var claimsUsd=f>0?debtJpy/f:0;
-    var netClaimsUsd=Math.max(0,claimsUsd-cashUsd);
-    var claimsBtc=p>0?netClaimsUsd/p:0;
-    var drag=btcH>0?Math.max(0,Math.min(1,claimsBtc/btcH)):0;
-    var commonBtc=Math.max(0,btcH-claimsBtc);
+function calcCEBE(btcH,shares,netClUsd,bp,mn,fx){
+    var p=bp||btcPrice,m=mn!==undefined?mn:mnavMultiple,f=fx||fxRate;
+    var clBtc=p>0?Math.max(0,netClUsd/p):0;
+    var drag=btcH>0?Math.max(0,Math.min(1,clBtc/btcH)):0;
+    var commonBtc=Math.max(0,btcH-clBtc);
     var cebeSats=shares>0?(commonBtc/shares)*1e8:0;
     var bpsSats=shares>0?(btcH/shares)*1e8:0;
     var amp=drag<.999?1/(1-drag):Infinity;
-    var breakEven=btcH>0?netClaimsUsd/btcH:0;
-    var navUsd=Math.max(0,(btcH*p)-netClaimsUsd);
-    var navPerShare=shares>0?navUsd/shares:0;
-    var navJpy=navPerShare*f;
-    var modeledJpy=navJpy*m;
-    var modeledUsd=navPerShare*m;
-    return{commonBtc:commonBtc,cebeSats:cebeSats,bpsSats:bpsSats,drag:drag,amp:amp,breakEven:breakEven,
-        navUsd:navUsd,navPerShare:navPerShare,navJpy:navJpy,modeledJpy:modeledJpy,modeledUsd:modeledUsd,
-        netClaimsUsd:netClaimsUsd,claimsUsd:claimsUsd,btcHoldings:btcH,shares:shares};
+    var breakEvenUsd=btcH>0?Math.max(0,netClUsd)/btcH:0;
+    var navUsd=Math.max(0,(btcH*p)-netClUsd);
+    var navPerShareUsd=shares>0?navUsd/shares:0;
+    var navPerShareJpy=navPerShareUsd*f;
+    var priceJpy=navPerShareJpy*m;
+    var priceUsd=navPerShareUsd*m;
+    return{commonBtc:commonBtc,cebeSats:cebeSats,bpsSats:bpsSats,drag:drag,amp:amp,breakEvenUsd:breakEvenUsd,
+        navUsd:navUsd,navPerShareUsd:navPerShareUsd,navPerShareJpy:navPerShareJpy,priceJpy:priceJpy,priceUsd:priceUsd,
+        btcH:btcH,shares:shares,netClaimsUsd:netClUsd,btcReserveUsd:btcH*p,btcReserveJpy:btcH*p*f};
 }
 
-function quickPrice(bp,mn){var inp=getInputs();return calcCEBE(inp.btcH,inp.shares,inp.debtJpy,inp.cashUsd,bp,fxRate,mn).modeledJpy}
-function quickDrag(bp,fx){var inp=getInputs();return calcCEBE(inp.btcH,inp.shares,inp.debtJpy,inp.cashUsd,bp,fx,1.0).drag}
+function getNetClaimsUsd(creditUsd,mercFaceJpy,cashJpy,usdcJpy,fx){
+    var mercUsd=mercFaceJpy/fx;
+    var cashUsd=(cashJpy+usdcJpy)/fx;
+    return Math.max(0,creditUsd+mercUsd-cashUsd);
+}
+
+function quickCalcPrice(bp,mn,fx){
+    var s=getShares(),nc=getNetClaimsUsd(DEFAULTS.credit_facility_usd,DEFAULTS.mercury_face_jpy,DEFAULTS.cash_jpy,DEFAULTS.usdc_jpy,fx||fxRate);
+    var r=calcCEBE(DEFAULTS.btc_holdings,s,nc,bp,mn,fx);return r.priceJpy;
+}
+function quickCalcDrag(bp,fx){
+    var nc=getNetClaimsUsd(DEFAULTS.credit_facility_usd,DEFAULTS.mercury_face_jpy,DEFAULTS.cash_jpy,DEFAULTS.usdc_jpy,fx);
+    var clBtc=bp>0?nc/bp:0;return DEFAULTS.btc_holdings>0?Math.max(0,Math.min(1,clBtc/DEFAULTS.btc_holdings)):0;
+}
+
+// ═══════════════════════════════════════════════════
+// PROJECTION ENGINE
+// ═══════════════════════════════════════════════════
+function projectYears(years){
+    var sType=getActiveType(),startBtc=liveBtcPrice||btcPrice,startFx=liveFxRate||fxRate;
+    var btcH=getVal('btc_holdings',DEFAULTS.btc_holdings),shares=getShares();
+    var creditUsd=DEFAULTS.credit_facility_usd,mercFace=DEFAULTS.mercury_face_jpy;
+    var cashJpy=DEFAULTS.cash_jpy+DEFAULTS.usdc_jpy;
+    var results=[],allEvents=[];
+
+    for(var y=0;y<=years;y++){
+        var yearEvents=[];
+        // 1. BTC price + mNAV + FX for this year
+        var yBtc,yMnav,yFx;
+        if(sType==='siege'){yBtc=50000;yMnav=0.7;yFx=y===0?startFx:Math.max(120,135-y)}
+        else if(sType==='powerlaw'){
+            if(y===0){yBtc=startBtc;yMnav=1.0;yFx=startFx}
+            else{var ce=POWERLAW_CAGR[Math.min(y-1,POWERLAW_CAGR.length-1)];yBtc=(y===1?startBtc:results[y-1].yearBtcPrice)*(1+ce.cagr);yMnav=Math.min(1.2,1.0+y*0.02);yFx=Math.min(200,startFx+y*2)}
+        }else if(sType==='plan555'){
+            if(y===0){yBtc=startBtc;yMnav=1.5;yFx=startFx}
+            else{var ce=POWERLAW_CAGR[Math.min(y-1,POWERLAW_CAGR.length-1)];yBtc=(y===1?startBtc:results[y-1].yearBtcPrice)*(1+ce.cagr);yMnav=Math.min(2.0,1.5+y*0.05);yFx=Math.min(210,startFx+y*3)}
+        }else{yBtc=btcPrice;yMnav=mnavMultiple;yFx=fxRate}
+
+        // 2. 555 Plan: BTC acquisition + funding
+        if(sType==='plan555'&&y>0){
+            var target=null;PLAN555_TARGETS.forEach(function(t){if(t.year===y)target=t});
+            if(target&&target.btc>btcH){
+                var toBuy=target.btc-btcH,costUsd=toBuy*yBtc;
+                var nc=getNetClaimsUsd(creditUsd,mercFace,Math.max(0,cashJpy),0,yFx);
+                var navNow=Math.max(0,(btcH*yBtc)-nc);var navPS=shares>0?navNow/shares:0;
+                var atmPrice=navPS*yMnav*yFx;
+                // 50% equity, 30% preferred, 20% credit
+                var eqRaise=costUsd*0.50,prefRaise=costUsd*0.30,credRaise=costUsd*0.20;
+                if(atmPrice>0){var newSh=eqRaise/(navPS*yMnav);shares+=newSh;yearEvents.push({type:'equity',cls:'info',icon:'\u{1F4E6}',text:'<strong>Equity raise '+fmtB(eqRaise)+'.</strong> Issued '+fmt(Math.round(newSh/1e6))+'M shares via ATM/warrants.'})}
+                var newPrefJpy=prefRaise*yFx;mercFace+=newPrefJpy;yearEvents.push({type:'pref',cls:'info',icon:'\u{1F4E6}',text:'<strong>New preferred '+fmtByen(newPrefJpy)+'</strong> ('+fmtB(prefRaise)+' USD equiv).'});
+                creditUsd+=credRaise;yearEvents.push({type:'credit',cls:'info',icon:'\u{1F4E6}',text:'<strong>Credit facility +'+fmtB(credRaise)+'</strong> (total: '+fmtB(creditUsd)+').'});
+                btcH=target.btc;yearEvents.push({type:'btc',cls:'green',icon:'\u{1F4B0}',text:'<strong>Acquired '+fmt(toBuy)+' BTC \u2192 total '+fmt(btcH)+' BTC.</strong>'});
+            }
+        }
+
+        // 3. Annual costs drain cash
+        if(y>0){
+            var mercDiv=FWD_WRAPPER.mercury_div_jpy*(mercFace/DEFAULTS.mercury_face_jpy);
+            var credInt=creditUsd*DEFAULTS.credit_rate*yFx;
+            var opex=FWD_WRAPPER.opex_jpy;
+            var btcIncome=FWD_WRAPPER.btc_income_jpy*(btcH/DEFAULTS.btc_holdings);
+            var hotel=FWD_WRAPPER.hotel_revenue_jpy;
+            var netDrain=mercDiv+credInt+opex-btcIncome-hotel;
+            cashJpy-=netDrain;
+            // Siege: sell BTC if cash negative
+            if(sType==='siege'&&cashJpy<0){
+                var deficitUsd=Math.abs(cashJpy)/yFx;var btcSell=yBtc>0?deficitUsd/yBtc:0;
+                if(btcSell<btcH){btcH-=btcSell;cashJpy=0;yearEvents.push({type:'sell',cls:'red',icon:'\u26A0\uFE0F',text:'<strong>Sold '+fmt(Math.round(btcSell))+' BTC</strong> to cover costs. Remaining: '+fmt(Math.round(btcH))+' BTC.'})}
+                else{yearEvents.push({type:'wipeout',cls:'red',icon:'\u{1F480}',text:'<strong>BTC reserves depleted.</strong> Common equity wiped out.'});btcH=0;cashJpy=0}
+            }
+        }
+
+        // 4. Year-end calc
+        var nc=getNetClaimsUsd(creditUsd,mercFace,Math.max(0,cashJpy),0,yFx);
+        var m=calcCEBE(btcH,shares,nc,yBtc,yMnav,yFx);
+        m.yearBtcPrice=yBtc;m.yearMnav=yMnav;m.yearFx=yFx;m.year=y;m.calYear=START_YEAR+y;m.events=yearEvents;m.cashJpy=cashJpy;m.creditUsd=creditUsd;m.mercFace=mercFace;
+        var status=btcH<=0?'red':cashJpy<0?'amber':'green';m.status=status;
+        results.push(m);
+        yearEvents.forEach(function(e){allEvents.push({year:y,type:e.type,cls:e.cls,icon:e.icon,text:e.text})});
+    }
+    results._events=allEvents;return results;
+}
+
+// ═══════════════════════════════════════════════════
+// WRAPPER FEE
+// ═══════════════════════════════════════════════════
+function calcWrapper(btcReserveJpy,isForward){
+    var w=isForward?FWD_WRAPPER:{opex_jpy:DEFAULTS.opex_jpy,mercury_div_jpy:DEFAULTS.mercury_div_actual_jpy,credit_interest_jpy:DEFAULTS.interest_paid_jpy,share_amort_jpy:DEFAULTS.share_amort_jpy,btc_income_jpy:DEFAULTS.btc_income_jpy,hotel_revenue_jpy:DEFAULTS.hotel_revenue_jpy};
+    var costs=(w.opex_jpy||0)+(w.mercury_div_jpy||0)+(w.credit_interest_jpy||0)+(w.share_amort_jpy||0);
+    var offsets=(w.btc_income_jpy||0)+(w.hotel_revenue_jpy||0);
+    var net=costs-offsets;
+    return{costs:costs,offsets:offsets,net:net,grossPct:btcReserveJpy>0?costs/btcReserveJpy:0,netPct:btcReserveJpy>0?net/btcReserveJpy:0,items:w};
+}
 
 // ═══════════════════════════════════════════════════
 // RENDERING
 // ═══════════════════════════════════════════════════
 function render(){
-    var inp=getInputs();
-    var r=calcCEBE(inp.btcH,inp.shares,inp.debtJpy,inp.cashUsd,btcPrice,fxRate,mnavMultiple);
-    var marketJpy=DEFAULTS.mtplf_price_jpy;
-    renderHero(r,marketJpy);renderNarrative(r,inp);renderMetrics(r,inp);
-    renderWaterfall(r,inp);renderPriceMatrix();renderDragMatrix();renderCapStructure(r,inp);renderAssumptions(inp);
+    var proj=projectYears(horizonYears),current=proj[0],final=proj[proj.length-1];
+    var refPrice=DEFAULTS.mtplf_price_jpy;
+    renderClaimsBanner(final);renderHero(final,refPrice);renderNarrative(final,current,proj);
+    renderMetrics(final,current);renderWaterfall(final);renderProjectionTable(proj);
+    renderPriceMatrix();renderDragMatrix();renderCapStructure(final);renderWrapperFee(final);renderAssumptions();
+    updateSliderLocking();
     $('liveBtcDisplay').textContent='BTC '+fmtPrice(liveBtcPrice||btcPrice);
     $('liveFxDisplay').textContent='\u00a5'+(liveFxRate||fxRate)+'/$';
-    $('liveDataDate').textContent=inp.snapshotDate!=='\u2014'?'Data: '+inp.snapshotDate:'';
+    $('liveDataDate').textContent=sheetData&&sheetData.snapshot_date?'Data: '+sheetData.snapshot_date:'FY2025 Filing';
     updateSliderFills();
 }
 
-function renderHero(r,marketJpy){
-    var el=$('heroPrice');
-    if(r.modeledJpy<=0||!isFinite(r.modeledJpy)){
-        el.textContent='\u00a50';el.className='hero-price negative';$('heroUsd').textContent='';
-        $('heroChange').textContent='\u2212100%';$('heroChange').className='hero-change down';
-        $('heroVs').textContent='common equity wiped out';$('heroContext').textContent='';
-        $('heroFx').style.display='none';$('heroImplied').style.display='none';return;
-    }
-    el.textContent=fmtYen(r.modeledJpy);
-    $('heroUsd').innerHTML='\u2248 $'+(r.modeledUsd>=1?r.modeledUsd.toFixed(2):r.modeledUsd.toFixed(4))+' USD';
-    var pctC=(r.modeledJpy-marketJpy)/marketJpy, sign=pctC>=0?'+':'';
-    $('heroChange').textContent=sign+(pctC*100).toFixed(1)+'%';
-    $('heroChange').className='hero-change '+(pctC>=0?'up':'down');
-    el.className='hero-price '+(pctC>.05?'positive':pctC<-.05?'negative':'neutral');
-    $('heroVs').textContent='vs market \u00a5'+marketJpy;
-    $('heroContext').textContent='instant snapshot \u00b7 \u00a5'+fxRate+'/$ FX rate';
-
-    // FX badge
-    var baseFx=liveFxRate||DEFAULTS.jpyusd, fb=$('heroFx');
-    if(Math.abs(fxRate-baseFx)>2){
-        var dir=fxRate>baseFx?'compress':'expand';
-        fb.className='hero-fx '+dir;
-        fb.textContent=dir==='compress'?'FX \u2193 JPY weak \u2192 drag compresses':'FX \u2191 JPY strong \u2192 drag expands';
-        fb.style.display='inline-block';
-    }else{fb.className='hero-fx fx-neutral';fb.textContent='FX neutral';fb.style.display='inline-block'}
-
-    // Implied mNAV — always use CURRENT prices, not scenario prices
-    var curBtc=liveBtcPrice||DEFAULTS.btc_price, curFx=liveFxRate||DEFAULTS.jpyusd;
-    var inp=getInputs();
-    var curR=calcCEBE(inp.btcH,inp.shares,inp.debtJpy,inp.cashUsd,curBtc,curFx,1.0);
-    if(marketJpy>0&&curR.navJpy>0){$('impliedMnavVal').textContent=(marketJpy/curR.navJpy).toFixed(2)+'\u00d7';$('heroImplied').style.display='inline-block'}
-    else{$('heroImplied').style.display='none'}
+function renderClaimsBanner(f){
+    var dp=(f.drag*100).toFixed(1),op=((1-f.drag)*100).toFixed(1);
+    var clBtc=Math.round(f.drag*f.btcH),sharesM=(f.shares/1e9).toFixed(2);
+    $('claimsDragDisplay').textContent='DRAG: '+dp+'%';
+    $('claimsSub').innerHTML='Common equity owns '+op+'% of '+fmt(Math.round(f.btcH))+' BTC \u00b7 Break-even: '+fmtPrice(f.breakEvenUsd);
+    $('claimsFormula').innerHTML='CEBE = ('+fmt(Math.round(f.btcH))+' \u2212 '+fmt(clBtc)+') \u00f7 '+sharesM+'B = '+fmtSats(f.cebeSats)+' sats/share';
+    $('claimsBanner').className='claims-banner'+(f.drag<0.15?' low-drag':f.drag>0.5?' high-drag':'');
 }
 
-function renderNarrative(r,inp){
-    var items=[], dp=r.drag*100, cp=(1-r.drag)*100;
-    var sObj=SCENARIOS.find(function(s){return s.id===activeScenario}), sName=sObj?sObj.name:'Custom';
-    $('narrativeTitle').innerHTML='\u{1F50D} '+sName+' \u2014 '+fmtPrice(btcPrice)+' BTC \u00b7 \u00a5'+fxRate+'/$';
+function renderHero(f,refPrice){
+    var pJpy=f.priceJpy,pUsd=f.priceUsd,el=$('heroPrice');
+    if(pJpy<=0||!isFinite(pJpy)){el.textContent='\u00a50';el.className='hero-price negative';$('heroUsd').textContent='($0.00)';$('heroChange').textContent='\u2212100%';$('heroChange').className='hero-change down';$('heroVs').textContent='common equity wiped out';$('heroContext').textContent='';$('heroFxBadge').innerHTML='';return}
+    el.textContent=fmtYen(pJpy);el.className='hero-price '+(pJpy>refPrice*1.05?'positive':pJpy<refPrice*0.95?'negative':'neutral');
+    $('heroUsd').textContent='($'+pUsd.toFixed(2)+')';
+    var pct=(pJpy-refPrice)/refPrice,sign=pct>=0?'+':'';
+    $('heroChange').textContent=sign+(pct*100).toFixed(1)+'% ('+sign+'\u00a5'+fmt(Math.abs(Math.round(pJpy-refPrice)))+')';
+    $('heroChange').className='hero-change '+(pct>=0?'up':'down');
+    $('heroVs').textContent='vs MTPLF \u00a5'+fmt(refPrice);
+    var sType=getActiveType(),ctx='';
+    if(horizonYears===0)ctx='instant snapshot \u00b7 \u00a5'+(f.yearFx||fxRate)+'/$';
+    else if(sType==='siege')ctx=horizonYears+'-yr stress \u00b7 $50K flat \u00b7 strong yen';
+    else if(sType==='plan555')ctx=horizonYears+'-yr projection \u00b7 555 Plan \u00b7 100K\u2192300K BTC';
+    else if(sType==='powerlaw')ctx=horizonYears+'-yr projection \u00b7 Power Law (~23% CAGR)';
+    else ctx=horizonYears>0?horizonYears+'-yr projection':'instant snapshot';
+    $('heroContext').textContent=ctx;
+    // FX badge
+    var baseFx=DEFAULTS.jpyusd,curFx=f.yearFx||fxRate;
+    if(curFx>baseFx+3)$('heroFxBadge').innerHTML='<div class="fx-badge-hero compress">\u00a5'+curFx+' WEAK YEN \u2192 DOUBLE COMPRESSION</div>';
+    else if(curFx<baseFx-3)$('heroFxBadge').innerHTML='<div class="fx-badge-hero expand">\u00a5'+curFx+' STRONG YEN \u2192 DRAG EXPANSION</div>';
+    else $('heroFxBadge').innerHTML='<div class="fx-badge-hero neutral">\u00a5'+curFx+' NEUTRAL FX</div>';
+}
 
-    // Scenario-specific — lead with this
-    if(activeScenario==='boj')items.push({cls:'amber',icon:'\u{1F3E6}',text:'<strong>BOJ Shock scenario.</strong> Bank of Japan tightens aggressively. Yen surges to \u00a5130/$. Combined with BTC decline to $50K, drag expands from both FX and price. This is Metaplanet\u2019s structural risk \u2014 the double compression engine works in reverse.'});
-    if(activeScenario==='gerovich')items.push({cls:'info',icon:'\u{1F4D0}',text:'<strong>Gerovich Model.</strong> 555 Million Plan executing. BTC $200K, yen weakens to \u00a5170 as BOJ maintains accommodation. Zero-cost bond leverage + FX tailwind = maximum drag compression. Target: 100K BTC by end 2026.'});
-    if(activeScenario==='terminal')items.push({cls:'green',icon:'\u{1F300}',text:'<strong>Terminal value.</strong> At $1M BTC with \u00a5180/$, drag becomes negligible. CEBE converges to BPS. Common equity owns effectively 100% of the Bitcoin.'});
-
+function renderNarrative(final,current,proj){
+    var items=[],dp=final.drag*100,cp=(1-final.drag)*100,sType=getActiveType();
+    var sObj=SCENARIOS.find(function(s){return s.id===activeScenario}),sName=sObj?sObj.name:'Custom';
+    var endBtc=final.yearBtcPrice||btcPrice;
+    $('narrativeTitle').innerHTML='\u{1F50D} '+sName+' \u2014 '+fmtPrice(endBtc)+' BTC \u00b7 \u00a5'+(final.yearFx||fxRate);
     // Drag
-    if(r.drag<.05)items.push({cls:'green',icon:'\u2705',text:'<strong>Drag nearly zero ('+dp.toFixed(1)+'%).</strong> Common owns '+cp.toFixed(1)+'% of Metaplanet\u2019s '+fmt(inp.btcH)+' BTC.'});
-    else if(r.drag<.20)items.push({cls:'green',icon:'\u{1F4C8}',text:'<strong>Low drag ('+dp.toFixed(1)+'%).</strong> Common owns '+cp.toFixed(1)+'% of the Bitcoin. Claims '+fmtB(r.netClaimsUsd)+' ('+fmtByen(inp.debtJpy)+').'});
-    else if(r.drag<.40)items.push({cls:'neutral',icon:'\u2696',text:'<strong>Moderate drag ('+dp.toFixed(1)+'%).</strong> Common owns '+cp.toFixed(1)+'% of BTC. Net claims '+fmtB(r.netClaimsUsd)+'.'});
-    else if(r.drag<.70)items.push({cls:'amber',icon:'\u26A0',text:'<strong>High drag ('+dp.toFixed(1)+'%).</strong> Only '+cp.toFixed(1)+'% of Bitcoin left for common.'});
-    else items.push({cls:'red',icon:'\u{1F4A5}',text:'<strong>Critical drag ('+dp.toFixed(1)+'%).</strong> Senior claims consume most Bitcoin value.'});
-
+    if(final.drag<.05)items.push({cls:'green',icon:'\u2705',text:'<strong>Near-zero drag ('+dp.toFixed(1)+'%).</strong> Cash reserves nearly offset all claims. Common owns '+cp.toFixed(1)+'% of BTC.'});
+    else if(final.drag<.15)items.push({cls:'green',icon:'\u{1F4C8}',text:'<strong>Low drag ('+dp.toFixed(1)+'%).</strong> Common owns '+cp.toFixed(1)+'% of '+fmt(Math.round(final.btcH))+' BTC. Credit facility and MERCURY well-covered.'});
+    else if(final.drag<.30)items.push({cls:'neutral',icon:'\u2696',text:'<strong>Moderate drag ('+dp.toFixed(1)+'%).</strong> Common owns '+cp.toFixed(1)+'%. Amplification: '+final.amp.toFixed(2)+'\u00d7 on BTC moves.'});
+    else if(final.drag<.50)items.push({cls:'amber',icon:'\u26A0',text:'<strong>Elevated drag ('+dp.toFixed(1)+'%).</strong> Senior claims consume '+dp.toFixed(1)+'% of BTC value. Amplification: '+final.amp.toFixed(2)+'\u00d7.'});
+    else items.push({cls:'red',icon:'\u{1F4A5}',text:'<strong>Critical drag ('+dp.toFixed(1)+'%).</strong> More than half of BTC committed to claims. Break-even '+fmtPrice(final.breakEvenUsd)+'.'});
     // FX dynamics
-    var baseFx=liveFxRate||DEFAULTS.jpyusd;
-    if(fxRate>baseFx+5){
-        var baseR=calcCEBE(inp.btcH,inp.shares,inp.debtJpy,inp.cashUsd,btcPrice,baseFx,mnavMultiple);
-        var fc=((baseR.drag-r.drag)*100).toFixed(1);
-        items.push({cls:'green',icon:'\u{1F4B1}',text:'<strong>Double compression active.</strong> Weak yen (\u00a5'+fxRate+' vs baseline \u00a5'+baseFx+') shrinks JPY claims in USD terms. FX contributed ~'+fc+'pp of drag compression.'});
-    }else if(fxRate<baseFx-5){
-        var baseR=calcCEBE(inp.btcH,inp.shares,inp.debtJpy,inp.cashUsd,btcPrice,baseFx,mnavMultiple);
-        var fc=((r.drag-baseR.drag)*100).toFixed(1);
-        items.push({cls:'red',icon:'\u{1F4B1}',text:'<strong>Double expansion risk.</strong> Strong yen (\u00a5'+fxRate+' vs baseline \u00a5'+baseFx+') inflates JPY claims in USD terms. FX added ~'+fc+'pp of drag expansion.'});
-    }
-
+    var baseFx=DEFAULTS.jpyusd,curFx=final.yearFx||fxRate;
+    if(curFx>baseFx+5)items.push({cls:'green',icon:'\u{1F30F}',text:'<strong>Double compression.</strong> Weaker yen (\u00a5'+curFx+' vs base \u00a5'+baseFx+') shrinks JPY claims in BTC terms while BTC appreciates. Metaplanet\u2019s structural FX advantage.'});
+    else if(curFx<baseFx-5)items.push({cls:'red',icon:'\u{1F30F}',text:'<strong>Double expansion.</strong> Stronger yen (\u00a5'+curFx+') grows MERCURY claims in BTC terms. USD credit facility unaffected by FX, but JPY-denominated claims increase.'});
     // Break-even
-    if(btcPrice<=r.breakEven)items.push({cls:'red',icon:'\u{1F480}',text:'<strong>Below break-even ('+fmtPrice(r.breakEven)+').</strong> Common equity theoretically \u00a50.'});
-    else if(btcPrice<=r.breakEven*1.15)items.push({cls:'red',icon:'\u26A0',text:'<strong>Near break-even.</strong> BTC only '+((btcPrice/r.breakEven-1)*100).toFixed(0)+'% above '+fmtPrice(r.breakEven)+' floor.'});
-    else if(btcPrice>r.breakEven*3)items.push({cls:'green',icon:'\u{1F6E1}',text:'<strong>Break-even safety margin: '+((btcPrice/r.breakEven-1)*100).toFixed(0)+'%.</strong> BTC must fall to '+fmtPrice(r.breakEven)+' to wipe common equity.'});
-
-    // Zero carry cost — always show, at the end
-    items.push({cls:'info',icon:'\u{1F4B0}',text:'<strong>Zero carry cost.</strong> Unlike Strategy\u2019s ~$1.4B/yr preferred dividend obligation, Metaplanet\u2019s zero-coupon bonds cost \u00a50 in annual interest. No cash drain, no share dilution from dividend coverage.'});
-
+    if(endBtc<=final.breakEvenUsd)items.push({cls:'red',icon:'\u{1F480}',text:'<strong>Below break-even ('+fmtPrice(final.breakEvenUsd)+').</strong> Common equity theoretically \u00a50. Credit facility has no forced liquidation.'});
+    else if(endBtc>final.breakEvenUsd*3)items.push({cls:'green',icon:'\u{1F6E1}',text:'<strong>Break-even safety: '+((endBtc/final.breakEvenUsd-1)*100).toFixed(0)+'%.</strong> BTC must fall to '+fmtPrice(final.breakEvenUsd)+' to wipe common equity.'});
+    else items.push({cls:'neutral',icon:'\u{1F6E1}',text:'<strong>Break-even: '+fmtPrice(final.breakEvenUsd)+'.</strong> Safety margin: '+((endBtc/final.breakEvenUsd-1)*100).toFixed(0)+'%.'});
+    // Wrapper fee
+    var wf=calcWrapper(final.btcReserveJpy,horizonYears>0);
+    if(wf.netPct<0)items.push({cls:'green',icon:'\u{1F4CB}',text:'<strong>Negative wrapper fee ('+fmtPct(wf.netPct,2)+').</strong> BTC Income ('+fmtByen(wf.items.btc_income_jpy||wf.items.btcIncome)+') + hotel revenue more than cover all costs. Structure pays for itself.'});
+    else if(wf.netPct<0.01)items.push({cls:'green',icon:'\u{1F4CB}',text:'<strong>Near-zero wrapper fee ('+fmtPct(wf.netPct,2)+').</strong> BTC Income nearly offsets all costs.'});
+    else items.push({cls:'neutral',icon:'\u{1F4CB}',text:'<strong>Wrapper fee: '+fmtPct(wf.netPct,2)+'.</strong> '+fmtByen(Math.abs(wf.net))+'/yr net cost.'});
+    // Engine events
+    if(proj._events)proj._events.forEach(function(e){items.push({cls:e.cls,icon:e.icon,text:e.text})});
+    // Siege survival
+    if(sType==='siege'&&horizonYears>=5){if(final.btcH>0)items.push({cls:'amber',icon:'\u{1F3F0}',text:'<strong>Siege result ('+horizonYears+'Y at $50K):</strong> '+fmt(Math.round(final.btcH))+' BTC remaining. Drag '+fmtPct(final.drag)+'. BTC Income provides structural cash flow.'});else items.push({cls:'red',icon:'\u{1F3F0}',text:'<strong>Siege result:</strong> BTC depleted.'})}
+    // 555 Plan
+    if(sType==='plan555'&&horizonYears>=3&&final.btcH>0)items.push({cls:'green',icon:'\u{1F3AF}',text:'<strong>555 Plan Y'+final.year+':</strong> '+fmt(Math.round(final.btcH))+' BTC, drag '+fmtPct(final.drag)+', CEBE '+fmtSats(final.cebeSats)+' sats. Price '+fmtYen(final.priceJpy)+' ($'+final.priceUsd.toFixed(2)+').'});
+    // EST disclaimer
+    items.push({cls:'est',icon:'\u{1F52C}',text:'Credit facility interest rate estimated (SOFR+2.25%). MERCURY face value estimated (\u00a5500 par). Updates with securities report ~March 25, 2026.'});
     $('narrativeBody').innerHTML=items.map(function(i){return'<div class="narr-item '+i.cls+'"><span class="narr-icon">'+i.icon+'</span><span class="narr-text">'+i.text+'</span></div>'}).join('');
 }
 
-function renderMetrics(r,inp){
+function renderMetrics(final,current){
+    var endBtc=final.yearBtcPrice||btcPrice;
+    var wf=calcWrapper(final.btcReserveJpy,horizonYears>0);
+    var wfCls=wf.netPct<0?'good':wf.netPct<0.02?'':'warn';
     var metrics=[
-        {label:'CEBE',value:fmtSats(r.cebeSats),sub:'sats/share',cls:r.cebeSats<=0?'danger':''},
-        {label:'DRAG',value:fmtPct(r.drag),sub:fmtPct(1-r.drag)+' to common',cls:r.drag>.5?'danger':r.drag>.35?'warn':r.drag>.20?'':'good'},
-        {label:'AMPLIFICATION',value:r.amp>100?'\u221e':r.amp.toFixed(2)+'\u00d7',sub:((r.amp-1)*100).toFixed(0)+'% amplified',cls:''},
-        {label:'BREAK-EVEN',value:fmtPrice(r.breakEven),sub:'BTC floor',cls:btcPrice<=r.breakEven*1.1?'danger':btcPrice<=r.breakEven*1.5?'warn':''},
-        {label:'NAV/SHARE',value:fmtYen(r.navJpy),sub:'\u00d7 '+mnavMultiple.toFixed(2)+' mNAV',cls:''},
-        {label:'ANNUAL COST',value:'\u00a50',sub:'zero-coupon',cls:'good'},
+        {label:'CEBE',value:fmtSats(final.cebeSats),sub:'sats/share',cls:final.cebeSats<=0?'danger':''},
+        {label:'DRAG',value:fmtPct(final.drag),sub:fmtPct(1-final.drag)+' to common',cls:final.drag>.5?'danger':final.drag>.35?'warn':''},
+        {label:'AMPLIFICATION',value:final.amp>100?'\u221e':final.amp.toFixed(2)+'\u00d7',sub:((final.amp-1)*100).toFixed(0)+'% amplified',cls:''},
+        {label:'BREAK-EVEN',value:fmtPrice(final.breakEvenUsd),sub:fmtYen(final.breakEvenUsd*(final.yearFx||fxRate)),cls:endBtc<=final.breakEvenUsd*1.1?'danger':endBtc<=final.breakEvenUsd*1.5?'warn':''},
+        {label:'NAV / SHARE',value:fmtYen(final.navPerShareJpy),sub:'($'+final.navPerShareUsd.toFixed(2)+')',cls:''},
+        {label:'WRAPPER FEE',value:fmtPct(wf.netPct,2),sub:fmtByen(Math.abs(wf.net))+(wf.net<0?' surplus':'/yr'),cls:wfCls},
     ];
+    if(horizonYears>0)metrics.push({label:'BTC HELD',value:fmt(Math.round(final.btcH)),sub:(final.btcH<DEFAULTS.btc_holdings?'\u2193':'\u2191')+' from '+fmt(DEFAULTS.btc_holdings),cls:final.btcH<DEFAULTS.btc_holdings*.9?'danger':final.btcH>DEFAULTS.btc_holdings?'good':''});
     $('metricsGrid').innerHTML=metrics.map(function(m){return'<div class="metric-card"><div class="metric-label">'+m.label+'</div><div class="metric-value '+m.cls+'">'+m.value+'</div><div class="metric-sub">'+m.sub+'</div></div>'}).join('');
 }
 
-function renderWaterfall(r,inp){
-    var totalBtcVal=inp.btcH*btcPrice;
+function renderWaterfall(f){
+    var eFx=f.yearFx||fxRate,totalVal=f.btcReserveJpy,nav=f.navPerShareJpy*f.shares;
     $('waterfall').innerHTML=
-        '<div class="wf-step btc-val"><div class="wf-label">BTC VALUE</div><div class="wf-value">'+fmtB(totalBtcVal)+'</div></div>'+
-        '<div class="wf-arrow">\u2192</div><div class="wf-step claims"><div class="wf-label">\u2212 \u00a5 CLAIMS</div><div class="wf-value">'+fmtB(r.netClaimsUsd)+'</div></div>'+
-        '<div class="wf-arrow">\u2192</div><div class="wf-step nav"><div class="wf-label">= NAV</div><div class="wf-value">'+fmtB(r.navUsd)+'</div></div>'+
-        '<div class="wf-arrow">\u2192</div><div class="wf-step shares"><div class="wf-label">\u00f7 '+(inp.shares/1e9).toFixed(2)+'B</div><div class="wf-value">SHARES</div></div>'+
-        '<div class="wf-arrow">\u2192</div><div class="wf-step shares"><div class="wf-label">NAV/SH</div><div class="wf-value">'+fmtYen(r.navJpy)+'</div></div>'+
-        '<div class="wf-arrow">\u2192</div><div class="wf-step shares"><div class="wf-label">\u00d7 mNAV</div><div class="wf-value">'+mnavMultiple.toFixed(2)+'\u00d7</div></div>'+
-        '<div class="wf-arrow">\u2192</div><div class="wf-step result"><div class="wf-label">PRICE</div><div class="wf-value" style="color:var(--orange-primary)">'+fmtYen(r.modeledJpy)+'</div></div>';
+        '<div class="wf-step btc-val"><div class="wf-label">BTC VALUE</div><div class="wf-value">'+fmtByen(totalVal)+'</div></div>'+
+        '<div class="wf-arrow">\u2192</div><div class="wf-step claims"><div class="wf-label">\u2212 CLAIMS</div><div class="wf-value">'+fmtByen(Math.max(0,f.netClaimsUsd*eFx))+'</div></div>'+
+        '<div class="wf-arrow">\u2192</div><div class="wf-step nav"><div class="wf-label">= NAV</div><div class="wf-value">'+fmtByen(nav)+'</div></div>'+
+        '<div class="wf-arrow">\u2192</div><div class="wf-step shares"><div class="wf-label">\u00f7 '+(f.shares/1e9).toFixed(2)+'B</div><div class="wf-value">SHARES</div></div>'+
+        '<div class="wf-arrow">\u2192</div><div class="wf-step shares"><div class="wf-label">NAV/SH</div><div class="wf-value">'+fmtYen(f.navPerShareJpy)+'</div></div>'+
+        '<div class="wf-arrow">\u2192</div><div class="wf-step shares"><div class="wf-label">\u00d7 mNAV</div><div class="wf-value">'+(f.yearMnav||mnavMultiple).toFixed(2)+'\u00d7</div></div>'+
+        '<div class="wf-arrow">\u2192</div><div class="wf-step result"><div class="wf-label">PRICE</div><div class="wf-value" style="color:var(--orange-primary)">'+fmtYen(f.priceJpy)+'</div></div>';
+}
+
+function renderProjectionTable(proj){
+    var sec=$('projectionSection');if(horizonYears===0){sec.style.display='none';return}sec.style.display='block';
+    var sType=getActiveType(),isF=sType==='siege'||sType==='plan555'||sType==='powerlaw';
+    var h='<tr><th style="text-align:center">YEAR</th>';
+    if(isF)h+='<th>BTC PRICE</th><th>JPY/$</th>';
+    h+='<th>BTC</th><th>SHARES</th><th>CEBE</th><th>DRAG</th><th>NAV/SH</th>';
+    if(isF)h+='<th>mNAV</th>';
+    h+='<th>PRICE (\u00a5)</th><th>STATUS</th></tr>';$('projHead').innerHTML=h;
+    var colCount=8+(isF?3:0);
+    $('projBody').innerHTML=proj.map(function(r){
+        var sE=r.status==='green'?'\u{1F7E2}':r.status==='amber'?'\u{1F7E1}':'\u{1F534}';
+        var hasEv=r.events&&r.events.length>0;
+        var row='<tr'+(hasEv?' class="event-row"':'')+'>';
+        row+='<td>'+sE+' '+(r.year===0?'Now':r.calYear)+'</td>';
+        if(isF)row+='<td class="cell-blue">'+fmtPrice(r.yearBtcPrice)+'</td><td>\u00a5'+r.yearFx+'</td>';
+        row+='<td class="'+(r.btcH<DEFAULTS.btc_holdings?'cell-red':r.btcH>DEFAULTS.btc_holdings?'cell-green':'')+'">'+fmt(Math.round(r.btcH))+'</td>';
+        row+='<td>'+(r.shares/1e9).toFixed(2)+'B</td>';
+        row+='<td class="cell-bold">'+fmtSats(r.cebeSats)+'</td>';
+        row+='<td class="'+(r.drag>.5?'cell-red':r.drag>.35?'cell-amber':'')+'">'+fmtPct(r.drag)+'</td>';
+        row+='<td>'+fmtYen(r.navPerShareJpy)+'</td>';
+        if(isF)row+='<td>'+r.yearMnav.toFixed(1)+'\u00d7</td>';
+        row+='<td class="cell-bold" style="color:'+(r.priceJpy>0?'var(--text-primary)':'var(--red)')+'">'+fmtYen(r.priceJpy)+'</td>';
+        row+='<td style="font-size:10px">'+(r.status==='green'?'Healthy':r.status==='amber'?'Stressed':'Critical')+'</td></tr>';
+        if(r.events)r.events.forEach(function(e){row+='<tr class="event-row"><td colspan="'+colCount+'" style="text-align:left;font-size:11px;padding:6px 16px;color:'+(e.cls==='red'?'var(--red)':e.cls==='green'?'var(--green)':'var(--blue)')+'">'+e.icon+' '+e.text+'</td></tr>'});
+        return row;
+    }).join('');
 }
 
 function renderPriceMatrix(){
-    var marketJpy=DEFAULTS.mtplf_price_jpy;
     var html='<thead><tr><th>BTC \u2193 mNAV \u2192</th>';
-    MATRIX_MNAVS.forEach(function(m){html+='<th>'+m.toFixed(2)+'\u00d7</th>'});
-    html+='</tr></thead><tbody>';
+    MATRIX_MNAVS.forEach(function(m){html+='<th>'+m.toFixed(2)+'\u00d7</th>'});html+='</tr></thead><tbody>';
     MATRIX_BTC.forEach(function(bp){
         html+='<tr><td class="row-label">'+(bp>=1e6?'$'+(bp/1e6)+'M':'$'+(bp/1000)+'K')+'</td>';
-        MATRIX_MNAVS.forEach(function(mn){
-            var pJpy=quickPrice(bp,mn), pctD=marketJpy>0?(pJpy-marketJpy)/marketJpy:0, cls='';
-            if(pJpy>=10000)cls='matrix-cell-gold';else if(pctD>.5)cls='matrix-cell-green';else if(pctD>.1)cls='matrix-cell-lightgreen';else if(pctD<-.5)cls='matrix-cell-red';else if(pctD<-.1)cls='matrix-cell-lightred';
-            var isBtc=Math.abs(bp-btcPrice)/btcPrice<.15,isMnav=Math.abs(mn-mnavMultiple)<.05;
-            if(isBtc&&isMnav)cls+=' matrix-cell-current';
-            html+='<td class="'+cls+'">'+(pJpy<=0?'\u00a50':fmtYen(pJpy))+'</td>';
+        MATRIX_MNAVS.forEach(function(m){
+            var pJpy=quickCalcPrice(bp,m,fxRate);
+            var isBtc=Math.abs(bp-btcPrice)/btcPrice<.15,isMn=Math.abs(m-mnavMultiple)<.1;
+            html+='<td class="'+(isBtc&&isMn?'matrix-cell-current':'')+'">'+(pJpy>0?fmtYen(pJpy):'\u00a50')+'</td>';
         });html+='</tr>';
-    });html+='</tbody>';
-    $('priceMatrix').innerHTML=html;
+    });html+='</tbody>';$('priceMatrix').innerHTML=html;
 }
 
 function renderDragMatrix(){
     var html='<thead><tr><th>BTC \u2193 JPY/$ \u2192</th>';
-    MATRIX_FX.forEach(function(fx){html+='<th>\u00a5'+fx+'</th>'});
-    html+='</tr></thead><tbody>';
+    MATRIX_FX.forEach(function(fx){html+='<th>\u00a5'+fx+'</th>'});html+='</tr></thead><tbody>';
     MATRIX_BTC.forEach(function(bp){
         html+='<tr><td class="row-label">'+(bp>=1e6?'$'+(bp/1e6)+'M':'$'+(bp/1000)+'K')+'</td>';
         MATRIX_FX.forEach(function(fx){
-            var drag=quickDrag(bp,fx), cls='';
+            var drag=quickCalcDrag(bp,fx),cls='';
             if(drag<.05)cls='matrix-cell-green';else if(drag<.10)cls='matrix-cell-lightgreen';else if(drag>.50)cls='matrix-cell-red';else if(drag>.30)cls='matrix-cell-lightred';
             var isBtc=Math.abs(bp-btcPrice)/btcPrice<.15,isFx=Math.abs(fx-fxRate)<5;
             if(isBtc&&isFx)cls+=' matrix-cell-current';
             html+='<td class="'+cls+'">'+fmtPct(drag)+'</td>';
         });html+='</tr>';
-    });html+='</tbody>';
-    $('dragMatrix').innerHTML=html;
+    });html+='</tbody>';$('dragMatrix').innerHTML=html;
 }
 
-function renderCapStructure(r,inp){
-    $('customizeBody').innerHTML=
-        '<div style="margin-bottom:16px"><div style="font-size:11px;color:var(--text-muted);letter-spacing:1px;margin-bottom:8px;font-weight:600">ZERO-COUPON BOND STACK</div>'+
-        '<table class="bond-stack"><thead><tr><th>INSTRUMENT</th><th>FACE VALUE</th><th>INTEREST</th><th>CURRENCY</th><th>TYPE</th></tr></thead><tbody>'+
-        '<tr><td>JPY Bonds (Aggregate)</td><td>'+fmtByen(inp.debtJpy)+'</td><td><span class="badge-zero">0%</span></td><td><span class="badge-jpy">JPY</span></td><td>Zero-coupon, unsecured</td></tr>'+
-        '<tr style="border-top:2px solid var(--border-subtle)"><td style="color:var(--text-secondary)">USD EQUIVALENT</td><td style="color:var(--orange-primary);font-weight:700">'+fmtB(r.claimsUsd)+'</td><td></td><td style="font-size:10px;color:var(--text-muted)">\u00a5'+fxRate+'/$</td><td></td></tr>'+
-        '</tbody></table></div>'+
-        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">'+
-        '<div class="metric-card"><div class="metric-label">ANNUAL COST</div><div class="metric-value good">\u00a50</div><div class="metric-sub">zero-coupon</div></div>'+
-        '<div class="metric-card"><div class="metric-label">BTC HOLDINGS</div><div class="metric-value">'+fmt(inp.btcH)+'</div><div class="metric-sub">BTC</div></div>'+
-        '<div class="metric-card"><div class="metric-label">SHARES</div><div class="metric-value">'+(inp.shares/1e9).toFixed(2)+'B</div><div class="metric-sub">outstanding</div></div></div>'+
-        '<div style="font-size:11px;color:var(--text-muted);line-height:1.6">'+
-        '<strong style="color:var(--text-secondary)">Structural advantage:</strong> Zero carry cost. No dividends, no interest. Bond obligations are principal-only at maturity. Issued as unsecured ordinary bonds to EVO Fund. All JPY-denominated \u2014 FX movements directly affect claims in BTC terms.'+
-        '<br><br><strong style="color:var(--text-secondary)">Key risk:</strong> Bond maturity refinancing. If BTC price is low AND yen is strong at maturity, refinancing becomes expensive. Unlike Strategy\u2019s converts, these bonds have no equity conversion option.'+
-        '<br><br><strong style="color:var(--text-secondary)">555 Million Plan:</strong> Targets 100K BTC by end 2026, 210K BTC by 2027. Funding via equity raises + additional bond issuance.</div>';
+function renderCapStructure(f){
+    var eFx=f.yearFx||fxRate;
+    $('capStructureBody').innerHTML=
+        '<table class="pref-stack"><thead><tr><th>INSTRUMENT</th><th>VALUE</th><th>COST</th><th>CURRENCY</th><th>TYPE</th></tr></thead><tbody>'+
+        '<tr><td>Credit Facility</td><td>'+fmtB(f.creditUsd||DEFAULTS.credit_facility_usd)+'</td><td><span class="badge-est">~5.9% EST</span></td><td><span class="badge-usd">USD</span></td><td>BTC-collateral, auto-renewing</td></tr>'+
+        '<tr><td>MERCURY Class B</td><td>'+fmtByen(f.mercFace||DEFAULTS.mercury_face_jpy)+' <span class="badge-est">EST</span></td><td>\u00a549/sh/yr</td><td><span class="badge-jpy">JPY</span></td><td>Cash div, '+fmt(DEFAULTS.mercury_shares)+' shares</td></tr>'+
+        '<tr style="border-top:2px solid var(--border-subtle)"><td style="color:var(--green)">\u2212 Cash + USDC</td><td style="color:var(--green)">'+fmtByen(DEFAULTS.cash_jpy+DEFAULTS.usdc_jpy)+'</td><td></td><td><span class="badge-jpy">JPY</span></td><td>Offsets claims</td></tr>'+
+        '<tr style="border-top:2px solid var(--orange-primary)"><td style="color:var(--orange-primary);font-weight:700">NET CLAIMS</td><td style="color:var(--orange-primary);font-weight:700">'+fmtB(f.netClaimsUsd)+'</td><td></td><td style="font-size:10px;color:var(--text-muted)">\u00a5'+eFx+'/$</td><td>'+fmt(Math.round(f.drag*f.btcH))+' BTC equiv</td></tr>'+
+        '</tbody></table>'+
+        '<div style="font-size:11px;color:var(--text-muted);line-height:1.6;margin-top:12px">'+
+        '<strong style="color:var(--text-secondary)">Key features:</strong> Credit facility is USD-denominated, BTC-collateralized. MERCURY preferred pays cash dividends in JPY. BTC Income from derivative strategies offsets costs. Hotel segment contributes positive cash flow. Capital Allocation Policy: no issuance below 1.0\u00d7 mNAV.'+
+        '</div>';
 }
 
-function renderAssumptions(inp){
-    var t='<strong>Assumptions:</strong> Capital structure snapshot ('+inp.snapshotDate+'). All bonds JPY-denominated zero-coupon. BTC price static. FX rate set by user. No bond maturity modeling in v1 (snapshot only). Cash position approximate.';
-    t+='<br><br><strong>Data:</strong> Holdings from Google Sheet (post-filing updates). Live BTC + JPY/USD derived from CoinGecko (BTC/JPY \u00f7 BTC/USD). Bond aggregate ~\u00a554.3B from Metaplanet analytics ($355M outstanding). Share count 1.14B from filings.';
-    t+='<br><br><strong>FX derivation:</strong> JPY/USD = BTC price in JPY \u00f7 BTC price in USD. This gives the market-consistent cross rate without needing a separate FX API.';
+function renderWrapperFee(f){
+    var isF=horizonYears>0,wf=calcWrapper(f.btcReserveJpy,isF);
+    var pctColor=wf.netPct<0?'var(--green)':wf.netPct<0.02?'var(--text-primary)':'var(--yellow)';
+    var period=isF?'FY2026 FORWARD ESTIMATE':'FY2025 ACTUALS (VERIFIED)';
+    $('wrapperFeeBody').innerHTML=
+        '<div style="text-align:center;margin-bottom:16px">'+
+        '<div style="font-size:9px;letter-spacing:1.5px;color:var(--text-muted);font-family:var(--mono);margin-bottom:4px">'+period+'</div>'+
+        '<div style="font-size:32px;font-weight:800;font-family:var(--mono);color:'+pctColor+'">'+fmtPct(wf.netPct,2)+'</div>'+
+        '<div style="font-size:12px;color:var(--text-muted);font-family:var(--mono)">Net: '+fmtByen(Math.abs(wf.net))+(wf.net<0?' SURPLUS':'')+' on '+fmtByen(f.btcReserveJpy)+' reserve</div></div>'+
+        '<div style="font-size:9px;letter-spacing:1.5px;color:var(--text-muted);font-family:var(--mono);margin-bottom:6px;font-weight:600">COSTS</div>'+
+        '<div class="wrapper-line cost"><span class="wl-label">Operating Expenses</span><span class="wl-value">'+fmtByen(wf.items.opex_jpy)+'</span></div>'+
+        '<div class="wrapper-line cost"><span class="wl-label">MERCURY Dividend'+(isF?' (full year)':' (2 days)')+'</span><span class="wl-value">'+fmtByen(wf.items.mercury_div_jpy)+'</span></div>'+
+        '<div class="wrapper-line cost"><span class="wl-label">Credit Facility Interest <span class="badge-est">EST</span></span><span class="wl-value">'+fmtByen(wf.items.credit_interest_jpy)+'</span></div>'+
+        '<div class="wrapper-line cost"><span class="wl-label">Share Issuance Amort</span><span class="wl-value">'+fmtByen(wf.items.share_amort_jpy)+'</span></div>'+
+        '<div style="font-size:9px;letter-spacing:1.5px;color:var(--text-muted);font-family:var(--mono);margin:12px 0 6px;font-weight:600">OFFSETS</div>'+
+        '<div class="wrapper-line offset"><span class="wl-label">BTC Income (derivatives)</span><span class="wl-value">\u2212'+fmtByen(wf.items.btc_income_jpy||wf.items.btcIncome)+'</span></div>'+
+        '<div class="wrapper-line offset"><span class="wl-label">Hotel Revenue</span><span class="wl-value">\u2212'+fmtByen(wf.items.hotel_revenue_jpy||wf.items.hotelRevenue)+'</span></div>'+
+        '<div class="wrapper-line total"><span class="wl-label" style="font-weight:700;color:var(--text-primary)">NET WRAPPER</span><span class="wl-value" style="color:'+pctColor+';font-size:16px">'+fmtByen(Math.abs(wf.net))+(wf.net<0?' SURPLUS':'')+'</span></div>'+
+        '<div style="font-size:11px;color:var(--text-muted);line-height:1.6;margin-top:12px">'+
+        '<strong>Methodology:</strong> Total annual costs \u00f7 BTC reserve value. BTC Income and hotel revenue are genuine offsets (same treatment as Strategy\u2019s software business). Comparable: Strategy ~1.68%, Strive ~5.06%.'+
+        '<br><br><strong>Sources:</strong> FY2025 \u6c7a\u7b97\u77ed\u4fe1. Credit facility interest estimated. Securities report due ~March 25, 2026.</div>';
+}
+
+function renderAssumptions(){
+    var sType=getActiveType(),t='';
+    if(sType==='plan555')t='<strong>555 Capital Plan (Bull Case):</strong> BTC follows Power Law Support (~23% CAGR). Gerovich targets: 100K BTC by end 2026, 210K by 2027, 300K by 2030. Funding: 50% equity (ATM/warrants), 30% new preferred, 20% credit facility expansion. Yen weakens \u00a53/yr (structural JPY trend). mNAV expands 1.5\u00d7 to 2.0\u00d7. BTC Income scales linearly with holdings.';
+    else if(sType==='siege')t='<strong>Siege:</strong> BTC $50K flat for entire horizon. Yen strengthens to \u00a5125. No new capital raised. mNAV 0.7\u00d7. BTC Income continues (derivatives run regardless of spot). Cash drained by MERCURY dividends + credit interest. When cash depleted, BTC sold to cover.';
+    else if(sType==='powerlaw')t='<strong>Power Law Support (Base Case):</strong> BTC follows support line (~23% avg CAGR). No new capital deployment. Existing structure rides the curve. Yen drifts weaker \u00a52/yr. mNAV conservative 1.0\u00d7 to 1.2\u00d7. Drag compresses naturally.';
+    else t='<strong>Assumptions:</strong> Capital structure frozen at FY2025 filing. BTC price and FX static. MERCURY \u00a549/share annual cash dividend. Credit facility ~5.9% (SOFR+2.25% EST). BTC Income and hotel revenue offset costs.';
+    t+='<br><br><strong>Data:</strong> BTC holdings, shares, costs from FY2025 \u6c7a\u7b97\u77ed\u4fe1 (Feb 14, 2026). Live BTC + FX from CoinGecko. Credit facility rate not disclosed \u2014 estimated from market comparables.';
     $('assumptions').innerHTML=t;
 }
 
@@ -558,22 +758,19 @@ function renderAssumptions(inp){
 // UI BUILDERS
 // ═══════════════════════════════════════════════════
 function buildScenarioBar(){
-    var inp=getInputs();
     var snaps=SCENARIOS.filter(function(s){return s.group==='snapshot'});
     var projs=SCENARIOS.filter(function(s){return s.group==='projection'});
     function renderCard(s){
-        var isP=s.group==='projection';
-        var bClass=isP?'future-badge':'now-badge', hLabel=isP?'FX':'NOW';
+        var isP=s.group==='projection',hLabel=s.horizon===0?'NOW':s.horizon+'Y';
+        var bClass=isP?'future-badge':'now-badge';
         var cClass='scenario-card'+(isP?' projection':'')+(s.id===activeScenario?' active':'');
         var pDisp;
-        if(s.btc)pDisp=s.btc>=1e6?'$'+(s.btc/1e6)+'M':'$'+(s.btc/1000)+'K';
+        if(s.type==='plan555')pDisp='\u2192 300K BTC';
+        else if(s.type==='powerlaw')pDisp='\u2192 ~$760K';
+        else if(s.btc)pDisp=s.btc>=1e6?'$'+(s.btc/1e6)+'M':s.btc>=1000?'$'+(s.btc/1000)+'K':'$'+s.btc;
         else pDisp=fmtPrice(btcPrice);
-        var mDisp=(s.mnav||1).toFixed(1)+'\u00d7 mNAV';
-        var fxDisp=s.fx?'\u00a5'+s.fx+'/$':'\u00a5'+fxRate+'/$';
-        var sBtc=s.btc||(liveBtcPrice||DEFAULTS.btc_price), sFx=s.fx||(liveFxRate||DEFAULTS.jpyusd), sMn=s.mnav||1.0;
-        var sR=calcCEBE(inp.btcH,inp.shares,inp.debtJpy,inp.cashUsd,sBtc,sFx,sMn);
-        var usdDisp=sR.modeledUsd>0?'$'+(sR.modeledUsd>=1?sR.modeledUsd.toFixed(2):sR.modeledUsd.toFixed(4))+' USD':'$0';
-        return'<div class="'+cClass+'" data-scenario="'+s.id+'"><span class="horizon-badge '+bClass+'">'+hLabel+'</span><div class="scenario-icon">'+s.icon+'</div><div class="scenario-name">'+s.name+'</div><div class="scenario-price">'+pDisp+'</div><div class="scenario-mnav">'+mDisp+'</div><div class="scenario-fx">'+fxDisp+'</div><div class="scenario-usd">'+usdDisp+'</div></div>';
+        var mDisp=s.type==='plan555'?'Gerovich Plan \u00b7 10Y':(s.type==='powerlaw'?'Support floor \u00b7 10Y':((s.mnav||1).toFixed(1)+'\u00d7'+(s.fx?' \u00b7 \u00a5'+s.fx:'')));
+        return'<div class="'+cClass+'" data-scenario="'+s.id+'"><span class="horizon-badge '+bClass+'">'+hLabel+'</span><div class="scenario-icon">'+s.icon+'</div><div class="scenario-name">'+s.name+'</div><div class="scenario-price">'+pDisp+'</div><div class="scenario-mnav">'+mDisp+'</div></div>';
     }
     $('snapshotBar').innerHTML=snaps.map(renderCard).join('');
     $('projectionBar').innerHTML=projs.map(renderCard).join('');
@@ -581,44 +778,53 @@ function buildScenarioBar(){
         card.addEventListener('click',function(){
             var id=this.dataset.scenario,sc=SCENARIOS.find(function(s){return s.id===id});if(!sc)return;
             activeScenario=id;
-            btcPrice=sc.btc||(liveBtcPrice||DEFAULTS.btc_price);
-            mnavMultiple=sc.mnav||1.0;
-            fxRate=sc.fx||(liveFxRate||DEFAULTS.jpyusd);
-            syncSliders();buildScenarioBar();updateMnavPresets();render();
+            if(sc.type==='plan555'||sc.type==='powerlaw'){btcPrice=liveBtcPrice||DEFAULTS.btc_price;mnavMultiple=1.0;fxRate=liveFxRate||DEFAULTS.jpyusd}
+            else{btcPrice=sc.btc||(liveBtcPrice||DEFAULTS.btc_price);mnavMultiple=sc.mnav||1.0;fxRate=sc.fx||(liveFxRate||DEFAULTS.jpyusd)}
+            horizonYears=sc.horizon;
+            syncSliders();buildScenarioBar();updateHorizonBar();updateMnavPresets();render();
         });
     });
 }
 
+function updateSliderLocking(){
+    var locked=isSlidersLocked();
+    $('btcSlider').disabled=locked;$('mnavSlider').disabled=locked;
+    $('btcLockedMsg').style.display=locked?'block':'none';
+    $('mnavLockedMsg').style.display=locked?'block':'none';
+}
+
+function buildHorizonBar(){
+    $('horizonBar').innerHTML=HORIZON_OPTIONS.map(function(h){return'<button class="toggle-btn '+(h.years===horizonYears?'active':'')+'" data-years="'+h.years+'">'+h.label+'</button>'}).join('');
+    document.querySelectorAll('#horizonBar .toggle-btn').forEach(function(btn){
+        btn.addEventListener('click',function(){horizonYears=parseInt(this.dataset.years);activeScenario='';updateHorizonBar();buildScenarioBar();render()});
+    });
+}
+function updateHorizonBar(){document.querySelectorAll('#horizonBar .toggle-btn').forEach(function(btn){btn.classList.toggle('active',parseInt(btn.dataset.years)===horizonYears)});$('horizonDisplay').textContent=horizonYears===0?'Now':horizonYears+'Y'}
 function buildMnavPresets(){
     $('mnavPresets').innerHTML=MNAV_PRESETS.map(function(m){return'<button class="mnav-btn '+(Math.abs(m-mnavMultiple)<.01?'active':'')+'" data-mnav="'+m+'">'+(m%1===0?m.toFixed(0):m.toFixed(2))+'\u00d7</button>'}).join('');
     document.querySelectorAll('.mnav-btn').forEach(function(btn){
-        btn.addEventListener('click',function(){mnavMultiple=parseFloat(this.dataset.mnav);$('mnavSlider').value=mnavMultiple*100;$('mnavDisplay').textContent=mnavMultiple.toFixed(2)+'\u00d7';activeScenario='';updateMnavPresets();buildScenarioBar();render()});
+        btn.addEventListener('click',function(){if(isSlidersLocked())return;mnavMultiple=parseFloat(this.dataset.mnav);$('mnavSlider').value=mnavMultiple*100;$('mnavDisplay').textContent=mnavMultiple.toFixed(2)+'\u00d7';activeScenario='';updateMnavPresets();buildScenarioBar();render()});
     });
 }
 function updateMnavPresets(){document.querySelectorAll('.mnav-btn').forEach(function(btn){btn.classList.toggle('active',Math.abs(parseFloat(btn.dataset.mnav)-mnavMultiple)<.01)})}
-function syncSliders(){
-    $('btcSlider').value=btcPrice;$('btcPriceDisplay').textContent=fmtPrice(btcPrice);
-    $('mnavSlider').value=mnavMultiple*100;$('mnavDisplay').textContent=mnavMultiple.toFixed(2)+'\u00d7';
-    $('fxSlider').value=fxRate;$('fxDisplay').textContent='\u00a5'+fxRate;
-    updateMnavPresets();
-}
+function setShareBasis(b){shareBasis=b;document.querySelectorAll('#shareBar .toggle-btn').forEach(function(btn){btn.classList.toggle('active',btn.dataset.basis===b)});$('shareDisplay').textContent=b==='diluted'?'Fully Diluted':'Basic';render()}
+function syncSliders(){$('btcSlider').value=btcPrice;$('btcPriceDisplay').textContent=fmtPrice(btcPrice);$('mnavSlider').value=mnavMultiple*100;$('mnavDisplay').textContent=mnavMultiple.toFixed(2)+'\u00d7';$('fxSlider').value=fxRate;$('fxDisplay').textContent='\u00a5'+fxRate;updateHorizonBar();updateMnavPresets()}
 function updateSliderFills(){
-    var bs=$('btcSlider'),bp=((bs.value-20000)/(1e6-20000))*100;bs.style.background='linear-gradient(90deg,var(--orange-primary) '+bp+'%,#333 '+bp+'%)';
-    var ms=$('mnavSlider'),mp=((ms.value-30)/(400-30))*100;ms.style.background='linear-gradient(90deg,var(--orange-primary) '+mp+'%,#333 '+mp+'%)';
-    var fs=$('fxSlider'),fp=((fs.value-120)/(200-120))*100;fs.style.background='linear-gradient(90deg,var(--red) '+fp+'%,#333 '+fp+'%)';
+    var bs=$('btcSlider'),bp=((bs.value-10000)/(1e6-10000))*100;bs.style.background=bs.disabled?'#222':'linear-gradient(90deg,var(--orange-primary) '+bp+'%,#333 '+bp+'%)';
+    var ms=$('mnavSlider'),mp=((ms.value-30)/(400-30))*100;ms.style.background=ms.disabled?'#222':'linear-gradient(90deg,var(--orange-primary) '+mp+'%,#333 '+mp+'%)';
+    var fs=$('fxSlider'),fp=((fs.value-100)/(220-100))*100;fs.style.background='linear-gradient(90deg,var(--fx-red) '+fp+'%,#333 '+fp+'%)';
 }
 
-// ─── SLIDER EVENTS ───
-$('btcSlider').addEventListener('input',function(e){btcPrice=parseInt(e.target.value);$('btcPriceDisplay').textContent=fmtPrice(btcPrice);activeScenario='';buildScenarioBar();render()});
-$('mnavSlider').addEventListener('input',function(e){mnavMultiple=parseInt(e.target.value)/100;$('mnavDisplay').textContent=mnavMultiple.toFixed(2)+'\u00d7';activeScenario='';updateMnavPresets();buildScenarioBar();render()});
-$('fxSlider').addEventListener('input',function(e){fxRate=parseInt(e.target.value);$('fxDisplay').textContent='\u00a5'+fxRate;activeScenario='';buildScenarioBar();render()});
+$('btcSlider').addEventListener('input',function(e){if(isSlidersLocked())return;btcPrice=parseInt(e.target.value);$('btcPriceDisplay').textContent=fmtPrice(btcPrice);activeScenario='';buildScenarioBar();render()});
+$('mnavSlider').addEventListener('input',function(e){if(isSlidersLocked())return;mnavMultiple=parseInt(e.target.value)/100;$('mnavDisplay').textContent=mnavMultiple.toFixed(2)+'\u00d7';activeScenario='';updateMnavPresets();buildScenarioBar();render()});
+$('fxSlider').addEventListener('input',function(e){fxRate=parseInt(e.target.value);$('fxDisplay').textContent='\u00a5'+fxRate;if(!isSlidersLocked())activeScenario='';buildScenarioBar();render()});
 
-// ─── KEYBOARD SHORTCUTS ───
 document.addEventListener('keydown',function(e){
     if(e.target.tagName==='INPUT')return;
     if(e.key>='1'&&e.key<='6'){var idx=parseInt(e.key)-1;if(SCENARIOS[idx]){var sc=SCENARIOS[idx];activeScenario=sc.id;
-        btcPrice=sc.btc||(liveBtcPrice||DEFAULTS.btc_price);mnavMultiple=sc.mnav||1.0;fxRate=sc.fx||(liveFxRate||DEFAULTS.jpyusd);
-        syncSliders();buildScenarioBar();updateMnavPresets();render()}}
+        if(sc.type==='plan555'||sc.type==='powerlaw'){btcPrice=liveBtcPrice||DEFAULTS.btc_price;mnavMultiple=1.0;fxRate=liveFxRate||DEFAULTS.jpyusd}
+        else{btcPrice=sc.btc||(liveBtcPrice||DEFAULTS.btc_price);mnavMultiple=sc.mnav||1.0;fxRate=sc.fx||(liveFxRate||DEFAULTS.jpyusd)}
+        horizonYears=sc.horizon;syncSliders();buildScenarioBar();updateHorizonBar();updateMnavPresets();render()}}
 });
 
 loadData();
