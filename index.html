@@ -201,7 +201,7 @@
             margin-bottom: 40px;
         }
         
-        .data-table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        .data-table { width: 100%; border-collapse: collapse; min-width: 900px; }
         
         .data-table th {
             background: var(--bg-secondary);
@@ -1298,6 +1298,8 @@
                         <th>CEBE</th>
                         <th>Drag</th>
                         <th>Common Equity</th>
+                        <th title="CEBE sats per $1 invested — how much BTC exposure does a dollar buy?">Sats/$</th>
+                        <th title="Stock price ÷ CEBE NAV per share — are you paying a premium or discount to net BTC value?">CEBE mNAV</th>
                         <th style="width: 100px;">Source</th>
                     </tr>
                 </thead>
@@ -1718,6 +1720,13 @@
                     <td>
                         <div class="metric-value">${(metrics.commonEquityPct * 100).toFixed(1)}%</div>
                         <div class="metric-label">of BTC</div>
+                    </td>
+                    <td>
+                        <div class="metric-value cebe-sats-dollar" data-ticker="${ticker}" data-cebe="${metrics.cebe}">-</div>
+                        <div class="metric-label">sats per $1</div>
+                    </td>
+                    <td>
+                        <div class="metric-value cebe-mnav" data-ticker="${ticker}" data-cebe-btc="${metrics.cebe / 100000000}">-</div>
                     </td>
                     <td>
                         <div class="source-cell">
@@ -2405,6 +2414,36 @@
                     const price = await fetchStockPrice(symbol);
                     if (price) {
                         el.textContent = '$' + price.toFixed(2);
+                        
+                        // Find the ticker for this symbol
+                        const ticker = Object.keys(tickerToStock).find(k => tickerToStock[k] === symbol) || symbol;
+                        
+                        // Update CEBE Sats/$ 
+                        const satsDollarEl = document.querySelector(`.cebe-sats-dollar[data-ticker="${ticker}"]`);
+                        if (satsDollarEl && price > 0) {
+                            const cebe = parseFloat(satsDollarEl.dataset.cebe) || 0;
+                            const satsPerDollar = cebe / price;
+                            satsDollarEl.textContent = formatNumber(Math.round(satsPerDollar));
+                        }
+                        
+                        // Update CEBE mNAV
+                        const cebeMnavEl = document.querySelector(`.cebe-mnav[data-ticker="${ticker}"]`);
+                        if (cebeMnavEl && price > 0 && liveBtcPrice > 0) {
+                            const cebeBtc = parseFloat(cebeMnavEl.dataset.cebeBtc) || 0;
+                            const navPerShare = cebeBtc * liveBtcPrice;
+                            if (navPerShare > 0) {
+                                const cebeMnav = price / navPerShare;
+                                cebeMnavEl.textContent = cebeMnav.toFixed(2) + 'x';
+                                // Color code: green = discount, red = premium
+                                if (cebeMnav < 0.95) {
+                                    cebeMnavEl.style.color = 'var(--green)';
+                                } else if (cebeMnav > 1.05) {
+                                    cebeMnavEl.style.color = 'var(--red)';
+                                } else {
+                                    cebeMnavEl.style.color = 'var(--text-primary)';
+                                }
+                            }
+                        }
                     } else {
                         el.textContent = '-';
                     }
