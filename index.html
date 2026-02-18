@@ -1343,11 +1343,21 @@
         let liveStockPrices = {};
         
         // Fetch live BTC price from CoinGecko (free, no key needed)
+        // Also derives FX rates from BTC cross-rates
         async function fetchBtcPrice() {
             try {
-                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,brl,gbp,jpy');
                 const data = await response.json();
                 liveBtcPrice = data.bitcoin.usd;
+                
+                // Derive FX rates: 1 foreign unit = X USD
+                // e.g. if BTC = $96,000 USD and BTC = R$550,000 BRL, then 1 BRL = 96000/550000 = $0.1745
+                if (data.bitcoin.eur > 0) fxRates.EUR = data.bitcoin.usd / data.bitcoin.eur;
+                if (data.bitcoin.brl > 0) fxRates.BRL = data.bitcoin.usd / data.bitcoin.brl;
+                if (data.bitcoin.gbp > 0) fxRates.GBP = data.bitcoin.usd / data.bitcoin.gbp;
+                if (data.bitcoin.jpy > 0) fxRates.JPY = data.bitcoin.usd / data.bitcoin.jpy;
+                
+                console.log('[FX] Rates derived from CoinGecko BTC cross-rates:', fxRates);
                 return liveBtcPrice;
             } catch (error) {
                 console.error('Failed to fetch BTC price:', error);
@@ -1406,6 +1416,20 @@
             ALCPB: 'ALCPB.PA',
             OBTC3: 'OBTC3.SA'
         };
+        
+        // Stock price currency — what currency does Finnhub return for each symbol?
+        // OTC tickers (MTPLF, TSWCF) return USD. Foreign exchange tickers return local currency.
+        const stockCurrency = {
+            MSTR: 'USD',
+            MTPLF: 'USD',
+            ASST: 'USD',
+            TSWCF: 'USD',
+            ALCPB: 'EUR',
+            OBTC3: 'BRL'
+        };
+        
+        // FX rates to USD (populated at init)
+        let fxRates = { USD: 1, EUR: 1, BRL: 1, GBP: 1, JPY: 1 };
         
         // Company metadata with multi-ticker support
         const companyMeta = {
@@ -1704,7 +1728,7 @@
                     </td>
                     <td>
                         <div class="metric-value stock-price" data-symbol="${tickerToStock[ticker] || ticker}">-</div>
-                        <div class="metric-label">USD</div>
+                        <div class="metric-label">${stockCurrency[ticker] || 'USD'}</div>
                     </td>
                     <td>
                         <div class="metric-value">${formatNumber(parseFloat(snapshot.btc_holdings))}</div>
@@ -2413,26 +2437,32 @@
                     const symbol = el.dataset.symbol;
                     const price = await fetchStockPrice(symbol);
                     if (price) {
-                        el.textContent = '$' + price.toFixed(2);
-                        
                         // Find the ticker for this symbol
                         const ticker = Object.keys(tickerToStock).find(k => tickerToStock[k] === symbol) || symbol;
+                        const currency = stockCurrency[ticker] || 'USD';
+                        const fxRate = fxRates[currency] || 1;
+                        const priceUsd = price * fxRate;
                         
-                        // Update CEBE Sats/$ 
+                        // Display in local currency with correct symbol
+                        const currencySymbols = { USD: '$', EUR: '€', BRL: 'R$', GBP: '£', JPY: '¥' };
+                        const sym = currencySymbols[currency] || '$';
+                        el.textContent = sym + price.toFixed(2);
+                        
+                        // Update CEBE Sats/$ (always in USD terms)
                         const satsDollarEl = document.querySelector(`.cebe-sats-dollar[data-ticker="${ticker}"]`);
-                        if (satsDollarEl && price > 0) {
+                        if (satsDollarEl && priceUsd > 0) {
                             const cebe = parseFloat(satsDollarEl.dataset.cebe) || 0;
-                            const satsPerDollar = cebe / price;
+                            const satsPerDollar = cebe / priceUsd;
                             satsDollarEl.textContent = formatNumber(Math.round(satsPerDollar));
                         }
                         
-                        // Update CEBE mNAV
+                        // Update CEBE mNAV (always in USD terms)
                         const cebeMnavEl = document.querySelector(`.cebe-mnav[data-ticker="${ticker}"]`);
-                        if (cebeMnavEl && price > 0 && liveBtcPrice > 0) {
+                        if (cebeMnavEl && priceUsd > 0 && liveBtcPrice > 0) {
                             const cebeBtc = parseFloat(cebeMnavEl.dataset.cebeBtc) || 0;
                             const navPerShare = cebeBtc * liveBtcPrice;
                             if (navPerShare > 0) {
-                                const cebeMnav = price / navPerShare;
+                                const cebeMnav = priceUsd / navPerShare;
                                 cebeMnavEl.textContent = cebeMnav.toFixed(2) + 'x';
                                 // Color code: green = discount, red = premium
                                 if (cebeMnav < 0.95) {
