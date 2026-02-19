@@ -213,6 +213,41 @@
             letter-spacing: 0.8px;
             color: var(--text-muted);
             border-bottom: 1px solid var(--border-subtle);
+            cursor: default;
+            user-select: none;
+        }
+        
+        .data-table th[data-sort] {
+            cursor: pointer;
+            position: relative;
+            padding-right: 28px;
+            transition: color 0.15s;
+        }
+        
+        .data-table th[data-sort]:hover {
+            color: var(--orange-primary);
+        }
+        
+        .data-table th[data-sort]::after {
+            content: '\2195';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 10px;
+            opacity: 0.3;
+        }
+        
+        .data-table th[data-sort].sort-asc::after {
+            content: '\25B2';
+            opacity: 0.8;
+            color: var(--orange-primary);
+        }
+        
+        .data-table th[data-sort].sort-desc::after {
+            content: '\25BC';
+            opacity: 0.8;
+            color: var(--orange-primary);
         }
         
         .data-table td {
@@ -1292,14 +1327,14 @@
             <table class="data-table" id="dataTable" style="display: none;">
                 <thead>
                     <tr>
-                        <th>Company</th>
+                        <th data-sort="name">Company</th>
                         <th>Stock Price</th>
-                        <th>BTC Holdings</th>
-                        <th>CEBE</th>
-                        <th>Drag</th>
-                        <th>Common Equity</th>
-                        <th title="CEBE sats per $1 invested — how much BTC exposure does a dollar buy?">Sats/$</th>
-                        <th title="Stock price ÷ CEBE NAV per share — are you paying a premium or discount to net BTC value?">CEBE mNAV</th>
+                        <th data-sort="btc">BTC Holdings</th>
+                        <th data-sort="cebe">CEBE</th>
+                        <th data-sort="drag">Drag</th>
+                        <th data-sort="equity">Common Equity</th>
+                        <th data-sort="sats_dollar" title="CEBE sats per $1 invested -- how much BTC exposure does a dollar buy?">Sats/$</th>
+                        <th data-sort="cebe_mnav" title="Stock price / CEBE NAV per share -- are you paying a premium or discount to net BTC value?">CEBE mNAV</th>
                         <th style="width: 100px;">Source</th>
                     </tr>
                 </thead>
@@ -1415,7 +1450,8 @@
             TSWCF: 'TSWCF',
             ALCPB: 'ALCPB.PA',
             OBTC3: 'OBTC3.SA',
-            BRR: 'BRR'
+            BRR: 'BRR',
+            NAKA: 'NAKA'
         };
         
         // Stock price currency — what currency does Finnhub return for each symbol?
@@ -1427,7 +1463,8 @@
             TSWCF: 'USD',
             ALCPB: 'EUR',
             OBTC3: 'BRL',
-            BRR: 'USD'
+            BRR: 'USD',
+            NAKA: 'USD'
         };
         
         // FX rates to USD (populated at init)
@@ -1480,11 +1517,19 @@
                 exchange: 'Nasdaq: BRR',
                 displayTickers: ['BRR'],
                 primaryTicker: 'BRR'
+            },
+            NAKA: { 
+                name: 'Nakamoto', 
+                exchange: 'Nasdaq: NAKA',
+                displayTickers: ['NAKA'],
+                primaryTicker: 'NAKA'
             }
         };
         
         let allSnapshots = [];
         let companiesData = {};
+        let currentSnapshots = [];
+        let currentSort = { key: null, dir: 'asc' };
         
         // Encumbrance data — Annual Cost to Common Equity
         // Sources: 10-K, DEF 14A, 8-K, earnings releases
@@ -1604,6 +1649,33 @@
                     'Q1 2026 10-Q (expected May 2026) will provide first full-quarter recurring data',
                     'Confirm SBC expense trajectory as RSU targets remain far out of money',
                 ]
+            },
+            NAKA: {
+                lastUpdated: '2026-02-19',
+                btcReserveForCalc: 518000000, // 5,398 BTC x ~$96K
+                items: [
+                    { category: 'interest', label: 'Kraken Loan Interest', sublabel: '$210M USDT at 8.0% p.a.', amount: 16800000, pctOfReserve: null, verified: true, note: 'Master Loan Agreement Dec 3, 2025. $210M USDT, 8% fixed, maturity Dec 4, 2026. BTC-collateralized (154% Required Margin Ratio). Default rate 13%. Source: 8-K Dec 9, 2025 + Exhibit 10.1.' },
+                    { category: 'operations', label: 'Operating Expenses (Q3 annualized)', sublabel: 'G&A + healthcare ops + digital asset costs', amount: 43200000, pctOfReserve: null, verified: false, note: 'Q3 2025 OpEx $10.8M x 4. Includes legacy healthcare, digital asset admin, G&A. 10-Q filed late (NT 10-Q Nov 14). Source: Q3 2025 10-Q.' },
+                    { category: 'exec', label: 'Executive Cash Compensation', sublabel: 'Bailey (CEO) + Evans (CIO) + Creighton (CCO)', amount: 3500000, pctOfReserve: null, verified: true, note: 'Bailey: $700K base + $250K signing. Evans: $500K + $250K signing. Creighton: $600K + $250K signing. Excludes performance bonuses (up to $2.1M Bailey, $1.5M Evans, $200K Creighton). Source: 8-K Aug 14, 2025.' },
+                    { category: 'sbc', label: 'Stock-Based Compensation', sublabel: 'Options + RSUs + performance awards', amount: 10000000, pctOfReserve: null, verified: false, note: 'Estimated. Bailey: 5M options + $1M RSU + $1M perf RSU/yr. Evans: 10M options + $800K perf RSU/yr. Creighton: 4M options + $600K perf RSU/yr. 37.6M shares reserved under 2025 plan. Source: 8-K Aug 14, 2025.' },
+                    { category: 'board', label: 'Board Compensation', sublabel: '6 directors x $300K (cash + equity)', amount: 1800000, pctOfReserve: null, verified: true, note: 'Each non-employee director: $75K cash retainer + 500K stock options + $50K-100K committee fees. Source: 8-K Aug 14, 2025 Director Compensation policy.' },
+                    { category: 'operations', label: 'BTC Inc Services Agreement', sublabel: 'Marketing, branding, conference services', amount: 960000, pctOfReserve: null, verified: true, note: 'Related-party agreement with BTC Inc (Bailey entity). $80K/month. Source: 8-K/S-4 disclosures.' },
+                ],
+                offsets: [
+                    { label: 'Healthcare Revenue', sublabel: 'KindlyMD legacy clinics (declining)', amount: 1600000, verified: false, note: 'Q3 2025: $0.4M revenue (down from $0.6M YoY). Annualized ~$1.6M. Negligible relative to costs. Source: Q3 2025 10-Q.' },
+                ],
+                sources: [
+                    'Q3 2025 10-Q (filed late Nov 2025)',
+                    '8-K Aug 14, 2025 (exec comp, board comp)',
+                    '8-K Dec 9, 2025 (Kraken loan terms)',
+                    'Exhibit 10.1 Master Loan Agreement',
+                ],
+                pendingBackfill: [
+                    'FY2025 10-K (expected spring 2026) for full-year expenses',
+                    'Cash position update (Q3 $24.2M is 5 months stale)',
+                    'BTC Inc deal close would add ~$62M revenue but 363.6M dilutive shares',
+                    'WARNING: BTC-secured debt. Kraken can force-liquidate collateral with zero notice at Liquidation Ratio breach.',
+                ]
             }
         };
         
@@ -1699,7 +1771,7 @@
         
         function getLatestSnapshots(snapshots) {
             const latest = {};
-            const order = ['MSTR', 'MTPLF', 'ASST', 'TSWCF', 'ALCPB', 'OBTC3', 'BRR'];
+            const order = ['MSTR', 'MTPLF', 'ASST', 'TSWCF', 'ALCPB', 'OBTC3', 'BRR', 'NAKA'];
             
             snapshots.forEach(s => {
                 const ticker = s.ticker;
@@ -1726,6 +1798,7 @@
         }
         
         function renderTable(snapshots) {
+            currentSnapshots = snapshots;
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
             
@@ -1803,6 +1876,113 @@
                 row.addEventListener('click', () => {
                     const ticker = row.getAttribute('data-ticker');
                     openModal(ticker);
+                });
+            });
+            
+            // Reapply cached stock prices after re-render (for sort)
+            applyStockPricesFromCache();
+        }
+        
+        function applyStockPricesFromCache() {
+            document.querySelectorAll('.stock-price').forEach(el => {
+                const symbol = el.dataset.symbol;
+                const price = liveStockPrices[symbol];
+                if (!price) return;
+                
+                const ticker = Object.keys(tickerToStock).find(k => tickerToStock[k] === symbol) || symbol;
+                const currency = stockCurrency[ticker] || 'USD';
+                const fxRate = fxRates[currency] || 1;
+                const priceUsd = price * fxRate;
+                
+                const currencySymbols = { USD: '$', EUR: '\u20AC', BRL: 'R$', GBP: '\u00A3', JPY: '\u00A5' };
+                const sym = currencySymbols[currency] || '$';
+                el.textContent = sym + price.toFixed(2);
+                
+                const satsDollarEl = document.querySelector(`.cebe-sats-dollar[data-ticker="${ticker}"]`);
+                if (satsDollarEl && priceUsd > 0) {
+                    const cebe = parseFloat(satsDollarEl.dataset.cebe) || 0;
+                    satsDollarEl.textContent = formatNumber(Math.round(cebe / priceUsd));
+                }
+                
+                const cebeMnavEl = document.querySelector(`.cebe-mnav[data-ticker="${ticker}"]`);
+                if (cebeMnavEl && priceUsd > 0 && liveBtcPrice > 0) {
+                    const cebeBtc = parseFloat(cebeMnavEl.dataset.cebeBtc) || 0;
+                    const navPerShare = cebeBtc * liveBtcPrice;
+                    if (navPerShare > 0) {
+                        const cebeMnav = priceUsd / navPerShare;
+                        cebeMnavEl.textContent = cebeMnav.toFixed(2) + 'x';
+                        if (cebeMnav < 0.95) cebeMnavEl.style.color = 'var(--green)';
+                        else if (cebeMnav > 1.05) cebeMnavEl.style.color = 'var(--red)';
+                        else cebeMnavEl.style.color = 'var(--text-primary)';
+                    }
+                }
+            });
+        }
+        
+        // Column sorting
+        function getSortValue(snapshot, key) {
+            const meta = companyMeta[snapshot.ticker] || {};
+            const metrics = calculateMetrics(snapshot);
+            const ticker = snapshot.ticker;
+            const stockSymbol = tickerToStock[ticker] || ticker;
+            const stockPrice = liveStockPrices[stockSymbol] || 0;
+            const currency = stockCurrency[ticker] || 'USD';
+            const priceUsd = currency !== 'USD' && fxRates[currency] ? stockPrice * fxRates[currency] : stockPrice;
+            
+            switch(key) {
+                case 'name': return (meta.name || ticker).toLowerCase();
+                case 'btc': return parseFloat(snapshot.btc_holdings) || 0;
+                case 'cebe': return metrics.cebe || 0;
+                case 'drag': return metrics.drag || 0;
+                case 'equity': return metrics.commonEquityPct || 0;
+                case 'sats_dollar': return priceUsd > 0 ? metrics.cebe / priceUsd : 0;
+                case 'cebe_mnav': {
+                    const cebeNAV = (metrics.cebe / 100000000) * (liveBtcPrice || 96000);
+                    return priceUsd > 0 && cebeNAV > 0 ? priceUsd / cebeNAV : 0;
+                }
+                default: return 0;
+            }
+        }
+        
+        function sortTable(key) {
+            if (currentSnapshots.length === 0) return;
+            
+            if (currentSort.key === key) {
+                currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.key = key;
+                currentSort.dir = key === 'name' ? 'asc' : 'desc';
+            }
+            
+            const sorted = [...currentSnapshots].sort((a, b) => {
+                const va = getSortValue(a, key);
+                const vb = getSortValue(b, key);
+                let cmp = 0;
+                if (typeof va === 'string') {
+                    cmp = va.localeCompare(vb);
+                } else {
+                    cmp = va - vb;
+                }
+                return currentSort.dir === 'asc' ? cmp : -cmp;
+            });
+            
+            renderTable(sorted);
+            
+            // Update header arrows
+            document.querySelectorAll('.data-table th[data-sort]').forEach(th => {
+                th.classList.remove('sort-asc', 'sort-desc');
+                if (th.getAttribute('data-sort') === key) {
+                    th.classList.add(currentSort.dir === 'asc' ? 'sort-asc' : 'sort-desc');
+                }
+            });
+        }
+        
+        // Attach sort handlers after DOM ready
+        function initSortHeaders() {
+            document.querySelectorAll('.data-table th[data-sort]').forEach(th => {
+                th.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sortTable(th.getAttribute('data-sort'));
                 });
             });
         }
@@ -2463,6 +2643,7 @@
                 
                 const latest = getLatestSnapshots(liveSnapshots);
                 renderTable(latest);
+                initSortHeaders();
                 
                 // Fetch live stock prices for table
                 document.querySelectorAll('.stock-price').forEach(async (el) => {
