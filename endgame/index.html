@@ -220,6 +220,64 @@
             font-family: 'JetBrains Mono', monospace;
             animation: pulse 1s ease infinite;
         }
+        .liquidation-warn {
+            font-size: 11px;
+            margin-top: 4px;
+            letter-spacing: 1px;
+            font-family: 'JetBrains Mono', monospace;
+            animation: pulse 1s ease infinite;
+        }
+        .liquidation-warn.margin-call { color: var(--yellow); }
+        .liquidation-warn.liquidated { color: var(--red); }
+
+        /* Seized state */
+        .tank.seized {
+            border-color: rgba(239, 68, 68, 0.5) !important;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.15), inset 0 0 20px rgba(239, 68, 68, 0.05);
+        }
+        .seized-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .seized-overlay.active { opacity: 1; }
+        .seized-icon { font-size: 32px; margin-bottom: 6px; }
+        .seized-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--red);
+            letter-spacing: 2px;
+            font-family: 'JetBrains Mono', monospace;
+            text-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+        }
+        .seized-sub {
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 4px;
+        }
+
+        /* Liquidation slider markers */
+        .liq-dot {
+            position: absolute;
+            top: 50%;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 2;
+        }
+        .liq-dot.margin-call { background: var(--yellow); box-shadow: 0 0 6px rgba(234, 179, 8, 0.5); }
+        .liq-dot.liquidation { background: var(--red); box-shadow: 0 0 6px rgba(239, 68, 68, 0.5); }
 
         /* Viz container */
         .viz-box {
@@ -660,6 +718,7 @@
         <div id="priceValue" class="price-value">$80K</div>
         <div id="priceHint" style="font-size:9px; color:#27272a; letter-spacing:1px; font-family:'JetBrains Mono',monospace; margin-top:4px; transition: opacity 0.5s;">tap to type a price</div>
         <div id="breakEvenWarn" class="break-even-warn" style="display:none;"></div>
+        <div id="liquidationWarn" class="liquidation-warn" style="display:none;"></div>
     </div>
 
     <!-- Viz container -->
@@ -670,6 +729,7 @@
             <svg id="tankSvg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
             <div id="tankTopLabel" class="tank-top-label"></div>
             <div id="tankLabelsInner"></div>
+            <div id="seizedOverlay" class="seized-overlay"></div>
             <div id="particleLayer"></div>
         </div>
 
@@ -685,6 +745,7 @@
         </div>
         <input type="range" id="priceSlider" min="20000" max="1000000" step="1000" value="80000">
         <div id="plTicks" class="slider-ticks"></div>
+        <div id="liqTicks" class="slider-ticks" style="pointer-events:none;"></div>
         <div id="sliderHint" style="text-align:center; margin-top:8px; margin-bottom:2px; font-size:10px; color:#3f3f46; letter-spacing:1px; font-family:'JetBrains Mono',monospace; transition: opacity 0.5s;">← drag to explore →</div>
         <div id="plPills" class="pl-pills"></div>
     </div>
@@ -732,9 +793,39 @@ const COMPANY_META = {
     TSWCF: { name: 'Smarter Web Co', exchange: 'LSE: SWC / OTC: TSWCF' },
     ALCPB: { name: 'Capital B', exchange: 'Euronext: ALCPB' },
     OBTC3: { name: 'OranjeBTC', exchange: 'B3: OBTC3' },
+    BRR: { name: 'ProCap Financial', exchange: 'Nasdaq: BRR' },
+    NAKA: { name: 'Nakamoto', exchange: 'Nasdaq: NAKA' },
 };
-const TICKER_ORDER = ['MSTR', 'MTPLF', 'ASST', 'TSWCF', 'ALCPB', 'OBTC3'];
-const TICKER_COLORS = { MSTR: '#f97316', MTPLF: '#38bdf8', ASST: '#a78bfa', TSWCF: '#4ade80', ALCPB: '#f472b6', OBTC3: '#fbbf24' };
+const TICKER_ORDER = ['MSTR', 'MTPLF', 'ASST', 'TSWCF', 'ALCPB', 'OBTC3', 'BRR', 'NAKA'];
+const TICKER_COLORS = { MSTR: '#f97316', MTPLF: '#38bdf8', ASST: '#a78bfa', TSWCF: '#4ade80', ALCPB: '#f472b6', OBTC3: '#fbbf24', BRR: '#06b6d4', NAKA: '#ef4444' };
+
+// ─── Liquidation thresholds (collateral-backed loans only) ───
+const LIQUIDATION_DATA = {
+    NAKA: {
+        lender: 'Kraken',
+        marginCallRatio: 1.54,   // 154% RMR — must post more collateral or pay down
+        liquidationRatio: 1.25,  // estimated auto-liquidation threshold
+        note: '$210M secured by BTC. 154% Required Maintenance Ratio.',
+    }
+};
+
+function getLiquidationLevels(ticker, m) {
+    const liq = LIQUIDATION_DATA[ticker];
+    if (!liq || m.isPure || m.netClaims <= 0 || m.btc <= 0) return null;
+    // netClaims = debt + pref - cash (already computed by calc())
+    // marginCallPrice = price where collateral value / loan < RMR
+    // collateral value = btc * price, loan ≈ netClaims
+    const marginCallPrice = (m.netClaims * liq.marginCallRatio) / m.btc;
+    const liquidationPrice = (m.netClaims * liq.liquidationRatio) / m.btc;
+    return {
+        lender: liq.lender,
+        marginCallPrice: Math.round(marginCallPrice),
+        liquidationPrice: Math.round(liquidationPrice),
+        note: liq.note,
+        isMarginCall: false,
+        isLiquidated: false,
+    };
+}
 
 // ─── State ───
 let companyData = null;
@@ -874,6 +965,28 @@ function updatePillStates() {
     });
 }
 
+// ─── Liquidation slider markers ───
+function renderLiqTicks() {
+    const container = $('liqTicks');
+    const snap = companyData?.[selectedTicker];
+    if (!snap) { container.innerHTML = ''; return; }
+    const m = calc(snap, btcPrice);
+    const levels = getLiquidationLevels(selectedTicker, m);
+    if (!levels) { container.innerHTML = ''; return; }
+
+    const min = 20000, max = 1000000;
+    const dots = [];
+    if (levels.liquidationPrice >= min && levels.liquidationPrice <= max) {
+        const pct = ((levels.liquidationPrice - min) / (max - min)) * 100;
+        dots.push(`<div class="liq-dot liquidation" style="left:${pct}%" title="Auto-liquidation: ${fmtPrice(levels.liquidationPrice)}"></div>`);
+    }
+    if (levels.marginCallPrice >= min && levels.marginCallPrice <= max) {
+        const pct = ((levels.marginCallPrice - min) / (max - min)) * 100;
+        dots.push(`<div class="liq-dot margin-call" style="left:${pct}%" title="Margin call: ${fmtPrice(levels.marginCallPrice)}"></div>`);
+    }
+    container.innerHTML = dots.join('');
+}
+
 // ─── Type-in Price ───
 let priceInputMode = false;
 
@@ -1001,6 +1114,7 @@ function buildTickerBar() {
             particles = [];
             clearAnimTimeouts();
             buildTickerBar();
+            renderLiqTicks();
             render();
         };
         bar.appendChild(btn);
@@ -1044,9 +1158,34 @@ function render() {
         bew.style.display = 'none';
     }
 
+    // Liquidation warning
+    const lw = $('liquidationWarn');
+    const levels = getLiquidationLevels(selectedTicker, m);
+    const isLiquidated = levels && btcPrice <= levels.liquidationPrice;
+    const isMarginCall = levels && !isLiquidated && btcPrice <= levels.marginCallPrice;
+    const isApproachingMargin = levels && !isLiquidated && !isMarginCall && btcPrice <= levels.marginCallPrice * 1.15;
+
+    if (isLiquidated) {
+        lw.className = 'liquidation-warn liquidated';
+        lw.textContent = '🔴 FORCED LIQUIDATION — ' + levels.lender.toUpperCase() + ' SEIZES COLLATERAL';
+        lw.style.display = 'block';
+        bew.style.display = 'none'; // liquidation supersedes break-even
+    } else if (isMarginCall) {
+        lw.className = 'liquidation-warn margin-call';
+        lw.textContent = '⚠ MARGIN CALL — ' + levels.lender.toUpperCase() + ' REQUIRES MORE COLLATERAL · ' + fmtPrice(levels.marginCallPrice);
+        lw.style.display = 'block';
+    } else if (isApproachingMargin) {
+        lw.className = 'liquidation-warn margin-call';
+        lw.textContent = '⚠ APPROACHING MARGIN CALL: ' + fmtPrice(levels.marginCallPrice);
+        lw.style.display = 'block';
+    } else {
+        lw.style.display = 'none';
+    }
+
     // Phase glow
     const glow = $('phaseGlow');
-    if (phase === 'crash') glow.style.background = 'radial-gradient(ellipse, rgba(239,68,68,0.08) 0%, transparent 70%)';
+    if (isLiquidated) glow.style.background = 'radial-gradient(ellipse, rgba(239,68,68,0.12) 0%, transparent 70%)';
+    else if (phase === 'crash') glow.style.background = 'radial-gradient(ellipse, rgba(239,68,68,0.08) 0%, transparent 70%)';
     else if (phase === 'moon') glow.style.background = 'radial-gradient(ellipse, rgba(34,197,94,0.08) 0%, transparent 70%)';
     else glow.style.background = 'radial-gradient(ellipse, rgba(249,115,22,0.05) 0%, transparent 70%)';
 
@@ -1055,7 +1194,25 @@ function render() {
     const prefColor = dragPct > 40 ? '#ef4444' : dragPct > 20 ? '#eab308' : '#71717a';
     const vl = $('vizLabels');
 
-    if (m.isPure) {
+    if (isLiquidated) {
+        vl.className = 'viz-labels';
+        vl.innerHTML = `
+            <div>
+                <div class="vlabel-title" style="color:var(--red)">${levels.lender.toUpperCase()}</div>
+                <div class="vlabel-pct" style="color:var(--red)">SEIZES BTC</div>
+                <div class="vlabel-sub">${fmt(m.btc)} BTC collateral</div>
+            </div>
+            <div class="vlabel-center">
+                <div class="vlabel-title" style="color:var(--red)">LIQUIDATION</div>
+                <div class="drag-divider" style="border-color:var(--red)"></div>
+            </div>
+            <div style="text-align:right">
+                <div class="vlabel-title">COMMON SHAREHOLDERS</div>
+                <div class="vlabel-pct" style="color:#52525b">0%</div>
+                <div class="vlabel-sub" style="color:#52525b">wiped out</div>
+            </div>
+        `;
+    } else if (m.isPure) {
         vl.className = 'viz-labels pure-equity';
         vl.innerHTML = `<div class="pure-label-wrap">
             <div class="vlabel-title" style="color:var(--text-muted)">COMMON SHAREHOLDERS</div>
@@ -1085,9 +1242,29 @@ function render() {
     // Tank top label
     $('tankTopLabel').textContent = fmt(m.btc) + ' BTC TOTAL';
 
+    // Tank class — seized state
+    const tank = $('tank');
+    tank.classList.toggle('seized', !!isLiquidated);
+
+    // Seized overlay
+    const so = $('seizedOverlay');
+    if (isLiquidated) {
+        so.className = 'seized-overlay active';
+        so.innerHTML = `
+            <div class="seized-icon">🔴</div>
+            <div class="seized-title">COLLATERAL SEIZED</div>
+            <div class="seized-sub">${levels.lender} liquidates at ${fmtPrice(levels.liquidationPrice)}</div>
+        `;
+    } else {
+        so.className = 'seized-overlay';
+        so.innerHTML = '';
+    }
+
     // Tank inner labels
     const til = $('tankLabelsInner');
-    if (m.isPure) {
+    if (isLiquidated) {
+        til.innerHTML = ''; // overlay handles it
+    } else if (m.isPure) {
         til.innerHTML = `<div class="pure-equity-badge" style="color:${col}; border: 1px solid ${col}33;">PURE EQUITY — NO SENIOR CLAIMS</div>`;
     } else {
         til.innerHTML = `
@@ -1151,11 +1328,11 @@ function render() {
     if (showEndgame) renderEndgame();
 
     // Render SVG
-    renderTankSVG(m, dragPct, commonPct, col, prefColor, commonColor);
+    renderTankSVG(m, dragPct, commonPct, col, prefColor, commonColor, isLiquidated);
 }
 
 // ─── SVG Tank ───
-function renderTankSVG(m, dragPct, commonPct, col, prefColor, commonColor) {
+function renderTankSVG(m, dragPct, commonPct, col, prefColor, commonColor, isLiquidated) {
     const svg = $('tankSvg');
     // Build gradient defs fresh
     let defsHTML = `
@@ -1171,12 +1348,21 @@ function renderTankSVG(m, dragPct, commonPct, col, prefColor, commonColor) {
             <stop offset="0%" stop-color="${col}" stop-opacity="0.4"/>
             <stop offset="100%" stop-color="${col}" stop-opacity="0.65"/>
         </linearGradient>
+        <linearGradient id="seizedGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#dc2626" stop-opacity="0.5"/>
+            <stop offset="100%" stop-color="#7f1d1d" stop-opacity="0.8"/>
+        </linearGradient>
         <filter id="glow"><feGaussianBlur stdDeviation="1.5" result="blur"/>
             <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>`;
 
     let bodyHTML = '';
-    if (m.isPure) {
+    if (isLiquidated) {
+        // Entire tank fills red — lender seizes all BTC
+        bodyHTML = `
+            <path d="${wavePath('full', 95, waveOffset)}" fill="url(#seizedGrad)"/>
+            <line x1="2" y1="5" x2="98" y2="5" stroke="#ef4444" stroke-width="0.5" opacity="0.6" filter="url(#glow)"/>`;
+    } else if (m.isPure) {
         bodyHTML = `
             <path d="${wavePath('full', 92, waveOffset)}" fill="url(#pureGrad)"/>
             <line x1="2" y1="8" x2="98" y2="8" stroke="${col}" stroke-width="0.5" opacity="0.4" filter="url(#glow)"/>`;
@@ -1220,9 +1406,12 @@ function startWaveLoop() {
         if (companyData && companyData[selectedTicker]) {
             const snap = companyData[selectedTicker];
             const m = calc(snap, btcPrice);
+            const levels = getLiquidationLevels(selectedTicker, m);
+            const isLiq = levels && btcPrice <= levels.liquidationPrice;
             renderTankSVG(m, m.drag * 100, m.commonPct * 100, TICKER_COLORS[selectedTicker],
                 m.drag * 100 > 40 ? '#ef4444' : m.drag * 100 > 20 ? '#eab308' : '#71717a',
-                m.commonPct * 100 > 85 ? '#22c55e' : m.commonPct * 100 > 60 ? '#f97316' : m.commonPct * 100 > 40 ? '#eab308' : '#ef4444');
+                m.commonPct * 100 > 85 ? '#22c55e' : m.commonPct * 100 > 60 ? '#f97316' : m.commonPct * 100 > 40 ? '#eab308' : '#ef4444',
+                isLiq);
         }
         requestAnimationFrame(tick);
     }
@@ -1236,6 +1425,8 @@ function startParticleLoop() {
         if (!snap) return;
         const m = calc(snap, btcPrice);
         const commonPct = m.commonPct * 100;
+        const levels = getLiquidationLevels(selectedTicker, m);
+        const isLiq = levels && btcPrice <= levels.liquidationPrice;
 
         // Update existing
         particles = particles
@@ -1244,7 +1435,15 @@ function startParticleLoop() {
 
         // Spawn
         if (Math.random() > 0.3) {
-            if (m.isPure) {
+            if (isLiq) {
+                // Seized: particles flow left (toward lender), spawn from right side
+                particles.push({
+                    x: 70 + Math.random() * 25, y: 20 + Math.random() * 55,
+                    vx: -(0.4 + Math.random() * 0.6), vy: (Math.random() - 0.5) * 0.3,
+                    life: 60 + Math.random() * 40, maxLife: 100, opacity: 1, size: 2 + Math.random() * 3,
+                    seized: true,
+                });
+            } else if (m.isPure) {
                 particles.push({
                     x: 5 + Math.random() * 35, y: 20 + Math.random() * 55,
                     vx: 0.15 + Math.random() * 0.35, vy: (Math.random() - 0.5) * 0.2,
@@ -1267,9 +1466,18 @@ function startParticleLoop() {
         const col = TICKER_COLORS[selectedTicker];
         const dragPct = m.drag * 100;
         layer.innerHTML = particles.map(p => {
-            const bg = m.isPure ? col : p.vx > 0 ? (commonPct > 85 ? '#22c55e' : '#FF8C00') : (dragPct > 40 ? '#ef4444' : '#FF8C00');
-            const glow = m.isPure ? col + '44' : p.vx > 0 ? '#FF8C0044' : '#ef444444';
-            return `<div class="particle" style="left:${p.x}%;top:${p.y}%;width:${p.size}px;height:${p.size}px;background:${bg};opacity:${(p.opacity * 0.6).toFixed(2)};box-shadow:0 0 ${p.size * 2}px ${glow}"></div>`;
+            let bg, glw;
+            if (p.seized || isLiq) {
+                bg = '#ef4444';
+                glw = '#ef444466';
+            } else if (m.isPure) {
+                bg = col;
+                glw = col + '44';
+            } else {
+                bg = p.vx > 0 ? (commonPct > 85 ? '#22c55e' : '#FF8C00') : (dragPct > 40 ? '#ef4444' : '#FF8C00');
+                glw = p.vx > 0 ? '#FF8C0044' : '#ef444444';
+            }
+            return `<div class="particle" style="left:${p.x}%;top:${p.y}%;width:${p.size}px;height:${p.size}px;background:${bg};opacity:${(p.opacity * 0.6).toFixed(2)};box-shadow:0 0 ${p.size * 2}px ${glw}"></div>`;
         }).join('');
     }, 50);
 }
@@ -1346,6 +1554,7 @@ function renderEndgame() {
     const m = calc(snap, btcPrice);
     const endM = calc(snap, 1000000);
     const col = TICKER_COLORS[selectedTicker];
+    const levels = getLiquidationLevels(selectedTicker, m);
 
     const card = $('endgameCard');
     if (m.isPure) {
@@ -1361,6 +1570,11 @@ function renderEndgame() {
             <div class="endgame-footer">CEBE Framework by <span style="color:#FF8C00">${String.fromCharCode(64)}chcbearsfan</span> | cebetracker.io</div>`;
     } else {
         const claimsStr = m.netClaims >= 1e9 ? '$' + (m.netClaims / 1e9).toFixed(1) + 'B' : '$' + (m.netClaims / 1e6).toFixed(1) + 'M';
+        const liqWarning = levels
+            ? `<div style="margin-top:10px; padding:8px 12px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2); border-radius:8px; font-size:12px; color:#f87171; font-family:'JetBrains Mono',monospace;">
+                ⚠ ${levels.lender} can force-liquidate below ${fmtPrice(levels.liquidationPrice)}. Unlike Strategy, this debt has teeth.
+               </div>`
+            : '';
         card.style.background = 'linear-gradient(135deg, rgba(34,197,94,0.08) 0%, rgba(255,140,0,0.05) 100%)';
         card.style.border = '1px solid rgba(34,197,94,0.3)';
         card.innerHTML = `
@@ -1369,7 +1583,7 @@ function renderEndgame() {
             <div class="endgame-body">${claimsStr} in senior claims becomes just ${fmt(Math.round(endM.claimsBtc))} BTC — less
                 than ${(endM.drag * 100).toFixed(1)}% of holdings. Common equity owns
                 <span style="color:#22c55e;font-weight:600">${(endM.commonPct * 100).toFixed(1)}% of the Bitcoin</span>.
-                The leverage that amplified the ride up? It becomes irrelevant.</div>
+                The leverage that amplified the ride up? It becomes irrelevant.${liqWarning}</div>
             <div class="endgame-punch" style="color:#FF8C00">CEBE explains the endgame.</div>
             <div class="endgame-footer">CEBE Framework by <span style="color:#FF8C00">${String.fromCharCode(64)}chcbearsfan</span> | cebetracker.io</div>`;
     }
@@ -1393,7 +1607,7 @@ $('priceValue').addEventListener('click', enterPriceInput);
 $('playBtn').addEventListener('click', runAnimation);
 
 // ─── Go ───
-loadData().then(() => { renderPLTicks(); });
+loadData().then(() => { renderPLTicks(); renderLiqTicks(); });
 </script>
 </body>
 </html>
