@@ -2360,11 +2360,11 @@
                                         <span id="simCurrentStock">$-</span>
                                     </div>
                                     <div class="sim-stock-row">
-                                        <span>Current mNAV</span>
+                                        <span>Current CEBE mNAV</span>
                                         <span id="simMnav">-</span>
                                     </div>
                                     <div class="sim-stock-row mnav-input-row">
-                                        <span>Projected mNAV</span>
+                                        <span>Projected CEBE mNAV</span>
                                         <div class="mnav-input-wrapper">
                                             <input type="number" id="simProjMnav" class="mnav-input" value="" placeholder="same" min="0.1" max="10" step="0.1">
                                             <span class="mnav-x">x</span>
@@ -2459,6 +2459,7 @@
             
             // Simulator interaction handlers
             const simData = {
+                ticker: ticker,
                 btcHoldings: parseFloat(data.btc_holdings),
                 shares: parseFloat(data.shares_outstanding),
                 netClaimsUsd: m.netClaimsUsd,
@@ -2495,26 +2496,38 @@
                     projDragEl.style.color = '';
                 }
                 
-                // Stock price projection
+                // Stock price projection using CEBE mNAV (matches table formula)
                 if (stockPrice > 0) {
                     document.getElementById('simStockSection').style.display = 'block';
-                    document.getElementById('simCurrentStock').textContent = '$' + stockPrice.toFixed(2);
+                    const currencySymbols = { USD: '$', EUR: '\u20AC', BRL: 'R$', GBP: '\u00A3', JPY: '\u00A5' };
+                    const currSym = currencySymbols[currency] || '$';
+                    document.getElementById('simCurrentStock').textContent = currSym + stockPrice.toFixed(2);
                     
-                    // Calculate current mNAV: Market Cap / BTC NAV
-                    const currentMarketCap = stockPrice * simData.shares;
-                    const currentBtcNav = simData.btcHoldings * simData.originalBtcPrice;
-                    const currentMnav = currentBtcNav > 0 ? currentMarketCap / currentBtcNav : 0;
-                    document.getElementById('simMnav').textContent = currentMnav.toFixed(2) + 'x';
+                    // Convert stock price to USD (Finnhub returns local currency for foreign tickers)
+                    const currency = stockCurrency[simData.ticker] || 'USD';
+                    const fxRate = fxRates[currency] || 1;
+                    const priceUsd = stockPrice * fxRate;
                     
-                    // Use projected mNAV if entered, otherwise use current
+                    // CEBE mNAV = priceUsd / (cebe_btc x liveBtcPrice)
+                    // This is the EXACT same formula used in the main table
+                    const currentBtcPriceForMnav = liveBtcPrice || simData.originalBtcPrice;
+                    const currentCebeBtc = simData.originalCebe / 100000000;
+                    const currentCebeNavPerShare = currentCebeBtc * currentBtcPriceForMnav;
+                    const currentCebeMnav = currentCebeNavPerShare > 0 ? priceUsd / currentCebeNavPerShare : 0;
+                    document.getElementById('simMnav').textContent = currentCebeMnav.toFixed(2) + 'x';
+                    
+                    // Use projected CEBE mNAV if entered, otherwise use current
                     const projMnavInput = parseFloat(document.getElementById('simProjMnav').value);
-                    const projMnav = projMnavInput > 0 ? projMnavInput : currentMnav;
+                    const projCebeMnav = projMnavInput > 0 ? projMnavInput : currentCebeMnav;
                     
-                    // Project new stock price
-                    const newBtcNav = simData.btcHoldings * newBtcPrice;
-                    const projectedMarketCap = newBtcNav * projMnav;
-                    const projectedStockPrice = projectedMarketCap / simData.shares;
-                    document.getElementById('simProjStock').textContent = '$' + projectedStockPrice.toFixed(2);
+                    // Project new stock price at new BTC price
+                    // newCebe already calculated above from drag simulation
+                    const newCebeBtc = newCebe / 100000000;
+                    const newCebeNavPerShare = newCebeBtc * newBtcPrice;
+                    const projectedStockPriceUsd = newCebeNavPerShare * projCebeMnav;
+                    // Convert back to local currency for display
+                    const projectedStockPrice = fxRate > 0 ? projectedStockPriceUsd / fxRate : projectedStockPriceUsd;
+                    document.getElementById('simProjStock').textContent = currSym + projectedStockPrice.toFixed(2);
                     
                     // Calculate change
                     const stockChange = ((projectedStockPrice - stockPrice) / stockPrice) * 100;
