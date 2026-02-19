@@ -1414,7 +1414,8 @@
             ASST: 'ASST',
             TSWCF: 'TSWCF',
             ALCPB: 'ALCPB.PA',
-            OBTC3: 'OBTC3.SA'
+            OBTC3: 'OBTC3.SA',
+            BRR: 'BRR'
         };
         
         // Stock price currency — what currency does Finnhub return for each symbol?
@@ -1425,7 +1426,8 @@
             ASST: 'USD',
             TSWCF: 'USD',
             ALCPB: 'EUR',
-            OBTC3: 'BRL'
+            OBTC3: 'BRL',
+            BRR: 'USD'
         };
         
         // FX rates to USD (populated at init)
@@ -1472,6 +1474,12 @@
                 fx_note: 'BRL claims converted to USD',
                 displayTickers: ['OBTC3'],
                 primaryTicker: 'OBTC3'
+            },
+            BRR: { 
+                name: 'ProCap Financial', 
+                exchange: 'Nasdaq: BRR',
+                displayTickers: ['BRR'],
+                primaryTicker: 'BRR'
             }
         };
         
@@ -1572,6 +1580,30 @@
                 offsets: [],
                 sources: [],
                 pendingBackfill: ['OranjeBTC reports via B3 / CVM (Brazil). Encumbrance data collection in progress.']
+            },
+            BRR: {
+                lastUpdated: '2026-02-18',
+                btcReserveForCalc: 485680000, // 5,007 BTC x $97K
+                items: [
+                    { category: 'operations', label: 'G&A (recurring est)', sublabel: 'Period $7.63M less ~$3.5M one-time SPAC costs', amount: 4000000, pctOfReserve: null, verified: false, note: 'Inception-period G&A of $7.63M includes substantial one-time SPAC transaction costs (~$3.5M). Recurring run-rate estimated at ~$4M/yr. Source: 10-K FY2025.' },
+                    { category: 'sbc', label: 'Stock-Based Compensation', sublabel: 'RSUs vest at $15-$50 targets (stock ~$2.50)', amount: 5700000, pctOfReserve: null, verified: false, note: '$17.1M unrecognized RSU cost / ~3yr avg vesting. Market-based targets ($15-$50) far above current price (~$2.50). Actual expense timing is probabilistic. Source: 10-K Note 13.' },
+                    { category: 'operations', label: 'Rent (to Inflection Points)', sublabel: '$19,600/mo sublease, month-to-month', amount: 235200, pctOfReserve: null, verified: true, note: 'Month-to-month sublease to Inflection Points (Pompliano entity). 60-day notice to terminate. $58,800 recorded for partial period. Source: 10-K Note 15.' },
+                    { category: 'interest', label: 'Interest Expense (cash)', sublabel: 'Zero-coupon convertible notes', amount: 0, pctOfReserve: null, verified: true, note: 'Converts are zero-coupon. $534K non-cash interest (discount amortization) not included. Source: 10-K Note 8.' },
+                ],
+                offsets: [
+                    { label: 'Revenue (Media/Advertising)', sublabel: '$85K for partial period, annualized', amount: 170000, verified: false, note: '$85K earned inception through Dec 31, 2025. Annualized estimate. Source: 10-K income statement.' },
+                    { label: 'Put Option Income', sublabel: 'Premium from selling BTC puts', amount: 1000000, verified: false, note: '$534K premium in FY2025. $889K received Jan 2026 alone for 900 BTC at $70K-$80K strikes. Variable income. Source: 10-K Notes 11-12, 18.' },
+                    { label: 'Interest Income', sublabel: 'Cash on deposit', amount: 500000, verified: false, note: '$260K earned in partial period on cash deposits. Annualized estimate. Source: 10-K income statement.' },
+                ],
+                sources: [
+                    'BRR 10-K FY2025 (filed Feb 18, 2026)',
+                    'Note 18 Subsequent Events (Feb 9 deleveraging)',
+                    'Note 15 Related Party (Inflection Points sublease)',
+                ],
+                pendingBackfill: [
+                    'Q1 2026 10-Q (expected May 2026) will provide first full-quarter recurring data',
+                    'Confirm SBC expense trajectory as RSU targets remain far out of money',
+                ]
             }
         };
         
@@ -1667,7 +1699,7 @@
         
         function getLatestSnapshots(snapshots) {
             const latest = {};
-            const order = ['MSTR', 'MTPLF', 'ASST', 'TSWCF', 'ALCPB', 'OBTC3'];
+            const order = ['MSTR', 'MTPLF', 'ASST', 'TSWCF', 'ALCPB', 'OBTC3', 'BRR'];
             
             snapshots.forEach(s => {
                 const ticker = s.ticker;
