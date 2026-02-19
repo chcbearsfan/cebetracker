@@ -425,7 +425,7 @@
             <div class="scenarios-row" id="snapshotBar"></div>
         </div>
         <div class="scenario-group">
-            <div class="group-label"><span class="group-label-badge future">&rarr; FORWARD</span><span class="group-label-text">PROJECTIONS &middot; CONVERT MATURITY DEC 2028 &middot; WRAPPER COSTS</span><div class="group-label-line"></div></div>
+            <div class="group-label"><span class="group-label-badge future">&rarr; FORWARD</span><span class="group-label-text">10-YEAR PROJECTIONS &middot; CONVERT MATURITY DEC 2028 &middot; WRAPPER COSTS</span><div class="group-label-line"></div></div>
             <div class="scenarios-row" id="projectionBar"></div>
         </div>
     </div>
@@ -596,32 +596,36 @@ const SCENARIOS = [
     { id: 'wipeout', icon: '&#128128;', name: 'Wipeout',       btc: 25000,  mnav: 0.5, horizon: 0, group: 'snapshot', type: 'static' },
     { id: 'current', icon: '&#128205;', name: 'Current',       btc: null,   mnav: 1.0, horizon: 0, group: 'snapshot', type: 'static' },
     { id: 'bull',    icon: '&#9728;',   name: 'Bull',          btc: 150000, mnav: 1.5, horizon: 0, group: 'snapshot', type: 'static' },
-    { id: 'siege',    icon: '&#127984;', name: 'Siege',         btc: 50000,  mnav: 0.7, horizon: 5, group: 'projection', type: 'siege' },
-    { id: 'powerlaw', icon: '&#128200;', name: 'Power Law',     btc: null,   mnav: null, horizon: 5, group: 'projection', type: 'powerlaw' },
-    { id: 'maturity', icon: '&#128197;', name: 'To Maturity',   btc: null,   mnav: null, horizon: 3, group: 'projection', type: 'maturity' },
+    { id: 'siege',    icon: '&#127984;', name: 'Siege',         btc: 50000,  mnav: 0.7, horizon: 10, group: 'projection', type: 'siege' },
+    { id: 'powerlaw', icon: '&#128200;', name: 'Power Law',     btc: null,   mnav: null, horizon: 10, group: 'projection', type: 'powerlaw' },
+    { id: 'growth',   icon: '&#128640;', name: 'Growth',        btc: null,   mnav: null, horizon: 10, group: 'projection', type: 'growth' },
 ];
 
-// Power Law Support Line
+// Power Law Support Line: ~23% avg CAGR decelerating
 const POWERLAW_CAGR = [
     {year:1,cagr:.30},{year:2,cagr:.27},{year:3,cagr:.25},{year:4,cagr:.24},{year:5,cagr:.23},
+    {year:6,cagr:.22},{year:7,cagr:.21},{year:8,cagr:.20},{year:9,cagr:.19},{year:10,cagr:.18},
 ];
 const POWERLAW_MNAV = [
-    {year:0,mnav:1.0},{year:1,mnav:1.0},{year:2,mnav:1.1},{year:3,mnav:1.2},{year:4,mnav:1.2},{year:5,mnav:1.2},
+    {year:0,mnav:1.0},{year:1,mnav:1.0},{year:2,mnav:1.1},{year:3,mnav:1.1},{year:4,mnav:1.2},
+    {year:5,mnav:1.2},{year:6,mnav:1.2},{year:7,mnav:1.2},{year:8,mnav:1.2},{year:9,mnav:1.2},{year:10,mnav:1.2},
 ];
 
-// To Maturity: 20% CAGR to Dec 2028, conservative mNAV ramp
-const MATURITY_CAGR = [
-    {year:1,cagr:.20},{year:2,cagr:.20},{year:3,cagr:.20},
+// Growth: ~26% avg CAGR to ~$1M, rising mNAV as BRR matures post-convert
+const GROWTH_CAGR = [
+    {year:1,cagr:.35},{year:2,cagr:.32},{year:3,cagr:.29},{year:4,cagr:.27},{year:5,cagr:.26},
+    {year:6,cagr:.25},{year:7,cagr:.24},{year:8,cagr:.23},{year:9,cagr:.22},{year:10,cagr:.21},
 ];
-const MATURITY_MNAV = [
-    {year:0,mnav:1.0},{year:1,mnav:1.0},{year:2,mnav:1.1},{year:3,mnav:1.2},
+const GROWTH_MNAV = [
+    {year:0,mnav:1.0},{year:1,mnav:1.0},{year:2,mnav:1.2},{year:3,mnav:1.3},{year:4,mnav:1.5},
+    {year:5,mnav:1.5},{year:6,mnav:1.5},{year:7,mnav:1.5},{year:8,mnav:1.5},{year:9,mnav:1.5},{year:10,mnav:1.5},
 ];
 
 const MNAV_PRESETS = [0.5, 0.75, 1.0, 1.5, 2.0, 3.0];
 const MATRIX_BTC = [10000, 25000, 50000, 75000, 100000, 150000, 200000, 300000, 500000];
 const MATRIX_MNAVS = [0.5, 0.75, 1.0, 1.5, 2.0, 3.0];
 
-const HORIZON_OPTIONS = [{label:'Now',years:0},{label:'1Y',years:1},{label:'3Y',years:3},{label:'5Y',years:5}];
+const HORIZON_OPTIONS = [{label:'Now',years:0},{label:'1Y',years:1},{label:'3Y',years:3},{label:'5Y',years:5},{label:'10Y',years:10}];
 const START_YEAR = 2026;
 
 // --- STATE ---
@@ -722,7 +726,7 @@ function getActiveType() {
     var s = SCENARIOS.find(function(x){return x.id===activeScenario});
     return s ? s.type : 'static';
 }
-function isSlidersLocked() { var t = getActiveType(); return t === 'powerlaw' || t === 'maturity'; }
+function isSlidersLocked() { var t = getActiveType(); return t === 'powerlaw' || t === 'growth'; }
 
 // --- PROJECTION ENGINE ---
 function projectYears(years) {
@@ -758,13 +762,13 @@ function projectYears(years) {
                 yearMnav = POWERLAW_MNAV[Math.min(y, POWERLAW_MNAV.length - 1)].mnav;
             }
         }
-        else if (sType === 'maturity') {
-            if (y === 0) { yearBtcPrice = startBtc; yearMnav = MATURITY_MNAV[0].mnav; }
+        else if (sType === 'growth') {
+            if (y === 0) { yearBtcPrice = startBtc; yearMnav = GROWTH_MNAV[0].mnav; }
             else {
-                var ce = MATURITY_CAGR[Math.min(y - 1, MATURITY_CAGR.length - 1)];
+                var ce = GROWTH_CAGR[Math.min(y - 1, GROWTH_CAGR.length - 1)];
                 var prevB = y === 1 ? startBtc : results[y - 1].yearBtcPrice;
                 yearBtcPrice = prevB * (1 + ce.cagr);
-                yearMnav = MATURITY_MNAV[Math.min(y, MATURITY_MNAV.length - 1)].mnav;
+                yearMnav = GROWTH_MNAV[Math.min(y, GROWTH_MNAV.length - 1)].mnav;
             }
         }
         else { yearBtcPrice = btcPrice; yearMnav = mnavMultiple; }
@@ -1285,11 +1289,11 @@ function renderAssumptions() {
     var co = COMPANY, sType = getActiveType();
     var t = '';
     if (sType === 'siege') {
-        t = '<strong>Siege:</strong> BTC $50,000 for entire horizon. mNAV 0.7\u00d7. Capital markets closed. $99.6M converts must be repaid at maturity (Dec 2028) via BTC sales. Tests: can BRR survive a prolonged bear market through maturity?';
+        t = '<strong>Siege:</strong> BTC $50,000 for entire horizon. mNAV 0.7\u00d7. Capital markets closed. $99.6M converts must be repaid at maturity (Dec 2028) via BTC sales. Tests: can BRR survive a prolonged bear market through maturity and beyond?';
     } else if (sType === 'powerlaw') {
-        t = '<strong>Power Law (Support Floor):</strong> BTC follows the power law support line. ~23% avg CAGR decelerating. mNAV conservative 1.0x to 1.2x. Convert refinancing assumed at maturity.';
-    } else if (sType === 'maturity') {
-        t = '<strong>To Maturity:</strong> 20% BTC CAGR to Dec 2028. mNAV 1.0x to 1.2x. Models the path from today through convert maturity. Key question: what does BRR look like when the $99.6M comes due?';
+        t = '<strong>Power Law (Support Floor):</strong> BTC follows the power law support line. ~23% avg CAGR decelerating from 30% to 18%, reaching ~$770K by 2036 (<a href="https://charts.bitbo.io/long-term-power-law/" target="_blank" style="color:var(--orange-primary)">Santostasi/Burger model</a>). mNAV conservative 1.0x to 1.2x. Convert refinancing assumed at Dec 2028 maturity.';
+    } else if (sType === 'growth') {
+        t = '<strong>Growth:</strong> BTC follows ~26% avg CAGR to ~$1M. mNAV starts 1.0\u00d7, reaches 1.5\u00d7 by Y4 as BRR matures post-convert. After Dec 2028 maturity, converts are refinanced and drag compresses toward zero with BTC appreciation. Post-convert BRR is near-pure equity.';
     } else {
         t = '<strong>Custom projection:</strong> BTC ' + fmtPrice(btcPrice) + ', mNAV ' + mnavMultiple.toFixed(2) + '\u00d7. Capital structure frozen except for scheduled events.';
     }
@@ -1327,12 +1331,12 @@ function buildScenarioBar() {
             var priceDisplay = s.btc ? (s.btc >= 1e6 ? '$' + (s.btc/1e6) + 'M' : '$' + (s.btc/1e3) + 'K') : fmtPrice(liveBtcPrice || btcPrice);
             var badge = s.horizon > 0 ? '<span class="horizon-badge future-badge">' + s.horizon + 'Y</span>' : '<span class="horizon-badge now-badge">NOW</span>';
             var mnavText;
-            if (s.type === 'maturity') {
-                priceDisplay = '&rarr; Maturity';
-                mnavText = 'Dec 2028 &middot; 3Y';
+            if (s.type === 'growth') {
+                priceDisplay = '&rarr; $1M';
+                mnavText = 'Post-convert &middot; 10Y';
             } else if (s.type === 'powerlaw') {
-                priceDisplay = '&rarr; PL Floor';
-                mnavText = 'Support floor &middot; 5Y';
+                priceDisplay = '&rarr; $770K';
+                mnavText = 'Support floor &middot; 10Y';
             } else {
                 var mnavVal = s.mnav !== null && s.mnav !== undefined ? s.mnav : 1.0;
                 mnavText = mnavVal.toFixed(1) + '&times; mNAV';
