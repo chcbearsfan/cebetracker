@@ -68,53 +68,90 @@ body::before {
 
 .wrap { max-width: 780px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
 
-/* ═══ TOPBAR ═══ */
-.topbar {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  background: rgba(8, 8, 13, 0.88);
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-  height: 52px; display: flex; align-items: center;
-  justify-content: space-between; padding: 0 24px;
+/* ═══ SITE HEADER ═══ */
+.site-header {
+  text-align: center;
+  padding: 60px 24px 0;
+  position: relative;
+  z-index: 1;
 }
-.topbar-logo {
+.site-glow {
+  position: absolute;
+  top: -40px; left: 50%; transform: translateX(-50%);
+  width: 400px; height: 200px;
+  background: radial-gradient(ellipse at center, rgba(247,147,26,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.site-logo {
   font-family: 'JetBrains Mono', monospace;
-  font-weight: 700; font-size: 13px; letter-spacing: 2.5px;
-  color: var(--btc); text-decoration: none;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: var(--btc);
+  text-shadow: 0 0 40px rgba(247,147,26,0.3), 0 0 80px rgba(247,147,26,0.1);
+  position: relative;
+  line-height: 1;
+  margin-bottom: 6px;
 }
-.topbar-right { display: flex; gap: 20px; align-items: center; }
-.topbar-right a {
-  font-size: 13px; font-weight: 500; color: var(--text3);
-  text-decoration: none; transition: color .2s;
+.site-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.35em;
+  color: var(--text3);
+  margin-bottom: 12px;
 }
-.topbar-right a:hover { color: var(--btc); }
+.site-tagline {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  color: var(--text2);
+  margin-bottom: 28px;
+}
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.site-nav a {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 8px 20px;
+  border-radius: 100px;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  text-decoration: none;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.site-nav a:hover {
+  border-color: var(--btc);
+  color: var(--btc);
+}
+.site-nav a.active {
+  background: var(--btc);
+  color: #000;
+  border-color: var(--btc);
+}
 
 .progress-bar {
-  position: fixed; top: 52px; left: 0; height: 2px;
+  position: fixed; top: 0; left: 0; height: 2px;
   background: linear-gradient(90deg, var(--btc), var(--yellow));
   z-index: 101; width: 0%; transition: width .1s linear;
 }
 
 /* ═══ HEADER ═══ */
-header { padding: 108px 0 0; text-align: center; }
+header { padding: 0; text-align: center; }
 
-.badge {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 5px 16px; border-radius: 100px;
-  border: 1px solid var(--btc-dim); background: var(--btc-glow);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--btc); margin-bottom: 28px;
-  opacity: 0; animation: fadeUp .5s ease forwards .1s;
-}
-.badge .dot { width:6px;height:6px;border-radius:50%;background:var(--btc);animation:pulse 2s ease-in-out infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
 
 h1 {
   font-family: 'Fraunces', serif;
-  font-size: clamp(2.2rem, 5.5vw, 3.4rem);
-  font-weight: 800; line-height: 1.08;
+  font-size: clamp(1.8rem, 4.5vw, 2.8rem);
+  font-weight: 800; line-height: 1.12;
   letter-spacing: -0.03em; margin-bottom: 20px;
   background: linear-gradient(135deg, #fff 30%, var(--btc));
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
@@ -450,13 +487,13 @@ footer a:hover { text-decoration:underline; }
   .nav a { font-size:12px; padding:6px 12px; }
   .cta-box .btn { display:block; margin:8px auto; width:fit-content; }
   .btn-ghost { margin-left:0; }
-  .topbar { padding: 0 16px; }
-  header { padding-top: 88px; }
+  .site-nav { gap:8px; }
+  .site-nav a { font-size:11px; padding:6px 14px; }
   .code-block { font-size: 12px; padding: 16px; }
 }
 
 @media print {
-  .topbar, .progress-bar, .back-top, .watermark { display:none; }
+  .progress-bar, .back-top, .watermark, .site-glow { display:none; }
   body { background:#fff; color:#111; }
   body::before { display:none; }
   header { padding-top:24px; }
@@ -466,21 +503,25 @@ footer a:hover { text-decoration:underline; }
 </head>
 <body>
 
-<!-- TOPBAR -->
-<nav class="topbar">
-  <a href="/" class="topbar-logo">CEBE TRACKER</a>
-  <div class="topbar-right">
-    <a href="/">Home</a>
-    <a href="/framework" style="color:var(--btc)">Framework</a>
-    <a href="https://x.com/chcbearsfan" target="_blank">@chcbearsfan</a>
-  </div>
-</nav>
+<!-- SITE HEADER -->
 <div class="progress-bar" id="progressBar"></div>
-
-<!-- HEADER -->
 <header id="top">
-<div class="wrap">
-  <div class="badge"><span class="dot"></span> cebetracker.io</div>
+<div class="site-header">
+  <div class="site-glow"></div>
+  <div class="site-logo">C E B E</div>
+  <div class="site-sub">t r a c k e r</div>
+  <div class="site-tagline">Common Equity Bitcoin Exposure</div>
+  <div class="site-nav">
+    <a href="/">TRACKER &rarr;</a>
+    <a href="/cebe">CEBE vs BPS &rarr;</a>
+    <a class="active">FRAMEWORK</a>
+    <a href="/endgame">ENDGAME &rarr;</a>
+    <a href="/modeler">MODELER &rarr;</a>
+  </div>
+</div>
+
+<!-- ARTICLE HEADER -->
+<div class="wrap" style="padding-top:48px;">
   <h1>What Do Common Shareholders Actually Own?</h1>
   <p class="sub">Bitcoin Per Share tells you how much BTC is in the warehouse. <strong>CEBE</strong> tells you how much of it is yours after the senior claims are paid.</p>
   <div class="hero-meta">
