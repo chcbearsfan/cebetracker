@@ -1036,6 +1036,56 @@
             line-height: 1.5;
         }
         
+        .sim-wrapper-impact {
+            margin-top: 16px;
+        }
+        
+        .sim-wrapper-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 140, 0, 0.06);
+            border: 1px solid var(--orange-border);
+            border-radius: 10px;
+            padding: 14px 16px;
+        }
+        
+        .sim-wrapper-bar.negative-wrapper {
+            background: rgba(34, 197, 94, 0.06);
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+        
+        .sim-wrapper-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        
+        .sim-wrapper-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .sim-wrapper-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+        }
+        
+        .sim-wrapper-detail {
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+        
+        .sim-wrapper-delta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        
         @media (max-width: 500px) {
             .sim-comparison {
                 flex-direction: column;
@@ -1295,10 +1345,10 @@
             </div>
             <p class="tagline">Common Equity Bitcoin Exposure</p>
             <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-top:10px;">
-                <a href="/cebe" style="display:inline-block; padding:5px 14px; border-radius:20px; border:1px solid rgba(249,115,22,0.3); background:rgba(249,115,22,0.06); color:#f97316; font-size:11px; font-weight:600; letter-spacing:1.5px; font-family:'JetBrains Mono',monospace; text-decoration:none; transition:all 0.2s;" onmouseover="this.style.background='rgba(249,115,22,0.15)';this.style.borderColor='rgba(249,115,22,0.6)'" onmouseout="this.style.background='rgba(249,115,22,0.06)';this.style.borderColor='rgba(249,115,22,0.3)'">CEBE vs BPS</a>
                 <a href="/framework" style="display:inline-block; padding:5px 14px; border-radius:20px; border:1px solid rgba(249,115,22,0.3); background:rgba(249,115,22,0.06); color:#f97316; font-size:11px; font-weight:600; letter-spacing:1.5px; font-family:'JetBrains Mono',monospace; text-decoration:none; transition:all 0.2s;" onmouseover="this.style.background='rgba(249,115,22,0.15)';this.style.borderColor='rgba(249,115,22,0.6)'" onmouseout="this.style.background='rgba(249,115,22,0.06)';this.style.borderColor='rgba(249,115,22,0.3)'">FRAMEWORK</a>
-                <a href="/endgame" style="display:inline-block; padding:5px 14px; border-radius:20px; border:1px solid rgba(249,115,22,0.3); background:rgba(249,115,22,0.06); color:#f97316; font-size:11px; font-weight:600; letter-spacing:1.5px; font-family:'JetBrains Mono',monospace; text-decoration:none; transition:all 0.2s;" onmouseover="this.style.background='rgba(249,115,22,0.15)';this.style.borderColor='rgba(249,115,22,0.6)'" onmouseout="this.style.background='rgba(249,115,22,0.06)';this.style.borderColor='rgba(249,115,22,0.3)'">ENDGAME</a>
                 <a href="/modeler" style="display:inline-block; padding:5px 14px; border-radius:20px; border:1px solid rgba(249,115,22,0.3); background:rgba(249,115,22,0.06); color:#f97316; font-size:11px; font-weight:600; letter-spacing:1.5px; font-family:'JetBrains Mono',monospace; text-decoration:none; transition:all 0.2s;" onmouseover="this.style.background='rgba(249,115,22,0.15)';this.style.borderColor='rgba(249,115,22,0.6)'" onmouseout="this.style.background='rgba(249,115,22,0.06)';this.style.borderColor='rgba(249,115,22,0.3)'">MODELER</a>
+                <a href="/endgame" style="display:inline-block; padding:5px 14px; border-radius:20px; border:1px solid rgba(249,115,22,0.3); background:rgba(249,115,22,0.06); color:#f97316; font-size:11px; font-weight:600; letter-spacing:1.5px; font-family:'JetBrains Mono',monospace; text-decoration:none; transition:all 0.2s;" onmouseover="this.style.background='rgba(249,115,22,0.15)';this.style.borderColor='rgba(249,115,22,0.6)'" onmouseout="this.style.background='rgba(249,115,22,0.06)';this.style.borderColor='rgba(249,115,22,0.3)'">ENDGAME</a>
+                <a href="/cebe" style="display:inline-block; padding:5px 14px; border-radius:20px; border:1px solid rgba(249,115,22,0.3); background:rgba(249,115,22,0.06); color:#f97316; font-size:11px; font-weight:600; letter-spacing:1.5px; font-family:'JetBrains Mono',monospace; text-decoration:none; transition:all 0.2s;" onmouseover="this.style.background='rgba(249,115,22,0.15)';this.style.borderColor='rgba(249,115,22,0.6)'" onmouseout="this.style.background='rgba(249,115,22,0.06)';this.style.borderColor='rgba(249,115,22,0.3)'">CEBE vs BPS</a>
             </div>
             <div class="btc-price-display" id="btcPriceDisplay">
                 <span class="btc-label">BTC</span>
@@ -2397,6 +2447,17 @@
                                 </div>
                             </div>
                             
+                            <div class="sim-wrapper-impact" id="simWrapperSection" style="display: none;">
+                                <div class="sim-wrapper-bar">
+                                    <div class="sim-wrapper-icon">⚙️</div>
+                                    <div class="sim-wrapper-content">
+                                        <div class="sim-wrapper-title">Wrapper Cost Impact</div>
+                                        <div class="sim-wrapper-detail" id="simWrapperDetail"></div>
+                                    </div>
+                                    <div class="sim-wrapper-delta" id="simWrapperDelta"></div>
+                                </div>
+                            </div>
+                            
                             <div class="sim-stock-projection" id="simStockSection" style="display: none;">
                                 <div class="section-title" style="margin-top: 20px;">Share Price Projection</div>
                                 <div class="sim-stock-result">
@@ -2428,7 +2489,7 @@
                         </div>
                         
                         <div class="sim-disclaimer">
-                            For educational purposes only. Assumes no changes to capital structure. Not financial advice. Actual results will vary.
+                            For educational purposes only. Assumes no changes to capital structure or share count. Wrapper costs projected at current annual rate. Not financial advice.
                         </div>
                     </div>
                 </div>
@@ -2502,7 +2563,17 @@
                 });
             });
             
-            // Simulator interaction handlers
+            // Simulator interaction handlers — compute net annual wrapper from encumbranceData
+            const enc = encumbranceData[ticker];
+            let netAnnualWrapper = 0;
+            let hasWrapperData = false;
+            if (enc && enc.lastUpdated && enc.items.length > 0) {
+                const totalCost = enc.items.reduce((s, i) => s + i.amount, 0);
+                const totalOffset = enc.offsets.reduce((s, o) => s + o.amount, 0);
+                netAnnualWrapper = totalCost - totalOffset;
+                hasWrapperData = true;
+            }
+            
             const simData = {
                 ticker: ticker,
                 btcHoldings: parseFloat(data.btc_holdings),
@@ -2511,15 +2582,21 @@
                 originalBtcPrice: m.btcPrice,
                 originalDrag: m.drag,
                 originalCebe: m.cebe,
-                originalOwn: m.commonEquityPct
+                originalOwn: m.commonEquityPct,
+                netAnnualWrapper: netAnnualWrapper,
+                hasWrapperData: hasWrapperData
             };
             
             function updateSimulation() {
                 const newBtcPrice = parseFloat(document.getElementById('simBtcPrice').value) || simData.originalBtcPrice;
                 const stockPrice = parseFloat(document.getElementById('simStockPrice').value);
                 
-                // Calculate new metrics at projected BTC price
-                const newClaimsBtc = simData.netClaimsUsd / newBtcPrice;
+                // Calculate wrapper cost erosion for time horizon
+                const wrapperErosion = selectedYears > 0 ? simData.netAnnualWrapper * selectedYears : 0;
+                const adjustedNetClaimsUsd = simData.netClaimsUsd + wrapperErosion;
+                
+                // Calculate new metrics at projected BTC price (wrapper-adjusted when years > 0)
+                const newClaimsBtc = adjustedNetClaimsUsd / newBtcPrice;
                 const newDrag = simData.btcHoldings > 0 ? newClaimsBtc / simData.btcHoldings : 0;
                 const newCommonEquityBtc = simData.btcHoldings - newClaimsBtc;
                 const newCebe = simData.shares > 0 ? (newCommonEquityBtc / simData.shares) * 100000000 : 0;
@@ -2530,6 +2607,39 @@
                 document.getElementById('simProjDrag').textContent = (newDrag * 100).toFixed(1) + '%';
                 document.getElementById('simProjCebe').textContent = formatNumber(Math.round(newCebe)) + ' sats';
                 document.getElementById('simProjOwn').textContent = (newOwn * 100).toFixed(1) + '%';
+                
+                // Wrapper impact callout
+                const wrapperSection = document.getElementById('simWrapperSection');
+                if (selectedYears > 0 && simData.hasWrapperData && simData.netAnnualWrapper !== 0) {
+                    wrapperSection.style.display = 'block';
+                    const bar = wrapperSection.querySelector('.sim-wrapper-bar');
+                    const isNegative = simData.netAnnualWrapper < 0;
+                    
+                    // Calculate pure drag-only CEBE for comparison
+                    const pureClaimsBtc = simData.netClaimsUsd / newBtcPrice;
+                    const pureCommonBtc = simData.btcHoldings - pureClaimsBtc;
+                    const pureCebe = simData.shares > 0 ? (pureCommonBtc / simData.shares) * 100000000 : 0;
+                    const cebeDelta = Math.round(newCebe - pureCebe);
+                    
+                    const annualDisplay = isNegative 
+                        ? '+$' + formatNumber(Math.abs(Math.round(simData.netAnnualWrapper / 1000000))) + 'M/yr net income'
+                        : '$' + formatNumber(Math.round(simData.netAnnualWrapper / 1000000)) + 'M/yr cost';
+                    const cumDisplay = isNegative
+                        ? '+$' + formatNumber(Math.abs(Math.round(wrapperErosion / 1000000))) + 'M over ' + selectedYears + 'Y'
+                        : '$' + formatNumber(Math.round(wrapperErosion / 1000000)) + 'M over ' + selectedYears + 'Y';
+                    
+                    document.getElementById('simWrapperDetail').textContent = annualDisplay + ' \u2192 ' + cumDisplay;
+                    
+                    const deltaEl = document.getElementById('simWrapperDelta');
+                    deltaEl.textContent = (cebeDelta >= 0 ? '+' : '') + formatNumber(cebeDelta) + ' sats';
+                    deltaEl.style.color = cebeDelta >= 0 ? 'var(--green)' : 'var(--red)';
+                    
+                    bar.className = 'sim-wrapper-bar' + (isNegative ? ' negative-wrapper' : '');
+                    wrapperSection.querySelector('.sim-wrapper-icon').textContent = isNegative ? '💰' : '⚙️';
+                    wrapperSection.querySelector('.sim-wrapper-title').textContent = isNegative ? 'Net Income Benefit' : 'Wrapper Cost Impact';
+                } else {
+                    wrapperSection.style.display = 'none';
+                }
                 
                 // Color code drag change
                 const projDragEl = document.getElementById('simProjDrag');
@@ -2613,7 +2723,10 @@
                         const projectedBtc = Math.round(simData.originalBtcPrice * Math.pow(1.15, selectedYears));
                         document.getElementById('simBtcPrice').value = projectedBtc;
                         document.getElementById('simBtcSlider').value = Math.min(projectedBtc, 500000);
-                        noteEl.textContent = 'Assuming 15% annual BTC appreciation. Adjust slider to explore scenarios.';
+                        const wrapperNote = simData.hasWrapperData && simData.netAnnualWrapper !== 0
+                            ? ' Includes wrapper cost erosion from Costs tab.'
+                            : '';
+                        noteEl.textContent = 'Assuming 15% annual BTC appreciation.' + wrapperNote + ' Adjust slider to explore scenarios.';
                         headerEl.textContent = 'In ' + selectedYears + ' Year' + (selectedYears > 1 ? 's' : '');
                     } else {
                         document.getElementById('simBtcPrice').value = Math.round(simData.originalBtcPrice);
