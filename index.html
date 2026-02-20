@@ -191,6 +191,34 @@
             line-height: 1.5;
         }
         
+        /* Cycle Toggle */
+        .cycle-toggle {
+            display: inline-flex;
+            gap: 2px;
+            background: var(--bg-primary);
+            border-radius: 6px;
+            padding: 2px;
+            margin-top: 4px;
+        }
+        .cycle-toggle button {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            font-weight: 500;
+            padding: 2px 6px;
+            border: none;
+            border-radius: 4px;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.15s;
+            letter-spacing: 0.3px;
+        }
+        .cycle-toggle button:hover { color: var(--text-secondary); }
+        .cycle-toggle button.active {
+            background: var(--orange-primary);
+            color: #000;
+        }
+        
         /* Table Container */
         .table-container {
             background: var(--bg-card);
@@ -222,6 +250,14 @@
             position: relative;
             padding-right: 28px;
             transition: color 0.15s;
+        }
+        
+        .data-table th[data-sort="cycle_mnav"] {
+            padding-right: 14px;
+        }
+        
+        .data-table th[data-sort="cycle_mnav"]::after {
+            display: none;
         }
         
         .data-table th[data-sort]:hover {
@@ -1384,7 +1420,14 @@
                         <th data-sort="cebe">CEBE</th>
                         <th data-sort="drag">Drag</th>
                         <th data-sort="equity">Common Equity</th>
-                        <th data-sort="sats_dollar" title="CEBE sats per $1 invested -- how much BTC exposure does a dollar buy?">Sats/$</th>
+                        <th data-sort="cycle_mnav" title="CEBE mNAV adjusted for wrapper cost over a full cycle">
+                            <span id="cycleHeader">Cycle mNAV (4Y)</span>
+                            <div class="cycle-toggle" id="cycleToggle">
+                                <button data-years="2">2Y</button>
+                                <button data-years="4" class="active">4Y</button>
+                                <button data-years="6">6Y</button>
+                            </div>
+                        </th>
                         <th data-sort="cebe_mnav" title="Stock price / CEBE NAV per share -- are you paying a premium or discount to net BTC value?">CEBE mNAV</th>
                         <th style="width: 100px;">Source</th>
                     </tr>
@@ -1581,6 +1624,25 @@
         let companiesData = {};
         let currentSnapshots = [];
         let currentSort = { key: null, dir: 'asc' };
+        let cycleYears = 4;
+        
+        // Get wrapper fee % for a ticker from encumbrance data
+        function getWrapperFee(ticker) {
+            const enc = encumbranceData[ticker];
+            if (!enc || !enc.lastUpdated || !enc.items) return null;
+            const totalCost = enc.items.reduce((sum, i) => sum + i.amount, 0);
+            const totalOffset = enc.offsets.reduce((sum, o) => sum + o.amount, 0);
+            const netCost = totalCost - totalOffset;
+            const btcReserve = enc.btcReserveForCalc || 1;
+            return netCost / btcReserve; // as decimal, e.g. 0.0169
+        }
+        
+        // Calculate Cycle mNAV: CEBE mNAV adjusted for wrapper cost over cycle
+        function calcCycleMnav(cebeMnav, ticker) {
+            const wrapper = getWrapperFee(ticker);
+            if (wrapper === null || cebeMnav <= 0) return null;
+            return cebeMnav * Math.pow(1 - wrapper, cycleYears);
+        }
         
         // Encumbrance data — Annual Cost to Common Equity
         // Sources: 10-K, DEF 14A, 8-K, earnings releases
@@ -1946,8 +2008,8 @@
                         <div class="metric-label">of BTC</div>
                     </td>
                     <td>
-                        <div class="metric-value cebe-sats-dollar" data-ticker="${ticker}" data-cebe="${metrics.cebe}">-</div>
-                        <div class="metric-label">sats per $1</div>
+                        <div class="metric-value cycle-mnav" data-ticker="${ticker}" data-cebe-btc="${metrics.cebe / 100000000}">-</div>
+                        <div class="metric-label">wrapper-adjusted</div>
                     </td>
                     <td>
                         <div class="metric-value cebe-mnav" data-ticker="${ticker}" data-cebe-btc="${metrics.cebe / 100000000}">-</div>
@@ -1993,11 +2055,7 @@
                 const sym = currencySymbols[currency] || '$';
                 el.textContent = sym + price.toFixed(2);
                 
-                const satsDollarEl = document.querySelector(`.cebe-sats-dollar[data-ticker="${ticker}"]`);
-                if (satsDollarEl && priceUsd > 0) {
-                    const cebe = parseFloat(satsDollarEl.dataset.cebe) || 0;
-                    satsDollarEl.textContent = formatNumber(Math.round(cebe / priceUsd));
-                }
+                const cycleMnavEl = document.querySelector(`.cycle-mnav[data-ticker="${ticker}"]`);
                 
                 const cebeMnavEl = document.querySelector(`.cebe-mnav[data-ticker="${ticker}"]`);
                 if (cebeMnavEl && priceUsd > 0 && liveBtcPrice > 0) {
@@ -2009,6 +2067,20 @@
                         if (cebeMnav < 0.95) cebeMnavEl.style.color = 'var(--green)';
                         else if (cebeMnav > 1.05) cebeMnavEl.style.color = 'var(--red)';
                         else cebeMnavEl.style.color = 'var(--text-primary)';
+                        
+                        // Update Cycle mNAV
+                        if (cycleMnavEl) {
+                            const cycleMnav = calcCycleMnav(cebeMnav, ticker);
+                            if (cycleMnav !== null) {
+                                cycleMnavEl.textContent = cycleMnav.toFixed(2) + 'x';
+                                if (cycleMnav < 0.95) cycleMnavEl.style.color = 'var(--green)';
+                                else if (cycleMnav > 1.05) cycleMnavEl.style.color = 'var(--red)';
+                                else cycleMnavEl.style.color = 'var(--text-primary)';
+                            } else {
+                                cycleMnavEl.textContent = '-';
+                                cycleMnavEl.style.color = 'var(--text-muted)';
+                            }
+                        }
                     }
                 }
             });
@@ -2030,7 +2102,12 @@
                 case 'cebe': return metrics.cebe || 0;
                 case 'drag': return metrics.drag || 0;
                 case 'equity': return metrics.commonEquityPct || 0;
-                case 'sats_dollar': return priceUsd > 0 ? metrics.cebe / priceUsd : 0;
+                case 'cycle_mnav': {
+                    const cebeNAV = (metrics.cebe / 100000000) * (liveBtcPrice || 96000);
+                    const cebeMnav = priceUsd > 0 && cebeNAV > 0 ? priceUsd / cebeNAV : 0;
+                    const cycleMnav = calcCycleMnav(cebeMnav, ticker);
+                    return cycleMnav !== null ? cycleMnav : 999;
+                }
                 case 'cebe_mnav': {
                     const cebeNAV = (metrics.cebe / 100000000) * (liveBtcPrice || 96000);
                     return priceUsd > 0 && cebeNAV > 0 ? priceUsd / cebeNAV : 0;
@@ -2831,15 +2908,8 @@
                         const sym = currencySymbols[currency] || '$';
                         el.textContent = sym + price.toFixed(2);
                         
-                        // Update CEBE Sats/$ (always in USD terms)
-                        const satsDollarEl = document.querySelector(`.cebe-sats-dollar[data-ticker="${ticker}"]`);
-                        if (satsDollarEl && priceUsd > 0) {
-                            const cebe = parseFloat(satsDollarEl.dataset.cebe) || 0;
-                            const satsPerDollar = cebe / priceUsd;
-                            satsDollarEl.textContent = formatNumber(Math.round(satsPerDollar));
-                        }
-                        
-                        // Update CEBE mNAV (always in USD terms)
+                        // Update Cycle mNAV and CEBE mNAV (always in USD terms)
+                        const cycleMnavEl = document.querySelector(`.cycle-mnav[data-ticker="${ticker}"]`);
                         const cebeMnavEl = document.querySelector(`.cebe-mnav[data-ticker="${ticker}"]`);
                         if (cebeMnavEl && priceUsd > 0 && liveBtcPrice > 0) {
                             const cebeBtc = parseFloat(cebeMnavEl.dataset.cebeBtc) || 0;
@@ -2854,6 +2924,20 @@
                                     cebeMnavEl.style.color = 'var(--red)';
                                 } else {
                                     cebeMnavEl.style.color = 'var(--text-primary)';
+                                }
+                                
+                                // Cycle mNAV
+                                if (cycleMnavEl) {
+                                    const cycleMnav = calcCycleMnav(cebeMnav, ticker);
+                                    if (cycleMnav !== null) {
+                                        cycleMnavEl.textContent = cycleMnav.toFixed(2) + 'x';
+                                        if (cycleMnav < 0.95) cycleMnavEl.style.color = 'var(--green)';
+                                        else if (cycleMnav > 1.05) cycleMnavEl.style.color = 'var(--red)';
+                                        else cycleMnavEl.style.color = 'var(--text-primary)';
+                                    } else {
+                                        cycleMnavEl.textContent = '-';
+                                        cycleMnavEl.style.color = 'var(--text-muted)';
+                                    }
                                 }
                             }
                         }
@@ -2873,6 +2957,19 @@
         }
         
         init();
+        
+        // Cycle mNAV toggle handlers
+        document.querySelectorAll('#cycleToggle button').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Don't trigger column sort
+                document.querySelectorAll('#cycleToggle button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                cycleYears = parseInt(btn.dataset.years);
+                document.getElementById('cycleHeader').textContent = 'Cycle mNAV (' + cycleYears + 'Y)';
+                // Recalculate all cycle mNAV cells
+                applyStockPricesFromCache();
+            });
+        });
         
         // Register Service Worker for PWA
         if ('serviceWorker' in navigator) {
