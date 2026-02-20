@@ -1619,12 +1619,25 @@
                 pendingBackfill: ['Capital B reports via Euronext / AMF (France). 0% drag — minimal encumbrances expected.']
             },
             OBTC3: {
-                lastUpdated: null,
-                btcReserveForCalc: null,
-                items: [],
-                offsets: [],
-                sources: [],
-                pendingBackfill: ['OranjeBTC reports via B3 / CVM (Brazil). Encumbrance data collection in progress.']
+                lastUpdated: '2026-02-20',
+                btcReserveForCalc: 361000000, // 3,722 BTC x ~$97K
+                items: [
+                    { category: 'interest', label: 'Convertible Note Interest', sublabel: '$23M zero-coupon — no interest payments', amount: 0, pctOfReserve: null, verified: true, note: 'Convertible note is zero-coupon. No cash interest, no share dilution from coupon payments. $23M principal due at maturity Sep 2030. Source: CVM filings, company disclosures.' },
+                    { category: 'operations', label: 'Operating Expenses (est)', sublabel: '57 employees · education + treasury ops', amount: 1500000, pctOfReserve: null, verified: false, note: 'Estimated from Q3 2025 ITR partial-quarter data. FY2025 net loss ~R$1.12M (~$194K) suggests very lean cost structure. Company notes expenses are partially indexed to BTC, reducing cash drag during downturns. Full-year detail pending FY2025 annual report.' },
+                ],
+                offsets: [
+                    { label: 'Education Revenue (Intergraus)', sublabel: 'Legacy prep courses + financial education', amount: 500000, verified: false, note: 'Estimated. Cursinho Intergraus (acquired via reverse IPO) generates education revenue. Scale unknown — likely small. FY2025 annual report will provide first full-year disclosure.' },
+                ],
+                sources: [
+                    'CVM weekly filings (Feb 2026) — BTC holdings, share buybacks',
+                    'Q3 2025 ITR (Sep 30, 2025) — first and only quarterly filing',
+                    'Company press releases via CVM / B3',
+                ],
+                pendingBackfill: [
+                    'FY2025 annual report (expected ~Mar-Apr 2026) — first full-year financials, OpEx breakdown, exec comp, SBC details',
+                    'CEO/board compensation not yet disclosed in any public filing. Board includes Joshua Levine (chair, ex-BlackRock/Bridgewater), Fernando Ulrich, Julio Capua (ex-XP).',
+                    'Company states expenses are partially indexed to BTC — unusual structure that reduces cash drag in downturns. Detail pending.',
+                ]
             },
             BRR: {
                 lastUpdated: '2026-02-18',
