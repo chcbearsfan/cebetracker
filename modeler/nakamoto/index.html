@@ -656,8 +656,28 @@ function projectYears(years) {
                     btcSold = btcH; btcH = 0; cash = 0; status = 'red';
                     yearEvents.push({type:'btcsale',cls:'red',icon:'\u{1F6A8}',text:'<strong>Treasury depleted.</strong> Insufficient BTC to cover ' + fmtB(deficit) + ' cash deficit.'});
                 }
+            } else if (sType === 'bailey' && y > 1) {
+                // Bailey: single ATM round covers deficit + accumulation
+                var netCl = Math.max(0, debtUsd - Math.max(0, cash));
+                var navNow = Math.max(0, (btcH * yearBtcPrice) - netCl);
+                var navPS = shares > 0 ? navNow / shares : 0;
+                var atmPrice = navPS * yearMnav;
+                if (atmPrice > 0 && yearBtcPrice > 0) {
+                    var totalRaise = BAILEY_ATM_ANNUAL_USD + deficit;
+                    var newShares = totalRaise / atmPrice;
+                    newBtcAcq = BAILEY_ATM_ANNUAL_USD / yearBtcPrice;
+                    btcH += newBtcAcq;
+                    shares += newShares;
+                    cash = 0;
+                    yearEvents.push({type:'accumulate',cls:'info',icon:'\u{1F4E6}',text:'<strong>ATM round.</strong> Raised ' + fmtB(totalRaise) + ' (' + fmtB(deficit) + ' covers cash deficit + ' + fmtB(BAILEY_ATM_ANNUAL_USD) + ' accumulation). Issued ' + fmt(Math.round(newShares)) + ' shares, acquired ' + fmt(Math.round(newBtcAcq)) + ' BTC.'});
+                } else {
+                    btcSold = yearBtcPrice > 0 ? deficit / yearBtcPrice : 0;
+                    btcH = Math.max(0, btcH - btcSold);
+                    cash = 0; status = 'red';
+                    yearEvents.push({type:'btcsale',cls:'red',icon:'\u26A0\uFE0F',text:'<strong>NAV too low for ATM.</strong> Sold ' + fmt(Math.round(btcSold)) + ' BTC to cover obligations.'});
+                }
             } else {
-                // Power Law / Bailey: ATM equity to cover cash needs
+                // Power Law / Bailey Y1: ATM equity to cover cash needs only
                 var netCl = Math.max(0, debtUsd - Math.max(0, cash));
                 var navNow = Math.max(0, (btcH * yearBtcPrice) - netCl);
                 var navPS = shares > 0 ? navNow / shares : 0;
@@ -677,8 +697,8 @@ function projectYears(years) {
             }
         }
 
-        // 5. Bailey Plan: resume accumulation via ATM (after Y1 refinance)
-        if (y > 1 && sType === 'bailey' && debtUsd > 0) {
+        // 5. Bailey Plan: accumulation when cash is positive (no deficit year)
+        if (y > 1 && sType === 'bailey' && cash >= 0 && debtUsd > 0) {
             var netCl = Math.max(0, debtUsd - Math.max(0, cash));
             var navNow = Math.max(0, (btcH * yearBtcPrice) - netCl);
             var navPS = shares > 0 ? navNow / shares : 0;
