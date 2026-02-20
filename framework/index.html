@@ -1,1 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The CEBE Framework | Common Equity Bitcoin Exposure</title>
+<meta name="description" content="CEBE measures the Bitcoin exposure available to common shareholders after accounting for senior claims. The rigorous analytical framework that reveals what BPS ignores.">
+<meta property="og:title" content="The CEBE Framework | CEBE Tracker">
+<meta property="og:description" content="What percentage of Bitcoin do common shareholders actually own? CEBE measures what BPS ignores.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://cebetracker.io/framework">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --btc: #F7931A;
+  --btc-dim: #F7931A33;
+  --btc-glow: #F7931A18;
+  --btc-subtle: #F7931A0A;
+  --bg: #08080D;
+  --bg-card: #101018;
+  --bg-card2: #16161F;
+  --bg-input: #0C0C14;
+  --border: #1C1C28;
+  --border2: #28283A;
+  --text: #E4E4EC;
+  --text2: #8585A0;
+  --text3: #505068;
+  --green: #34D399;
+  --green-dim: #34D39920;
+  --red: #F87171;
+  --red-dim: #F8717120;
+  --yellow: #FBBF24;
+  --blue: #60A5FA;
+}
 
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  line-height: 1.78;
+  font-size: 17px;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, #F7931A08 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 80% 100%, #60A5FA06 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+.wrap { max-width: 780px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+/* ═══ TOPBAR ═══ */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(8, 8, 13, 0.88);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  height: 52px; display: flex; align-items: center;
+  justify-content: space-between; padding: 0 24px;
+}
+.topbar-logo {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700; font-size: 13px; letter-spacing: 2.5px;
+  color: var(--btc); text-decoration: none;
+}
+.topbar-right { display: flex; gap: 20px; align-items: center; }
+.topbar-right a {
+  font-size: 13px; font-weight: 500; color: var(--text3);
+  text-decoration: none; transition: color .2s;
+}
+.topbar-right a:hover { color: var(--btc); }
+
+.progress-bar {
+  position: fixed; top: 52px; left: 0; height: 2px;
+  background: linear-gradient(90deg, var(--btc), var(--yellow));
+  z-index: 101; width: 0%; transition: width .1s linear;
+}
+
+/* ═══ HEADER ═══ */
+header { padding: 108px 0 0; text-align: center; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 5px 16px; border-radius: 100px;
+  border: 1px solid var(--btc-dim); background: var(--btc-glow);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--btc); margin-bottom: 28px;
+  opacity: 0; animation: fadeUp .5s ease forwards .1s;
+}
+.badge .dot { width:6px;height:6px;border-radius:50%;background:var(--btc);animation:pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+@keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(2.2rem, 5.5vw, 3.4rem);
+  font-weight: 800; line-height: 1.08;
+  letter-spacing: -0.03em; margin-bottom: 20px;
+  background: linear-gradient(135deg, #fff 30%, var(--btc));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0; animation: fadeUp .5s ease forwards .2s;
+}
+
+.sub {
+  font-size: 1.12rem; color: var(--text2);
+  max-width: 540px; margin: 0 auto 20px; line-height: 1.65;
+  opacity: 0; animation: fadeUp .5s ease forwards .3s;
+}
+.sub strong { color: var(--text); font-weight: 600; }
+
+.hero-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: var(--text3); margin-bottom: 40px;
+  opacity: 0; animation: fadeUp .5s ease forwards .4s;
+}
+.hero-meta a { color: var(--btc); text-decoration: none; }
+.hero-meta a:hover { text-decoration: underline; }
+
+.nav {
+  display: flex; flex-wrap: wrap; justify-content: center;
+  gap: 8px; margin-bottom: 72px;
+  opacity: 0; animation: fadeUp .5s ease forwards .5s;
+}
+.nav a {
+  padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 500;
+  color: var(--text2); background: var(--bg-card); border: 1px solid var(--border);
+  text-decoration: none; transition: all .2s; white-space: nowrap;
+}
+.nav a:hover { color: var(--text); border-color: var(--btc-dim); background: var(--bg-card2); }
+
+/* ═══ SECTIONS ═══ */
+section { margin-bottom: 88px; }
+.label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--btc); margin-bottom: 10px;
+}
+h2 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
+  font-weight: 600; line-height: 1.2; letter-spacing: -0.02em;
+  margin-bottom: 18px; color: var(--text);
+}
+h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.25rem; font-weight: 600; line-height: 1.3;
+  margin-top: 44px; margin-bottom: 14px; color: var(--text);
+}
+h4 {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem; font-weight: 600; color: var(--btc);
+  margin-top: 32px; margin-bottom: 10px;
+}
+p { color: var(--text2); margin-bottom: 16px; }
+p strong { color: var(--text); font-weight: 600; }
+p:last-child { margin-bottom: 0; }
+a { color: var(--btc); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ═══ CARDS ═══ */
+.card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 28px; margin: 28px 0;
+  position: relative; overflow: hidden;
+}
+.card.accent::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background: linear-gradient(90deg, var(--btc), transparent 80%);
+}
+.card h3 { margin-top: 0; }
+.card p:last-child { margin-bottom: 0; }
+
+.callout {
+  background: var(--btc-subtle);
+  border-left: 3px solid var(--btc);
+  border-radius: 0 10px 10px 0;
+  padding: 20px 24px; margin: 28px 0;
+}
+.callout p { color: var(--text2); margin-bottom: 8px; }
+.callout p:last-child { margin-bottom: 0; }
+.callout strong { color: var(--btc); }
+.callout-warn { border-left-color: var(--yellow); background: rgba(251,191,36,0.05); }
+.callout-warn strong { color: var(--yellow); }
+
+.agrid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:18px; }
+.acol {
+  padding: 16px; border-radius: 10px;
+  background: var(--bg-input); border: 1px solid var(--border);
+}
+.acol-label {
+  font-family:'JetBrains Mono',monospace; font-size:10px;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--text3); margin-bottom:8px;
+}
+.acol p { font-size:.88rem; margin-bottom:6px; }
+
+.formula-box {
+  background: var(--bg-card); border: 1px solid var(--btc-dim);
+  border-radius: 12px; padding: 24px 28px; margin: 28px 0; text-align: center;
+}
+.formula-box .fl {
+  font-family:'JetBrains Mono',monospace; font-size:10px;
+  color:var(--btc); letter-spacing:.1em; text-transform:uppercase; margin-bottom:10px;
+}
+.fm {
+  font-family:'JetBrains Mono',monospace;
+  font-size: clamp(.82rem,2.2vw,1.05rem);
+  color:var(--text); font-weight:600; line-height:1.9;
+}
+.fm .o { color:var(--btc); }
+.fm .d { color:var(--text3); font-weight:400; }
+
+.code-block {
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: 10px; padding: 20px 24px; margin: 24px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px; line-height: 1.85; color: var(--text2);
+  overflow-x: auto; white-space: pre; 
+}
+.code-block strong { color: var(--btc); font-weight: 600; }
+.code-block .cm { color: var(--text3); }
+.code-block .gr { color: var(--green); }
+.code-block .yw { color: var(--yellow); }
+
+/* ═══ CALCULATOR ═══ */
+.calc {
+  background: var(--bg-card); border:1px solid var(--border);
+  border-radius: 16px; overflow: hidden; margin: 32px 0;
+}
+.calc-head {
+  padding: 18px 24px; border-bottom: 1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.calc-head h3 { margin-top:0; margin-bottom:0; font-size:1.15rem; }
+.calc-live {
+  font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--green);
+  display:flex; align-items:center; gap:6px;
+}
+.calc-live .dot { width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.5s ease-in-out infinite; }
+.calc-body { padding: 24px; }
+
+.inp-group { margin-bottom: 22px; }
+.inp-row { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; }
+.inp-row span:first-child { font-size:.88rem; font-weight:500; color:var(--text2); }
+.inp-val { font-family:'JetBrains Mono',monospace; font-size:.95rem; font-weight:600; color:var(--btc); }
+
+input[type=range] {
+  width:100%; height:5px; -webkit-appearance:none; appearance:none;
+  background:var(--border); border-radius:3px; outline:none; cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance:none; width:18px;height:18px;border-radius:50%;
+  background:var(--btc); border:3px solid var(--bg); box-shadow:0 0 10px var(--btc-dim); cursor:grab;
+}
+input[type=range]::-moz-range-thumb {
+  width:18px;height:18px;border-radius:50%;
+  background:var(--btc); border:3px solid var(--bg); box-shadow:0 0 10px var(--btc-dim); cursor:grab;
+}
+.range-ends { display:flex; justify-content:space-between; margin-top:4px; }
+.range-ends span { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text3); }
+
+.results {
+  display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;
+  margin-top: 24px; padding-top: 24px; border-top:1px solid var(--border);
+}
+.res-box {
+  text-align:center; padding:16px 10px;
+  background:var(--bg-input); border-radius:10px; border:1px solid var(--border);
+}
+.res-label {
+  font-family:'JetBrains Mono',monospace; font-size:10px;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--text3); margin-bottom:6px;
+}
+.res-val {
+  font-family:'JetBrains Mono',monospace; font-size:1.3rem;
+  font-weight:700; color:var(--text);
+}
+.res-val.orange { color:var(--btc); }
+.res-sub {
+  font-family:'JetBrains Mono',monospace; font-size:11px;
+  color:var(--text3); margin-top:4px;
+}
+
+.drag-vis { margin:28px 0; }
+.drag-bar-wrap {
+  height: 40px; border-radius: 8px; overflow: hidden;
+  display: flex; border: 1px solid var(--border);
+}
+.drag-bar-cebe {
+  background: linear-gradient(90deg, #1a6b3a, var(--green));
+  transition: width .4s ease;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; color:#fff;
+  min-width: 60px;
+}
+.drag-bar-drag {
+  background: linear-gradient(90deg, #b45309, var(--btc));
+  transition: width .4s ease;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; color:#fff;
+  min-width: 40px;
+}
+.drag-legend { display:flex; gap:20px; margin-top:10px; justify-content:center; }
+.drag-legend span { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text2); }
+.drag-legend .sq { width:10px; height:10px; border-radius:3px; }
+.drag-legend .sq.gr { background:var(--green); }
+.drag-legend .sq.or { background:var(--btc); }
+
+/* ═══ FORCES ═══ */
+.forces { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:28px 0; }
+.force {
+  padding: 22px; border-radius: 12px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  transition: border-color .2s;
+}
+.force:hover { border-color: var(--btc-dim); }
+.force-icon { font-size:1.6rem; margin-bottom:10px; }
+.force h4 { margin-top:0; font-family:'Fraunces',serif; font-size:1rem; font-weight:600; margin-bottom:8px; color:var(--text); }
+.force p { font-size:.85rem; margin-bottom:0; }
+
+/* ═══ TABLES ═══ */
+.table-wrap { overflow-x: auto; margin: 28px 0; }
+.data-table {
+  width:100%; border-collapse:collapse;
+  font-family:'JetBrains Mono',monospace; font-size:13px;
+}
+.data-table th {
+  text-align:left; padding:12px 14px;
+  font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--text3); border-bottom:1px solid var(--border); font-weight:500;
+  background: var(--bg-card); position: sticky; top: 0;
+}
+.data-table td {
+  padding:11px 14px; border-bottom:1px solid var(--border); color:var(--text2);
+}
+.data-table td.txt { font-family:'DM Sans',sans-serif; font-size:14px; }
+.data-table tr:hover td { background:var(--bg-card); }
+.data-table .hl { color:var(--btc); font-weight:600; }
+.data-table .gr { color:var(--green); font-weight:600; }
+.data-table .rd { color:var(--red); font-weight:600; }
+.data-table .yw { color:var(--yellow); font-weight:600; }
+.data-table .base td { background: var(--btc-subtle); }
+
+/* ═══ METRICS ═══ */
+.metrics { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin:28px 0; }
+.metric {
+  padding:20px; border-radius:12px;
+  background:var(--bg-card); border:1px solid var(--border); text-align:center;
+}
+.metric-num {
+  font-family:'JetBrains Mono',monospace; font-size:11px;
+  color:var(--btc); font-weight:600; margin-bottom:6px;
+}
+.metric h4 { margin-top:0; font-family:'Fraunces',serif; font-size:1rem; font-weight:600; margin-bottom:8px; }
+.metric p { font-size:.82rem; margin-bottom:0; line-height:1.5; }
+
+/* ═══ SCENARIOS ═══ */
+.scenario-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:28px 0; }
+.scenario-card {
+  padding: 22px; border-radius: 12px;
+  background: var(--bg-card); border: 1px solid var(--border);
+}
+.scenario-card h4 { margin-top:0; margin-bottom:10px; }
+.scenario-card p { font-size:.88rem; margin-bottom:6px; }
+
+/* ═══ CTA ═══ */
+.cta-box {
+  text-align:center; padding:48px 28px;
+  background: var(--bg-card); border: 1px solid var(--btc-dim);
+  border-radius: 16px; margin: 48px 0;
+  position: relative; overflow: hidden;
+}
+.cta-box::before {
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(ellipse at 50% 0%, var(--btc-glow), transparent 70%);
+  pointer-events:none;
+}
+.cta-box h2 { position:relative; }
+.cta-box p { position:relative; max-width:460px; margin:0 auto 28px; }
+.btn {
+  display:inline-flex; align-items:center; gap:8px;
+  padding: 14px 32px; border-radius: 10px;
+  font-family:'DM Sans',sans-serif; font-size:1rem; font-weight:600;
+  text-decoration:none; transition:all .2s; position:relative;
+}
+.btn-primary {
+  background:var(--btc); color:#000;
+  box-shadow: 0 4px 24px var(--btc-dim);
+}
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 32px #F7931A44; }
+.btn-ghost {
+  background:transparent; color:var(--text2);
+  border:1px solid var(--border); margin-left:12px;
+}
+.btn-ghost:hover { color:var(--text); border-color:var(--border2); }
+
+.sep { height: 1px; background: var(--border); margin: 0 0 88px; border: none; }
+
+footer {
+  text-align:center; padding:40px 0 48px;
+  border-top:1px solid var(--border);
+}
+footer p { font-size:.82rem; color:var(--text3); margin-bottom:6px; }
+footer a { color:var(--btc); text-decoration:none; }
+footer a:hover { text-decoration:underline; }
+
+.watermark {
+  position:fixed; bottom:12px; right:16px;
+  font-family:'JetBrains Mono',monospace; font-size:10px;
+  color:var(--text3); opacity:.4; z-index:99; pointer-events:none;
+}
+
+.back-top {
+  position:fixed; bottom:32px; right:56px;
+  width:40px; height:40px; border-radius:50%;
+  background:var(--bg-card); border:1px solid var(--btc-dim);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--btc); font-size:16px; text-decoration:none;
+  opacity:0; pointer-events:none; transition: opacity .3s, transform .2s;
+  z-index: 99;
+}
+.back-top.visible { opacity:1; pointer-events:auto; }
+.back-top:hover { transform:translateY(-2px); background:var(--btc-glow); }
+
+@media(max-width:640px) {
+  .agrid, .forces, .scenario-grid { grid-template-columns:1fr; }
+  .metrics { grid-template-columns:1fr; }
+  .results { grid-template-columns:1fr; }
+  .nav { gap:6px; }
+  .nav a { font-size:12px; padding:6px 12px; }
+  .cta-box .btn { display:block; margin:8px auto; width:fit-content; }
+  .btn-ghost { margin-left:0; }
+  .topbar { padding: 0 16px; }
+  header { padding-top: 88px; }
+  .code-block { font-size: 12px; padding: 16px; }
+}
+
+@media print {
+  .topbar, .progress-bar, .back-top, .watermark { display:none; }
+  body { background:#fff; color:#111; }
+  body::before { display:none; }
+  header { padding-top:24px; }
+  h1 { background:none; -webkit-text-fill-color:#111; color:#111; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<nav class="topbar">
+  <a href="/" class="topbar-logo">CEBE TRACKER</a>
+  <div class="topbar-right">
+    <a href="/">Home</a>
+    <a href="/framework" style="color:var(--btc)">Framework</a>
+    <a href="https://x.com/chcbearsfan" target="_blank">@chcbearsfan</a>
+  </div>
+</nav>
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- HEADER -->
+<header id="top">
+<div class="wrap">
+  <div class="badge"><span class="dot"></span> cebetracker.io</div>
+  <h1>What Do Common Shareholders Actually Own?</h1>
+  <p class="sub">Bitcoin Per Share tells you how much BTC is in the warehouse. <strong>CEBE</strong> tells you how much of it is yours after the senior claims are paid.</p>
+  <div class="hero-meta">
+    By <a href="https://x.com/chcbearsfan" target="_blank">@chcbearsfan</a>&ensp;/&ensp;January 2026&ensp;/&ensp;cebetracker.io
+  </div>
+  <div class="nav">
+    <a href="#concept">The Concept</a>
+    <a href="#bps-vs-cebe">BPS vs CEBE</a>
+    <a href="#calculator">Calculator</a>
+    <a href="#forces">Four Forces</a>
+    <a href="#tracking">Historical</a>
+    <a href="#projections">Projections</a>
+    <a href="#risk">Risk</a>
+    <a href="#metrics">What to Track</a>
+    <a href="#thesis">Thesis</a>
+  </div>
+</div>
+</header>
+
+<!-- 01 THE CONCEPT -->
+<section id="concept">
+<div class="wrap">
+  <div class="label">01 | The Problem</div>
+  <h2>BPS tells you what's in the warehouse.<br>CEBE tells you what you actually own.</h2>
+  <p>Most Bitcoin Treasury Company analysis focuses on <strong>Bitcoin Per Share (BPS)</strong>: total BTC divided by share count. Simple metric. But BPS ignores leverage entirely.</p>
+  <p>When a company issues preferred stock or debt to buy Bitcoin, BPS goes up immediately, even though the new Bitcoin is fully offset by new claims against it. Common equity legally owns the BTC, but economically, it's only exposed to what remains after senior claims are satisfied.</p>
+  <p>This has created a toxic debate in the Bitcoin community: MSTR evangelists point to BPS as the holy grail, while critics dismiss it as a vanity metric. <strong>CEBE resolves this</strong> by measuring the Bitcoin exposure available to common shareholders <em>after</em> accounting for senior claims like debt and preferred stock.</p>
+
+  <div class="card accent">
+    <div style="font-size:1.6rem;margin-bottom:14px;">&#127968;</div>
+    <h3>The Mortgage Analogy</h3>
+    <p>When you own a house with a mortgage, you own the house, but your equity is the difference between its value and what you owe. Nobody confuses a $500K house with $500K in equity when there's a $300K mortgage on it.</p>
+    <div class="agrid">
+      <div class="acol">
+        <div class="acol-label">Your House</div>
+        <p><strong>Home value</strong> = Total BTC</p>
+        <p><strong>Mortgage</strong> = Senior claims</p>
+        <p><strong>Your equity</strong> = CEBE</p>
+      </div>
+      <div class="acol">
+        <div class="acol-label">A BTCTC</div>
+        <p><strong>Total BTC held</strong> = BPS</p>
+        <p><strong>Debt + preferreds</strong> = Claims</p>
+        <p><strong>What's left</strong> = CEBE</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="formula-box">
+    <div class="fl">Core Formulas</div>
+    <div class="fm">
+      <span class="o">CEBE</span> <span class="d">=</span> <span class="d">(</span>Total BTC <span class="d">-</span> Senior Claims in BTC<span class="d">)</span> <span class="d">/</span> Shares<br>
+      <span class="o">Drag</span> <span class="d">=</span> <span class="d">(</span>BPS <span class="d">-</span> CEBE<span class="d">)</span> <span class="d">/</span> BPS<br>
+      <span class="d" style="font-size:.85em">Senior Claims in BTC = (Debt + Preferreds - Cash) / BTC Price</span>
+    </div>
+  </div>
+
+  <p><strong>Drag</strong> is the percentage of BPS consumed by senior claims. It's dynamic. It changes every time BTC price moves. When BTC rises, fiat-denominated claims shrink in Bitcoin terms and drag compresses. When BTC falls, claims expand and drag increases.</p>
+  <p>A company with 0% drag (like Capital B or OranjeBTC) means common equity owns 100% of the Bitcoin. At 22.8% drag, common shareholders own 77.2% of the economic Bitcoin exposure, not 100%. The other 22.8% is committed to servicing senior obligations.</p>
+</div>
+</section>
+
+<!-- 02 BPS vs CEBE -->
+<section id="bps-vs-cebe">
+<div class="wrap">
+  <div class="label">02 | Why It Matters</div>
+  <h2>When BPS lies to you</h2>
+  <p>Consider this: a company issues $3B in preferred stock at par and uses it to buy 33,898 BTC at $88,500.</p>
+
+  <div class="card">
+    <h3>The Phantom Gain</h3>
+    <div class="agrid" style="margin-top:12px;">
+      <div class="acol">
+        <div class="acol-label">BPS says</div>
+        <p style="font-size:1.5rem;font-weight:700;color:var(--green);margin-bottom:4px;">+4.8%</p>
+        <p>Looks like common shareholders gained exposure.</p>
+      </div>
+      <div class="acol">
+        <div class="acol-label">CEBE says</div>
+        <p style="font-size:1.5rem;font-weight:700;color:var(--yellow);margin-bottom:4px;">+0.0%</p>
+        <p>New BTC is exactly offset by new claims. Real exposure unchanged.</p>
+      </div>
+    </div>
+  </div>
+
+  <p>The company bought exactly enough Bitcoin to cover the preferred obligation at current prices. Common equity's real exposure didn't move. <strong>This is why BPS alone is insufficient</strong>. It doesn't account for leverage.</p>
+
+  <div class="code-block"><span class="cm">Day 0 (no leverage):</span>
+BPS:  195,726 sats    CEBE: 195,726 sats    Drag: 0%
+
+<span class="cm">Day 1 (issue $3B pref, buy 33,898 BTC):</span>
+BPS:  205,086 sats <span class="gr">(+4.8%)</span>
+CEBE: 195,726 sats <span class="yw">(unchanged)</span>
+Drag: 4.6%</div>
+
+  <p>BPS isn't wrong. It just tells an incomplete story. CEBE measures what BPS ignores: the senior claims between you and the Bitcoin.</p>
+</div>
+</section>
+
+<!-- 03 CALCULATOR -->
+<section id="calculator">
+<div class="wrap">
+  <div class="label">03 | Try It Yourself</div>
+  <h2>Interactive CEBE Calculator</h2>
+  <p>Adjust the sliders to see how Bitcoin price and leverage affect common equity's real exposure. Defaults are Strategy's January 2026 position.</p>
+
+  <div class="calc">
+    <div class="calc-head">
+      <h3>CEBE Explorer</h3>
+      <div class="calc-live"><span class="dot"></span> Interactive</div>
+    </div>
+    <div class="calc-body">
+      <div class="inp-group">
+        <div class="inp-row"><span>Bitcoin Price</span><span class="inp-val" id="v-price">$88,348</span></div>
+        <input type="range" id="r-price" min="20000" max="1000000" step="1000" value="88348">
+        <div class="range-ends"><span>$20K</span><span>$1M</span></div>
+      </div>
+      <div class="inp-group">
+        <div class="inp-row"><span>Total BTC Held</span><span class="inp-val" id="v-btc">709,715</span></div>
+        <input type="range" id="r-btc" min="100000" max="1500000" step="5000" value="709715">
+        <div class="range-ends"><span>100K</span><span>1.5M</span></div>
+      </div>
+      <div class="inp-group">
+        <div class="inp-row"><span>Net Senior Claims (USD)</span><span class="inp-val" id="v-claims">$14.32B</span></div>
+        <input type="range" id="r-claims" min="0" max="40000" step="100" value="14324">
+        <div class="range-ends"><span>$0</span><span>$40B</span></div>
+      </div>
+      <div class="inp-group">
+        <div class="inp-row"><span>Common Shares Outstanding</span><span class="inp-val" id="v-shares">362.6M</span></div>
+        <input type="range" id="r-shares" min="100000" max="800000" step="1000" value="362606">
+        <div class="range-ends"><span>100M</span><span>800M</span></div>
+      </div>
+
+      <div class="drag-vis">
+        <div class="drag-bar-wrap">
+          <div class="drag-bar-cebe" id="bar-cebe" style="width:77.2%">77.2%</div>
+          <div class="drag-bar-drag" id="bar-drag" style="width:22.8%">22.8%</div>
+        </div>
+        <div class="drag-legend">
+          <span><span class="sq gr"></span> Common equity exposure</span>
+          <span><span class="sq or"></span> Senior claims (Drag)</span>
+        </div>
+      </div>
+
+      <div class="results">
+        <div class="res-box">
+          <div class="res-label">BPS</div>
+          <div class="res-val" id="o-bps">195,726</div>
+          <div class="res-sub">sats/share</div>
+        </div>
+        <div class="res-box">
+          <div class="res-label">CEBE</div>
+          <div class="res-val orange" id="o-cebe">151,015</div>
+          <div class="res-sub">sats/share</div>
+        </div>
+        <div class="res-box">
+          <div class="res-label">Drag</div>
+          <div class="res-val" id="o-drag" style="color:var(--yellow)">22.8%</div>
+          <div class="res-sub" id="o-drag-note">moderate</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- 04 FOUR FORCES -->
+<section id="forces">
+<div class="wrap">
+  <div class="label">04 | Dynamics</div>
+  <h2>The Four Forces That Change Drag</h2>
+  <p>Drag isn't static. Four forces drive it. Understanding them is the key to evaluating any Bitcoin Treasury Company.</p>
+
+  <div class="forces">
+    <div class="force">
+      <div class="force-icon">&#9889;</div>
+      <h4>Bitcoin Price</h4>
+      <p>The primary driver (~80% of the effect). Senior claims are USD-denominated, so as BTC rises, claims shrink in BTC terms. Drag compresses exponentially at higher prices.</p>
+    </div>
+    <div class="force">
+      <div class="force-icon">&#127959;</div>
+      <h4>BTC Accumulation</h4>
+      <p>How Bitcoin is acquired matters. Equity raises compress drag (no new claims). Preferred issuances add claims proportionally. Neutral at issuance, but win if BTC appreciates after.</p>
+    </div>
+    <div class="force">
+      <div class="force-icon">&#128176;</div>
+      <h4>Deleveraging</h4>
+      <p>Paying down claims directly compresses drag. A $2B paydown can cut drag by ~3pp. Strategy doesn't use this. They maximize leverage to maximize Bitcoin exposure.</p>
+    </div>
+    <div class="force">
+      <div class="force-icon">&#128201;</div>
+      <h4>Dividend Dilution</h4>
+      <p>Preferred dividends paid via share issuance dilute ~1.3%/year. Both BPS and CEBE decline equally, so drag stays flat. Manageable if BTC appreciates >5%/year.</p>
+    </div>
+  </div>
+
+  <h3>Force 1: Bitcoin Price Movement</h3>
+  <p>Because senior claims are USD-denominated, they change in Bitcoin terms as price moves. This is the primary driver of drag compression, responsible for roughly 80% or more of the effect.</p>
+
+  <div class="code-block">Claims (BTC) = USD Claims / BTC Price
+
+BTC rises  -->  USD claims constant  -->  Claims shrink in BTC  -->  <strong>Drag compresses</strong>
+BTC falls  -->  USD claims constant  -->  Claims expand in BTC  -->  <strong>Drag increases</strong></div>
+
+  <h3>Force 2: How Accumulation Is Funded</h3>
+  <p>Not all BTC accumulation affects drag equally. It comes down to whether new senior claims are created.</p>
+
+  <div class="agrid" style="margin-top:20px">
+    <div class="acol">
+      <div class="acol-label">Accretive Equity Raise</div>
+      <p><strong>BPS:</strong> +2.3%</p>
+      <p><strong>CEBE:</strong> <span style="color:var(--green)">+3.8%</span></p>
+      <p><strong>Drag:</strong> <span style="color:var(--green)">-1.1pp</span></p>
+      <p style="font-size:.82rem;color:var(--text3);margin-bottom:0;">No new claims. Improvement flows to common.</p>
+    </div>
+    <div class="acol">
+      <div class="acol-label">Preferred Stock Offering</div>
+      <p><strong>BPS:</strong> +2.9%</p>
+      <p><strong>CEBE:</strong> <span style="color:var(--yellow)">+0.1%</span></p>
+      <p><strong>Drag:</strong> <span style="color:var(--red)">+2.2pp</span></p>
+      <p style="font-size:.82rem;color:var(--text3);margin-bottom:0;">New claims offset new BTC. BPS misleads.</p>
+    </div>
+  </div>
+
+  <p style="margin-top:20px;">Issuing preferreds at par means new claims (in BTC terms) exactly equal the new BTC purchased. Drag is unchanged at the current price. But if BTC rises after issuance, those claims shrink in BTC terms and drag compresses retroactively. This is Strategy's bet: issue preferreds at par, and wait for future BTC appreciation to make the leverage work.</p>
+
+  <h3>Force 3: Deleveraging</h3>
+  <p>Reducing claims directly compresses drag. A $2B debt paydown on Strategy's current balance sheet would compress drag from 22.8% to 19.7% (a 3.1pp improvement). But Strategy doesn't do this. They maximize leverage to maximize Bitcoin exposure. Their bet is on drag compression through price appreciation rather than deleveraging.</p>
+
+  <h3>Force 4: Dividend Dilution</h3>
+  <p>Strategy currently pays preferred dividends via share issuance at ~1.29% annual dilution. This preserves the $2.25B cash buffer for flexibility.</p>
+
+  <div class="callout">
+    <p><strong>Key insight:</strong> Dividend dilution does NOT change drag. Both BPS and CEBE decline by the same percentage, so the drag ratio stays constant. It's a headwind to CEBE, but not a structural shift in leverage.</p>
+  </div>
+
+  <p>Strategy had three options: pay in cash (2.8 years runway before depletion), pay in kind / PIK (drag expands ~2.5pp/year as claims compound), or pay via share issuance (1.29% dilution, drag unchanged). They chose Option 3 because it preserves cash, avoids compounding claims, and the dilution rate is easily overcome by BTC appreciation above 5% per year.</p>
+
+  <div class="callout callout-warn">
+    <p><strong>Note on total dilution:</strong> The 1.29% represents dilution from preferred dividends only. It does not include dilution from new BTC purchases, which has historically been far larger (~35% annualized from Q3 2024 through Q1 2026). Total dilution = dividend dilution + accumulation dilution.</p>
+  </div>
+</div>
+</section>
+
+<hr class="sep">
+
+<!-- 05 COMPRESSION TABLE -->
+<section id="compression">
+<div class="wrap">
+  <div class="label">05 | Compression</div>
+  <h2>How Drag Compresses at Scale</h2>
+  <p>This table shows Strategy's drag at various Bitcoin prices, assuming $14.3B in net claims and 709,715 BTC held. Watch how claims that feel massive at $88K become a rounding error at $500K+.</p>
+
+  <div class="table-wrap">
+  <table class="data-table">
+    <thead><tr><th>BTC Price</th><th>Claims (BTC)</th><th>Drag</th><th>CEBE (sats)</th><th>Status</th></tr></thead>
+    <tbody id="comp-body"></tbody>
+  </table>
+  </div>
+  <p style="font-size:.82rem;color:var(--text3);margin-top:8px;">Assumes no new accumulation, no deleveraging. Isolates BTC price effect only.</p>
+
+  <div class="card accent">
+    <h3>The Core Thesis</h3>
+    <p>If Bitcoin appreciates at historical rates (15-30% CAGR), senior claims, denominated in dollars, shrink exponentially in BTC terms. At $300K BTC, Strategy's $14.3B in claims compresses to just ~6.7% drag. <strong>The leverage becomes economically irrelevant.</strong></p>
+    <p>The risk is the mirror image: if BTC enters a prolonged period below 9.73% CAGR (the weighted cost of preferreds), preferred holders capture more value than common. The <strong>spread</strong> between BTC returns and preferred costs determines everything.</p>
+  </div>
+</div>
+</section>
+
+<hr class="sep">
+
+<!-- 06 HISTORICAL -->
+<section id="tracking">
+<div class="wrap">
+  <div class="label">06 | Historical</div>
+  <h2>Tracking Drag Over Time</h2>
+  <p>Real data from Strategy's balance sheet shows how these four forces interact in practice.</p>
+
+  <div class="table-wrap">
+  <table class="data-table">
+    <thead><tr><th>Period</th><th>BTC Price</th><th>Total BTC</th><th>Net Claims</th><th>Drag</th><th>Change</th></tr></thead>
+    <tbody>
+      <tr><td class="txt">Q3 2024</td><td>$63,000</td><td>252,220</td><td>$1,900M</td><td>12.0%</td><td>--</td></tr>
+      <tr class="base"><td class="txt">Q4 2024</td><td>$95,000</td><td>446,400</td><td>$1,400M</td><td class="gr">3.3%</td><td class="gr">-8.7pp</td></tr>
+      <tr><td class="txt">Q1 2025</td><td>$85,000</td><td>550,000</td><td>$8,000M</td><td class="rd">17.1%</td><td class="rd">+13.8pp</td></tr>
+      <tr><td class="txt">Jan 2026</td><td>$88,348</td><td>709,715</td><td>$14,324M</td><td class="rd">22.8%</td><td class="rd">+5.7pp</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h4>Q4 2024: The Golden Quarter</h4>
+  <p>BTC surged from $63K to $95K (+51%). Holdings nearly doubled. Claims actually decreased and the cash buffer grew by $6B. Drag compressed by 8.7 percentage points. This is what the bull case looks like in action.</p>
+
+  <h4>Q1 2025: The Warning Quarter</h4>
+  <p>BTC fell 10.5% to $85K. Despite accumulating 103K BTC (+23%), drag expanded by nearly 14 percentage points because Strategy issued $4.5B in new preferreds (STRK). Leverage grew faster than BTC price appreciation.</p>
+
+  <h4>Q1 2025 to January 2026</h4>
+  <p>BTC price remained choppy ($85K to $105K to $92K to $88K). Continued aggressive accumulation (+160K BTC) and preferred issuances pushed drag from 17.1% to 22.8%. They are leveraging faster than BTC is appreciating.</p>
+
+  <div class="callout">
+    <p><strong>The drag compression thesis requires three things:</strong> BTC price appreciation (80%+ of the effect), controlled leverage growth (can't add claims faster than BTC appreciates), and time (the longer BTC appreciates, the more claims shrink in BTC terms).</p>
+  </div>
+</div>
+</section>
+
+<hr class="sep">
+
+<!-- 07 PROJECTIONS -->
+<section id="projections">
+<div class="wrap">
+  <div class="label">07 | Projections</div>
+  <h2>Forward CEBE Projections</h2>
+  <p>Assumptions: no new BTC accumulation (conservative), net claims fixed at $14,324M, 1.29% annual dilution from dividends, various BTC price scenarios.</p>
+
+  <div class="table-wrap">
+  <table class="data-table">
+    <thead><tr><th>BTC Price</th><th>Drag</th><th>CEBE Now</th><th>CEBE 3Y</th><th>CEBE 5Y</th><th>Annual</th></tr></thead>
+    <tbody>
+      <tr><td>$50,000</td><td class="rd">40.4%</td><td>116,687</td><td>112,244</td><td>109,391</td><td class="rd">-1.3%</td></tr>
+      <tr class="base"><td class="hl">$88,348</td><td class="yw">22.8%</td><td>151,015</td><td>145,252</td><td>141,530</td><td class="rd">-1.3%</td></tr>
+      <tr><td>$150,000</td><td class="gr">13.5%</td><td>169,359</td><td>162,894</td><td>158,719</td><td class="gr">+3.9%*</td></tr>
+      <tr><td>$300,000</td><td class="gr">6.7%</td><td>182,618</td><td>175,750</td><td>171,246</td><td class="gr">+6.3%*</td></tr>
+      <tr><td>$500,000</td><td class="gr">4.0%</td><td>187,747</td><td>180,687</td><td>176,060</td><td class="gr">+7.5%*</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p style="font-size:.82rem;color:var(--text3);">*Annual growth includes BTC price appreciation effect on CEBE, net of 1.3% dilution. All CEBE in sats/share.</p>
+
+  <p>At flat $88K BTC, CEBE decays slowly at -1.3% per year from dividend dilution alone. But at $150K and above, CEBE grows substantially despite the dilution headwind. The higher BTC goes, the more irrelevant the dilution becomes.</p>
+
+  <h3>The Perpetual Spread</h3>
+  <p>Common equity value equals the present value of the spread between BTC's growth rate and preferred cost, compounded indefinitely.</p>
+
+  <div class="formula-box">
+    <div class="fl">The Spread</div>
+    <div class="fm">
+      <span class="o">Spread</span> <span class="d">=</span> BTC CAGR <span class="d">-</span> Weighted Avg Preferred Cost <span class="d">(</span>9.73%<span class="d">)</span>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+  <table class="data-table">
+    <thead><tr><th>BTC CAGR</th><th>Spread</th><th>10Y BTC Growth</th><th>10Y Pref Growth</th><th>Common Captures</th></tr></thead>
+    <tbody>
+      <tr><td>30%</td><td class="gr">+20.27%</td><td>13.8x</td><td>2.5x</td><td class="gr">>90% of upside</td></tr>
+      <tr><td>15%</td><td class="gr">+5.27%</td><td>4.05x</td><td>2.5x</td><td class="gr">~65% of upside</td></tr>
+      <tr><td>8%</td><td class="rd">-1.73%</td><td>2.16x</td><td>2.53x</td><td class="rd">Preferreds win</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>At 30% BTC CAGR (near historical average), common equity captures over 90% of the upside over a decade. Even at a conservative 15%, common still wins comfortably. Below ~10% CAGR, the leverage works against common equity and preferred holders benefit at common's expense.</p>
+</div>
+</section>
+
+<hr class="sep">
+
+<!-- 08 RISK -->
+<section id="risk">
+<div class="wrap">
+  <div class="label">08 | Risk</div>
+  <h2>Risk Scenarios</h2>
+
+  <div class="scenario-grid">
+    <div class="scenario-card">
+      <h4 style="color:var(--yellow);">BTC Crashes to $50K</h4>
+      <p><strong>Drag:</strong> <span style="color:var(--red)">40.4%</span></p>
+      <p><strong>CEBE:</strong> 116,687 sats</p>
+      <p>Common owns only 59.6% of BTC exposure. High risk territory, but no forced liquidation.</p>
+    </div>
+    <div class="scenario-card">
+      <h4 style="color:var(--red);">Extended Bear at $50K (3yr)</h4>
+      <p><strong>Drag:</strong> <span style="color:var(--red)">~45%</span></p>
+      <p><strong>CEBE:</strong> Decays from dilution</p>
+      <p>Very painful, but the model holds. No debt can be called early.</p>
+    </div>
+    <div class="scenario-card">
+      <h4 style="color:var(--red);">Break-Even: ~$20K BTC</h4>
+      <p><strong>Drag:</strong> <span style="color:var(--red)">100%</span></p>
+      <p><strong>Common equity:</strong> $0</p>
+      <p>Senior claims exceed total BTC holdings. Theoretical equity wipeout.</p>
+    </div>
+    <div class="scenario-card">
+      <h4 style="color:var(--yellow);">Low Growth (8% CAGR)</h4>
+      <p><strong>Spread:</strong> <span style="color:var(--red)">-1.73%</span></p>
+      <p>Prefs grow faster than BTC</p>
+      <p>Not catastrophic, but wealth transfers from common to preferred over time.</p>
+    </div>
+  </div>
+
+  <h3>Break-Even Price</h3>
+  <div class="code-block">Break-Even = Net Senior Claims / Total BTC
+           = $14,324M / 709,715 BTC
+           = <strong>~$20,182 per BTC</strong></div>
+
+  <p>Below $20K BTC, senior claims would exceed total BTC holdings and common equity would be theoretically worth zero.</p>
+
+  <div class="callout callout-warn">
+    <p><strong>But here's what most people miss: debt structure matters.</strong> None of Strategy's debt can be called early. The convertible notes and preferred stock have fixed maturity dates with no acceleration clauses based on BTC price. Even if BTC drops to $20K, creditors cannot force liquidation. Strategy can continue operating as long as they meet dividend payments. The actual risk is an extended period below $30-40K where drag stays extremely high and dividend dilution accelerates, not immediate insolvency.</p>
+  </div>
+
+  <h3>5-Year Scenario Comparison</h3>
+  <div class="table-wrap">
+  <table class="data-table">
+    <thead><tr><th>Scenario</th><th>BTC Price</th><th>CAGR</th><th>Drag</th><th>CEBE</th><th>CEBE Chg</th><th>USD Return</th></tr></thead>
+    <tbody>
+      <tr class="base"><td class="txt">Best Case</td><td>$300,000</td><td>+28%</td><td class="gr">6.7%</td><td>169,700</td><td class="gr">+12.4%</td><td class="gr">+282%</td></tr>
+      <tr><td class="txt">Base Case</td><td>$170,000</td><td>+14%</td><td class="gr">~12%</td><td>~160,000</td><td class="gr">+6%</td><td class="gr">+99%</td></tr>
+      <tr><td class="txt">Bear Case</td><td>$120,000</td><td>+6%</td><td class="yw">~19%</td><td>~150,000</td><td class="yw">~0%</td><td class="gr">+36%</td></tr>
+      <tr><td class="txt">Worst Case</td><td>$30,000</td><td>-31%</td><td class="rd">67.3%</td><td>61,614</td><td class="rd">-59%</td><td class="rd">-79%</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+</section>
+
+<hr class="sep">
+
+<!-- 09 WHAT TO TRACK -->
+<section id="metrics">
+<div class="wrap">
+  <div class="label">09 | Your Dashboard</div>
+  <h2>Three Metrics to Track Quarterly</h2>
+  <p>You don't need a spreadsheet. Track these three numbers each quarter and you'll know whether the strategy is working.</p>
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-num">#1</div>
+      <h4>Drag</h4>
+      <p>Claims / Total BTC. Compressing = strategy working. Expanding = leverage working against you.</p>
+    </div>
+    <div class="metric">
+      <div class="metric-num">#2</div>
+      <h4>The Spread</h4>
+      <p>BTC CAGR minus weighted preferred cost (9.73%). Positive = common wins. Negative = preferreds win.</p>
+    </div>
+    <div class="metric">
+      <div class="metric-num">#3</div>
+      <h4>Dilution Rate</h4>
+      <p>Annual dividends / (price x shares). Below 1.5% = manageable. Above 2.5% = significant CEBE headwind.</p>
+    </div>
+  </div>
+
+  <div class="card" style="text-align:center;">
+    <p><strong>If all three look healthy, the strategy is working.</strong></p>
+    <p>If any turn negative, reassess immediately.</p>
+  </div>
+</div>
+</section>
+
+<hr class="sep">
+
+<!-- 10 THESIS -->
+<section id="thesis">
+<div class="wrap">
+  <div class="label">10 | The Bottom Line</div>
+  <h2>The Investment Thesis</h2>
+
+  <p><strong>Core Premise:</strong> Bitcoin Treasury Companies use leverage to amplify Bitcoin exposure. The cost of this leverage (drag) compresses exponentially as BTC appreciates because senior claims are denominated in dollars.</p>
+
+  <p><strong>Bitcoin price movement</strong> is the primary driver, responsible for 80%+ of drag compression. <strong>BTC accumulation vs. claims growth</strong> determines whether new transactions help or hurt. <strong>Deleveraging</strong> directly compresses drag but sacrifices exposure. <strong>Dividend payments</strong> via share issuance create a 1.29% annual headwind that's easily overcome by BTC appreciation above 5%.</p>
+
+  <div class="agrid" style="margin:28px 0">
+    <div class="acol" style="border-color:var(--green-dim)">
+      <div class="acol-label" style="color:var(--green)">Consider BTCTC Common If</div>
+      <p>You believe BTC will appreciate >15% CAGR over 5+ years</p>
+      <p>You can tolerate current drag for future compression</p>
+      <p>You want leveraged BTC exposure without personal leverage</p>
+      <p style="margin-bottom:0;">You understand the spread must stay positive</p>
+    </div>
+    <div class="acol" style="border-color:var(--red-dim)">
+      <div class="acol-label" style="color:var(--red)">Avoid BTCTC Common If</div>
+      <p>You think BTC will stagnate or decline</p>
+      <p>You can't stomach 40%+ drag in crash scenarios</p>
+      <p>You want pure BTC exposure without leverage</p>
+      <p style="margin-bottom:0;">You prefer simpler investments</p>
+    </div>
+  </div>
+
+  <div class="card accent" style="text-align:center;padding:36px;">
+    <p style="font-size:1.1rem;color:var(--text);margin-bottom:12px;"><strong>BPS tells you how much Bitcoin is in the warehouse.</strong></p>
+    <p style="font-size:1.1rem;color:var(--text);margin-bottom:12px;"><strong style="color:var(--btc)">CEBE tells you how much of that Bitcoin common equity actually owns.</strong></p>
+    <p style="font-size:1rem;">Master these dynamics, and you understand the game.</p>
+  </div>
+</div>
+</section>
+
+<!-- CTA -->
+<div class="wrap">
+  <div class="cta-box">
+    <h2>Track CEBE Live</h2>
+    <p>Real-time drag, CEBE, and compression dynamics across major Bitcoin Treasury Companies. All sourced from SEC and LSE filings.</p>
+    <div>
+      <a href="https://cebetracker.io" class="btn btn-primary">Open CEBE Tracker &#8594;</a>
+      <a href="https://cebetracker.io/endgame" class="btn btn-ghost">The Endgame</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+<div class="wrap">
+  <p>CEBE Framework by Bobby Tierney&ensp;/&ensp;<a href="https://x.com/chcbearsfan" target="_blank">@chcbearsfan</a>&ensp;/&ensp;<a href="mailto:bobby.tierney@gmail.com">bobby.tierney@gmail.com</a></p>
+  <p>All data sourced from SEC/LSE filings as of January 2026. Not investment advice. DYOR.</p>
+</div>
+</footer>
+
+<div class="watermark">cebetracker.io</div>
+<a href="#top" class="back-top" id="backTop">&#8593;</a>
+
+<script>
+// Progress + back-to-top
+var pBar = document.getElementById('progressBar');
+var bTop = document.getElementById('backTop');
+function updateP() {
+  var s = window.scrollY, h = document.documentElement.scrollHeight - window.innerHeight;
+  pBar.style.width = (h > 0 ? (s / h) * 100 : 0) + '%';
+  bTop.classList.toggle('visible', s > 500);
+}
+window.addEventListener('scroll', updateP, { passive: true });
+updateP();
+
+// Calculator
+var rP = document.getElementById('r-price');
+var rB = document.getElementById('r-btc');
+var rC = document.getElementById('r-claims');
+var rS = document.getElementById('r-shares');
+
+function fmt(n) { return n.toLocaleString('en-US'); }
+function fmtM(n) { return n >= 1000 ? '$' + (n/1000).toFixed(2) + 'T' : '$' + n.toFixed(2) + 'B'; }
+
+function calc() {
+  var price = +rP.value, btc = +rB.value, clM = +rC.value, sh = +rS.value * 1000;
+  var clBtc = (clM * 1e6) / price;
+  var bps = btc / sh;
+  var cebe = Math.max(0, (btc - clBtc) / sh);
+  var drag = bps > 0 ? Math.max(0, Math.min(1, (bps - cebe) / bps)) : 0;
+
+  document.getElementById('v-price').textContent = '$' + fmt(price);
+  document.getElementById('v-btc').textContent = fmt(btc);
+  document.getElementById('v-claims').textContent = fmtM(clM);
+  document.getElementById('v-shares').textContent = (sh/1e6).toFixed(1) + 'M';
+
+  document.getElementById('o-bps').textContent = fmt(Math.round(bps * 1e8));
+  document.getElementById('o-cebe').textContent = fmt(Math.round(cebe * 1e8));
+  document.getElementById('o-drag').textContent = (drag * 100).toFixed(1) + '%';
+
+  var dEl = document.getElementById('o-drag'), nEl = document.getElementById('o-drag-note');
+  if (drag < 0.10) { dEl.style.color = 'var(--green)'; nEl.textContent = 'low'; }
+  else if (drag < 0.25) { dEl.style.color = 'var(--yellow)'; nEl.textContent = 'moderate'; }
+  else if (drag < 0.40) { dEl.style.color = 'var(--btc)'; nEl.textContent = 'elevated'; }
+  else { dEl.style.color = 'var(--red)'; nEl.textContent = 'critical'; }
+
+  var cp = Math.max(8, (1 - drag) * 100), dp = Math.min(92, drag * 100);
+  var bc = document.getElementById('bar-cebe'), bd = document.getElementById('bar-drag');
+  bc.style.width = cp + '%'; bc.textContent = cp.toFixed(1) + '%';
+  bd.style.width = dp + '%'; bd.textContent = dp.toFixed(1) + '%';
+}
+[rP, rB, rC, rS].forEach(function(r) { r.addEventListener('input', calc); });
+calc();
+
+// Compression table
+(function() {
+  var prices = [20000,30000,50000,88348,100000,150000,200000,300000,500000,1000000];
+  var tBtc = 709715, nCl = 14324e6, sh = 362606000;
+  var tb = document.getElementById('comp-body');
+
+  prices.forEach(function(p) {
+    var cl = nCl / p, drag = cl / tBtc;
+    var cBtc = Math.max(0, tBtc - cl);
+    var cS = Math.round((cBtc / sh) * 1e8);
+    var st, cls;
+    if (drag >= 1) { st = 'Wipeout'; cls = 'rd'; }
+    else if (drag > .5) { st = 'Critical'; cls = 'rd'; }
+    else if (drag > .25) { st = 'Elevated'; cls = 'yw'; }
+    else if (drag > .10) { st = 'Healthy'; cls = 'gr'; }
+    else { st = 'Minimal'; cls = 'gr'; }
+
+    var isB = p === 88348;
+    var tr = document.createElement('tr');
+    if (isB) tr.className = 'base';
+    var ps = p >= 1e6 ? '$' + (p/1e6) + 'M' : '$' + fmt(p);
+    tr.innerHTML =
+      '<td' + (isB ? ' class="hl"' : '') + '>' + ps + (isB ? ' \u2190' : '') + '</td>' +
+      '<td>' + fmt(Math.round(cl)) + '</td>' +
+      '<td class="' + cls + '">' + (drag * 100).toFixed(1) + '%</td>' +
+      '<td>' + (cS > 0 ? fmt(cS) : '--') + '</td>' +
+      '<td class="' + cls + '">' + st + '</td>';
+    tb.appendChild(tr);
+  });
+})();
+</script>
+
+<!-- Vercel Web Analytics -->
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
