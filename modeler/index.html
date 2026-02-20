@@ -8,8 +8,13 @@
     <meta name="application-name" content="CEBE">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CEBE">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#09090b">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%2309090b' width='32' height='32' rx='4'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f97316'/%3E%3Cstop offset='100%25' stop-color='%23fb923c'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='16' y='15' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='url(%23g)' text-anchor='middle'%3ECE%3C/text%3E%3Ctext x='16' y='28' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='url(%23g)' text-anchor='middle'%3EBE%3C/text%3E%3C/svg%3E">
+    <meta name="msapplication-TileColor" content="#09090b">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%2309090b' width='32' height='32' rx='4'/%3E%3Ccircle cx='13' cy='13' r='8' fill='none' stroke='%23f97316' stroke-width='2'/%3E%3Cline x1='19' y1='19' x2='27' y2='27' stroke='%23f97316' stroke-width='2.5' stroke-linecap='round'/%3E%3Ctext x='13' y='17' font-family='Arial,sans-serif' font-size='10' font-weight='700' fill='%23f97316' text-anchor='middle'%3E%E2%82%BF%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -178,11 +183,11 @@
         </a>
 
         <!-- SMARTER WEB -->
-        <a href="/modeler/swc" class="modeler-card">
+        <a href="/modeler/smarterweb" class="modeler-card">
             <div class="modeler-top">
                 <div style="display:flex;align-items:center;gap:10px">
                     <span class="modeler-name">&#127468;&#127463; Smarter Web Co</span>
-                    <span class="tier-badge tier-3">0% DRAG</span>
+                    <span class="tier-badge tier-2">CLN</span>
                 </div>
                 <span class="modeler-arrow">&rarr;</span>
             </div>
@@ -191,15 +196,15 @@
                 <span class="ticker-tag">TSWCF</span>
                 <span class="ticker-tag">3M8</span>
             </div>
-            <div class="modeler-desc">UK's largest Bitcoin holder. Zero drag, GBP-denominated. Upgraded to LSE Main Market Feb 2026. Pure equity exposure through London-listed shares.</div>
+            <div class="modeler-desc">UK's largest Bitcoin holder. ~7% drag from Smarter Convert CLN (matures Aug 2026). GBP-denominated, LSE Main Market listed. Three-pillar growth engine.</div>
             <div class="modeler-stats">
-                <div class="modeler-stat"><div class="modeler-stat-label">CAPITAL STRUCTURE</div><div class="modeler-stat-value">Pure Equity &mdash; No Debt</div></div>
+                <div class="modeler-stat"><div class="modeler-stat-label">CAPITAL STRUCTURE</div><div class="modeler-stat-value">Convertible Loan Note (~7% drag)</div></div>
                 <div class="modeler-stat"><div class="modeler-stat-label">CURRENCY</div><div class="modeler-stat-value">&pound; GBP (LSE Main Market)</div></div>
             </div>
         </a>
 
         <!-- BRR -->
-        <div class="modeler-card coming-soon">
+        <a href="/modeler/procap" class="modeler-card">
             <div class="modeler-top">
                 <div style="display:flex;align-items:center;gap:10px">
                     <span class="modeler-name">&#127482;&#127480; ProCap Financial</span>
@@ -215,10 +220,10 @@
                 <div class="modeler-stat"><div class="modeler-stat-label">CAPITAL STRUCTURE</div><div class="modeler-stat-value">Zero-Coupon Converts</div></div>
                 <div class="modeler-stat"><div class="modeler-stat-label">KEY FEATURE</div><div class="modeler-stat-value">Deleveraging Story</div></div>
             </div>
-        </div>
+        </a>
 
         <!-- NAKA -->
-        <div class="modeler-card coming-soon">
+        <a href="/modeler/nakamoto" class="modeler-card">
             <div class="modeler-top">
                 <div style="display:flex;align-items:center;gap:10px">
                     <span class="modeler-name">&#127482;&#127480; Nakamoto</span>
@@ -234,22 +239,22 @@
                 <div class="modeler-stat"><div class="modeler-stat-label">CAPITAL STRUCTURE</div><div class="modeler-stat-value">$210M Secured Loan (Kraken)</div></div>
                 <div class="modeler-stat"><div class="modeler-stat-label">KEY FEATURE</div><div class="modeler-stat-value">Forced Liquidation Floor</div></div>
             </div>
-        </div>
+        </a>
 
-        <!-- PLACEHOLDER: OranjeBTC -->
-        <div class="modeler-card coming-soon">
+        <!-- OranjeBTC -->
+        <a href="/modeler/oranjebtc" class="modeler-card">
             <div class="modeler-top">
                 <div style="display:flex;align-items:center;gap:10px">
                     <span class="modeler-name">OranjeBTC</span>
-                    <span class="tier-badge tier-3">0% DRAG</span>
+                    <span class="tier-badge tier-2">CONVERT</span>
                 </div>
                 <span class="modeler-arrow">&rarr;</span>
             </div>
             <div class="modeler-tickers">
                 <span class="ticker-tag">OBTC3</span>
             </div>
-            <div class="modeler-desc">Brazilian pure equity BTCTC. BRL currency dynamics. Zero drag with emerging market FX exposure.</div>
-        </div>
+            <div class="modeler-desc">LATAM's largest Bitcoin treasury. $23M zero-coupon convertible note (~6% drag). BRL/USD currency dynamics. Matures Sep 2030.</div>
+        </a>
 
         <!-- PLACEHOLDER: More -->
         <div class="modeler-card coming-soon">
