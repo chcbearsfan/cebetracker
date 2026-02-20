@@ -5,16 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Nakamoto Modeler | CEBE Tracker</title>
     <meta name="description" content="Model Nakamoto share price through CEBE. BTC-collateralized Kraken loan with forced liquidation risk. Nasdaq: NAKA.">
-    <meta name="application-name" content="CEBE">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="CEBE">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="msapplication-TileColor" content="#09090b">
-    <link rel="apple-touch-icon" href="/icon-192.png">
-    <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#09090b">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%2309090b' width='32' height='32' rx='4'/%3E%3Ccircle cx='13' cy='13' r='8' fill='none' stroke='%23f97316' stroke-width='2'/%3E%3Cline x1='19' y1='19' x2='27' y2='27' stroke='%23f97316' stroke-width='2.5' stroke-linecap='round'/%3E%3Ctext x='13' y='17' font-family='Arial,sans-serif' font-size='10' font-weight='700' fill='%23f97316' text-anchor='middle'%3E%E2%82%BF%3C/text%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%2309090b' width='32' height='32' rx='4'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f97316'/%3E%3Cstop offset='100%25' stop-color='%23fb923c'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='16' y='15' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='url(%23g)' text-anchor='middle'%3ECE%3C/text%3E%3Ctext x='16' y='28' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='url(%23g)' text-anchor='middle'%3EBE%3C/text%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -255,15 +247,6 @@
         </div>
     </div>
 
-    <!-- BTC Inc Deal Toggle (matches BRR earnout toggle position) -->
-    <div style="display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 16px;margin-bottom:16px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid var(--border-subtle)">
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-muted)">
-            <input type="checkbox" id="dealToggle" style="accent-color:var(--orange-primary);width:16px;height:16px">
-            Include Earnout Shares (363.6M, BTC Inc Deal)
-        </label>
-        <span id="dealShareCount" style="font-size:11px;font-family:var(--mono);color:var(--text-muted)">511.6M shares</span>
-    </div>
-
     <!-- Claims Banner -->
     <div class="claims-banner" id="claimsBanner">
         <div class="claims-title" id="claimsDragDisplay">DRAG: &mdash;%</div>
@@ -429,6 +412,7 @@ const COMPANY = {
         debt_usd: 210000000,          // Kraken loan
         preferred_usd: 0,             // No preferred
         cash_usd: 24200000,           // Q3 2025 -- STALE
+        deal_ebitda: 34180486,        // BTC Inc + UTXO (8-K Feb 19, 2026; fallback if sheet has no ebitda column)
     },
     // Kraken loan specifics
     kraken_loan_usd: 210000000,
@@ -445,8 +429,7 @@ const COMPANY = {
     board_comp_annual_usd: 1800000,   // Board compensation
     btc_inc_services_usd: 960000,     // BTC Inc service agreement
     // BTC Inc deal
-    deal_shares: 363589816,
-    deal_ebitda: 23000000,            // BTC Inc annual EBITDA if deal closes
+    // deal_ebitda now sourced from sheet 'ebitda' column. Fallback in defaults.
 };
 
 const SHEET_ID = '1BNsCWGVU08PDinDcfzJccqcuj9_KrK1VZGETErzBZvg';
@@ -498,7 +481,7 @@ let activeScenario = 'current';
 let liveBtcPrice = null;
 let liveFxRate = 1.0;
 let loadedData = {};
-let dealOn = false;
+// BTC Inc deal closed Feb 19, 2026. Shares + EBITDA baked into base case.
 
 // --- HELPERS ---
 const $ = id => document.getElementById(id);
@@ -519,7 +502,7 @@ function btcToSlider(btc) {
 
 function getData() {
     var shares = loadedData.shares || COMPANY.defaults.shares;
-    if (dealOn) shares += COMPANY.deal_shares;
+    // Deal shares baked into sheet share count post-close
     return {
         btcHoldings: loadedData.btc_holdings || COMPANY.defaults.btc_holdings,
         shares: shares,
@@ -528,6 +511,7 @@ function getData() {
         debtUsd: loadedData.debt_usd || COMPANY.defaults.debt_usd,
         preferredUsd: 0,
         cashUsd: loadedData.cash_usd || COMPANY.defaults.cash_usd,
+        ebitda: loadedData.ebitda || COMPANY.defaults.deal_ebitda || 0,
         snapshotDate: loadedData.snapshot_date || null,
     };
 }
@@ -597,7 +581,7 @@ function projectYears(years) {
     var startBtc = liveBtcPrice || btcPrice;
     var krakenRate = co.kraken_rate;
     var opex = co.opex_annual_usd;
-    var dealEbitda = dealOn ? co.deal_ebitda : 0;
+    var dealEbitda = d.ebitda;
 
     for (var y = 0; y <= years; y++) {
         var calYear = START_YEAR + y, yearEvents = [];
@@ -769,6 +753,7 @@ async function loadData() {
                     debt_usd: parseFloat(best.debt_usd) || COMPANY.defaults.debt_usd,
                     preferred_usd: 0,
                     cash_usd: parseFloat(best.cash_usd) || COMPANY.defaults.cash_usd,
+                    ebitda: parseFloat(best.ebitda) || 0,
                     snapshot_date: best.snapshot_date || null,
                 };
             }
@@ -838,7 +823,6 @@ function render() {
 
     $('liveBtcDisplay').textContent = 'BTC ' + fmtPrice(liveBtcPrice || btcPrice);
     $('liveDataDate').textContent = d.snapshotDate ? 'Data: ' + d.snapshotDate : '';
-    $('dealShareCount').textContent = (d.shares / 1e6).toFixed(1) + 'M shares';
     updateSliderFills();
 }
 
@@ -977,7 +961,7 @@ function renderNarrative(r, co, d, projResults) {
 
     // Wrapper fee
     var totalCost = (d.debtUsd > 0 ? d.debtUsd * co.kraken_rate : 0) + co.opex_annual_usd + co.sbc_annual_usd;
-    var netCost = totalCost - (dealOn ? co.deal_ebitda : 0);
+    var netCost = totalCost - d.ebitda;
     var btcResVal = useBtcH * useBtc;
     var wfPct = btcResVal > 0 ? netCost / btcResVal : 0;
     if (wfPct > 0.05) {
@@ -993,10 +977,8 @@ function renderNarrative(r, co, d, projResults) {
         items.push({cls:'amber',icon:'&#128176;',text:'<strong>' + fmtB(cashToShow) + ' cash reserve.</strong> ~' + runwayQ + ' quarters of runway at current burn. Cash position is from Q3 2025 and likely lower. No BTC accumulation since Nov 19, 2025.'});
     }
 
-    // BTC Inc deal context
-    if (dealOn) {
-        items.push({cls:'info',icon:'&#128230;',text:'<strong>BTC Inc deal included.</strong> +363.6M shares (~71% dilution) but adds ~' + fmtB(co.deal_ebitda) + '/yr EBITDA from Bitcoin Magazine, conference portfolio. Deal pending Q1 2026 close.'});
-    }
+    // BTC Inc + UTXO context (deal closed Feb 19, 2026)
+    items.push({cls:'info',icon:'&#128230;',text:'<strong>BTC Inc + UTXO acquired.</strong> Deal closed Feb 19, 2026. +364.8M shares issued. Adds $34.2M/yr EBITDA ($80.5M revenue) from Bitcoin Magazine, The Bitcoin Conference, and UTXO advisory. Partially offsets wrapper costs.'});
 
     // Stale accumulation warning
     if (!r._proj) {
@@ -1020,7 +1002,7 @@ function renderMetrics(r, co, d, projResults) {
     var dragCls = r.drag < 0.2 ? 'good' : r.drag > 0.5 ? 'danger' : 'warn';
 
     var totalCost = (d.debtUsd > 0 ? d.debtUsd * co.kraken_rate : 0) + co.opex_annual_usd + co.sbc_annual_usd;
-    var netCost = totalCost - (dealOn ? co.deal_ebitda : 0);
+    var netCost = totalCost - d.ebitda;
     var btcResVal = (r._proj ? r._proj.btcH : d.btcHoldings) * (r._proj ? r._proj.yearBtcPrice : btcPrice);
     var wfPct = btcResVal > 0 ? netCost / btcResVal : 0;
     var wfCls = wfPct > 0.10 ? 'danger' : wfPct > 0.05 ? 'warn' : '';
@@ -1185,7 +1167,7 @@ function renderAssumptions() {
     } else {
         t = '<strong>Custom projection:</strong> BTC ' + fmtPrice(btcPrice) + ', mNAV ' + mnavMultiple.toFixed(2) + 'x. Kraken loan refinanced at maturity Y1 (assumed). Static BTC holdings.';
     }
-    t += '<br><br><strong>Wrapper costs:</strong> Kraken interest $16.8M/yr (8% on $210M), operating expenses ~$43.2M/yr (Q3 annualized), SBC ~$7.5M/yr. Total: ~$67.5M/yr without BTC Inc EBITDA offset.' + (dealOn ? ' BTC Inc deal adds ~$23M/yr EBITDA offset but +363.6M shares dilution.' : '');
+    t += '<br><br><strong>Wrapper costs:</strong> Kraken interest $16.8M/yr (8% on $210M), operating expenses ~$43.2M/yr (Q3 annualized), SBC ~$7.5M/yr. Total: ~$67.5M/yr gross. BTC Inc + UTXO EBITDA offsets $34.2M/yr (8-K Feb 19, 2026). Net wrapper: ~$33.3M/yr.';
     t += '<br><br><strong>Collateral thresholds:</strong> Required Margin Ratio 154% (confirmed from 8-K). Margin call ~130% and liquidation ~110% are ESTIMATES based on industry norms. Actual thresholds from non-public Loan Term Sheet.';
     t += '<br><br><strong>Cash position:</strong> $24.2M is from Q3 2025 10-Q (Sep 30, 2025). Likely lower. Flagged as stale in all calculations.';
     t += '<br><br><strong>Data:</strong> BTC holdings from nakamoto.com/dashboard. Kraken loan from 8-K Dec 9, 2025. Shares from Q3 earnings. Live BTC from CoinGecko.';
@@ -1331,12 +1313,6 @@ $('mnavSlider').addEventListener('input', function(e) {
     activeScenario = '';
     updateMnavPresets();
     buildScenarioBar();
-    render();
-});
-
-// --- DEAL TOGGLE ---
-$('dealToggle').addEventListener('change', function() {
-    dealOn = this.checked;
     render();
 });
 
