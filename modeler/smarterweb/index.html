@@ -1,1 +1,1729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Smarter Web Company Modeler | CEBE Tracker</title>
+    <meta name="description" content="Model Smarter Web Company share price through CEBE. UK's largest Bitcoin holder with Smarter Convert CLN creating ~7% drag. LSE Main Market listed.">
+    <meta name="theme-color" content="#09090b">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%2309090b' width='32' height='32' rx='4'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f97316'/%3E%3Cstop offset='100%25' stop-color='%23fb923c'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='16' y='15' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='url(%23g)' text-anchor='middle'%3ECE%3C/text%3E%3Ctext x='16' y='28' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='url(%23g)' text-anchor='middle'%3EBE%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #09090b;
+            --bg-secondary: #0f0f11;
+            --bg-card: #141416;
+            --bg-elevated: #1a1a1d;
+            --orange-primary: #f97316;
+            --orange-light: #fb923c;
+            --orange-glow: rgba(249, 115, 22, 0.12);
+            --orange-border: rgba(249, 115, 22, 0.25);
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #52525b;
+            --green: #22c55e;
+            --green-muted: rgba(34, 197, 94, 0.15);
+            --red: #ef4444;
+            --red-muted: rgba(239, 68, 68, 0.15);
+            --yellow: #eab308;
+            --yellow-muted: rgba(234, 179, 8, 0.15);
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --mono: 'JetBrains Mono', monospace;
+        }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(249,115,22,0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(249,115,22,0.015) 1px, transparent 1px);
+            background-size: 48px 48px;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 24px 16px 60px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ═══ HEADER ═══ */
+        .header { text-align: center; margin-bottom: 28px; }
+        .nav-back {
+            display: inline-block;
+            font-size: 12px;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+            transition: color 0.2s;
+        }
+        .nav-back:hover { color: var(--orange-primary); }
+        .logo-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 6px;
+        }
+        .logo {
+            font-size: 32px;
+            font-weight: 300;
+            letter-spacing: 16px;
+            padding-left: 16px;
+            color: var(--text-primary);
+            position: relative;
+            z-index: 1;
+        }
+        .logo span {
+            background: linear-gradient(135deg, var(--orange-primary) 0%, var(--orange-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 600;
+        }
+        .logo-whisper {
+            font-size: 11px;
+            font-weight: 400;
+            letter-spacing: 8px;
+            padding-left: 8px;
+            margin-top: 2px;
+            text-transform: lowercase;
+            background: linear-gradient(180deg, rgba(161,161,170,0.6) 0%, rgba(82,82,91,0.2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .logo-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 180px;
+            height: 50px;
+            background: radial-gradient(ellipse, rgba(249,115,22,0.3) 0%, transparent 70%);
+            filter: blur(20px);
+            z-index: 0;
+        }
+        .logo-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: var(--yellow-muted);
+            border: 1px solid rgba(234,179,8,0.3);
+            color: var(--yellow);
+            letter-spacing: 1px;
+            font-family: var(--mono);
+            margin-top: 8px;
+        }
+        .header-sub {
+            font-size: 13px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+        .live-strip {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 12px;
+            font-size: 11px;
+            font-family: var(--mono);
+            color: var(--text-muted);
+            flex-wrap: wrap;
+        }
+        .live-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+            display: inline-block;
+            animation: pulse-dot 2s ease infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .live-price { color: var(--text-secondary); }
+
+        /* ═══ COMPANY SELECTOR ═══ */
+        .company-selector {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+        .company-btn {
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: 1.5px solid var(--border-subtle);
+            background: var(--bg-card);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: center;
+            user-select: none;
+            flex: 1;
+            max-width: 280px;
+        }
+        .company-btn:hover {
+            border-color: rgba(255,255,255,0.12);
+            background: var(--bg-elevated);
+            transform: translateY(-2px);
+        }
+        .company-btn.active {
+            border-color: var(--orange-primary);
+            background: var(--orange-glow);
+            box-shadow: 0 0 20px rgba(249,115,22,0.1);
+        }
+        .company-btn-flag { font-size: 20px; margin-bottom: 2px; }
+        .company-btn-name {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .company-btn-ticker {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-family: var(--mono);
+            margin-top: 2px;
+        }
+
+        /* ═══ CAPITAL STRUCTURE BANNER ═══ */
+        .zero-drag-banner {
+            background: var(--green-muted);
+            border: 1px solid rgba(34,197,94,0.25);
+            border-radius: 12px;
+            padding: 16px 20px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .zero-drag-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--green);
+            margin-bottom: 4px;
+            font-family: var(--mono);
+        }
+        .zero-drag-sub {
+            font-size: 13px;
+            color: #86efac;
+        }
+
+        /* ═══ SCENARIO SECTION LABELS ═══ */
+        .scenario-section-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 9px;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            padding-left: 2px;
+        }
+        .section-pill {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: var(--orange-glow);
+            border: 1px solid var(--orange-border);
+            color: var(--orange-primary);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            white-space: nowrap;
+        }
+
+        /* ═══ SCENARIO CARDS ═══ */
+        .scenarios-section { margin-bottom: 24px; }
+        .scenarios-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        @media (max-width: 500px) {
+            .scenarios-row { grid-template-columns: repeat(2, 1fr); }
+        }
+        #scenarioBarForward .scenario-card {
+            border-left: 3px solid var(--orange-primary);
+        }
+        .scenario-card {
+            padding: 16px 12px 14px;
+            border-radius: 12px;
+            border: 1.5px solid var(--border-subtle);
+            background: var(--bg-card);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: center;
+            user-select: none;
+            position: relative;
+        }
+        .scenario-card:hover {
+            border-color: rgba(255,255,255,0.12);
+            background: var(--bg-elevated);
+            transform: translateY(-2px);
+        }
+        .scenario-card.active {
+            border-color: var(--orange-primary);
+            background: var(--orange-glow);
+            box-shadow: 0 0 20px rgba(249,115,22,0.1);
+        }
+        .scenario-card.forward-card {
+            border-left: 3px solid var(--orange-primary);
+        }
+        .scenario-card.forward-card.active {
+            border-left: 3px solid var(--orange-primary);
+        }
+        .scenario-icon { font-size: 22px; margin-bottom: 4px; }
+        .scenario-name {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .scenario-price {
+            font-size: 15px;
+            font-weight: 700;
+            font-family: var(--mono);
+            color: var(--orange-light);
+        }
+        .scenario-mnav {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-family: var(--mono);
+            margin-top: 4px;
+        }
+
+        /* ═══ HERO ═══ */
+        .hero {
+            text-align: center;
+            padding: 28px 20px;
+            margin-bottom: 20px;
+            background: linear-gradient(180deg, rgba(249,115,22,0.04) 0%, transparent 100%);
+            border-radius: 20px;
+            border: 1px solid rgba(249,115,22,0.1);
+        }
+        .hero-label {
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .hero-price {
+            font-size: 64px;
+            font-weight: 700;
+            font-family: var(--mono);
+            line-height: 1;
+            margin-bottom: 8px;
+            transition: color 0.3s;
+        }
+        .hero-price.positive { color: var(--green); }
+        .hero-price.negative { color: var(--red); }
+        .hero-price.neutral { color: var(--text-primary); }
+        .hero-usd {
+            font-size: 18px;
+            font-family: var(--mono);
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+        .hero-change {
+            font-size: 16px;
+            font-weight: 600;
+            font-family: var(--mono);
+            margin-bottom: 4px;
+        }
+        .hero-change.up { color: var(--green); }
+        .hero-change.down { color: var(--red); }
+        .hero-vs {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        .hero-implied {
+            margin-top: 10px;
+            font-size: 12px;
+            font-family: var(--mono);
+            color: var(--text-secondary);
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-subtle);
+            display: inline-block;
+        }
+        .hero-implied em {
+            font-style: normal;
+            color: var(--orange-primary);
+            font-weight: 600;
+        }
+
+        /* ═══ NARRATIVE PANEL ═══ */
+        .narrative {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .narrative-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .narrative-body {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .narr-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .narr-item.green {
+            background: var(--green-muted);
+            border: 1px solid rgba(34,197,94,0.2);
+            color: #86efac;
+        }
+        .narr-item.red {
+            background: var(--red-muted);
+            border: 1px solid rgba(239,68,68,0.2);
+            color: #fca5a5;
+        }
+        .narr-item.amber {
+            background: var(--yellow-muted);
+            border: 1px solid rgba(234,179,8,0.2);
+            color: #fde68a;
+        }
+        .narr-item.info {
+            background: rgba(56,189,248,0.08);
+            border: 1px solid rgba(56,189,248,0.2);
+            color: #7dd3fc;
+        }
+        .narr-item.neutral {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+        }
+        .narr-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+        .narr-text strong { color: var(--text-primary); }
+
+        /* ═══ METRICS ROW ═══ */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .metric-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 12px 10px;
+            text-align: center;
+        }
+        .metric-label {
+            font-size: 8px;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+        .metric-value {
+            font-size: 17px;
+            font-weight: 700;
+            font-family: var(--mono);
+            line-height: 1.2;
+        }
+        .metric-sub {
+            font-size: 9px;
+            color: #3f3f46;
+            margin-top: 2px;
+            font-family: var(--mono);
+        }
+        .metric-value.good { color: var(--green); }
+        .metric-value.warn { color: var(--yellow); }
+        .metric-value.danger { color: var(--red); }
+
+        /* ═══ COLLAPSIBLE SECTIONS ═══ */
+        .collapse-section { margin-bottom: 12px; }
+        .collapse-section summary {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            list-style: none;
+            user-select: none;
+        }
+        .collapse-section summary::-webkit-details-marker { display: none; }
+        .collapse-section summary:hover {
+            border-color: rgba(255,255,255,0.12);
+            color: var(--text-primary);
+        }
+        .collapse-section[open] summary {
+            border-radius: 12px 12px 0 0;
+            border-bottom-color: transparent;
+            color: var(--orange-primary);
+        }
+        .collapse-body {
+            padding: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+        }
+
+        /* ═══ CONTROLS ═══ */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        @media (max-width: 500px) {
+            .controls-grid { grid-template-columns: 1fr; }
+        }
+        .control-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 14px;
+        }
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .control-label {
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        .control-value {
+            font-size: 18px;
+            font-weight: 700;
+            font-family: var(--mono);
+            color: var(--orange-light);
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #333;
+            outline: none;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--orange-primary);
+            box-shadow: 0 0 10px rgba(249,115,22,0.4);
+            cursor: grab;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--orange-primary);
+            border: none;
+            box-shadow: 0 0 10px rgba(249,115,22,0.4);
+            cursor: grab;
+        }
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: #444;
+            font-family: var(--mono);
+            margin-top: 4px;
+        }
+        .mnav-presets {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+        }
+        .mnav-btn {
+            flex: 1;
+            padding: 4px 0;
+            border-radius: 6px;
+            border: 1px solid var(--border-subtle);
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 10px;
+            font-family: var(--mono);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .mnav-btn:hover, .mnav-btn.active {
+            border-color: var(--orange-primary);
+            color: var(--orange-primary);
+            background: var(--orange-glow);
+        }
+
+        /* ═══ WATERFALL ═══ */
+        .waterfall {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            overflow-x: auto;
+            padding: 12px;
+            scrollbar-width: none;
+        }
+        .waterfall::-webkit-scrollbar { display: none; }
+        .wf-step {
+            flex: 0 0 auto;
+            text-align: center;
+            padding: 8px 14px;
+            border-radius: 8px;
+            min-width: 90px;
+        }
+        .wf-step.btc-val { background: rgba(249,115,22,0.08); border: 1px solid rgba(249,115,22,0.2); }
+        .wf-step.nav { background: var(--green-muted); border: 1px solid rgba(34,197,94,0.2); }
+        .wf-step.shares { background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); }
+        .wf-step.result { background: rgba(249,115,22,0.12); border: 1px solid var(--orange-border); }
+        .wf-label {
+            font-size: 8px;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+        .wf-value {
+            font-size: 12px;
+            font-weight: 700;
+            font-family: var(--mono);
+        }
+        .wf-arrow {
+            flex: 0 0 auto;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* ═══ SENSITIVITY MATRIX ═══ */
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .matrix-table th {
+            padding: 8px 10px;
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-subtle);
+            background: rgba(255,255,255,0.02);
+        }
+        .matrix-table td {
+            padding: 8px 10px;
+            text-align: center;
+            font-family: var(--mono);
+            font-size: 11px;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            transition: all 0.2s;
+        }
+        .matrix-table td.row-label {
+            text-align: right;
+            color: var(--text-secondary);
+            font-weight: 600;
+            background: rgba(255,255,255,0.02);
+        }
+        .matrix-table th:first-child { text-align: right; }
+        .matrix-cell-green { color: var(--green); background: rgba(34,197,94,0.06); }
+        .matrix-cell-lightgreen { color: #86efac; background: rgba(34,197,94,0.03); }
+        .matrix-cell-red { color: var(--red); background: rgba(239,68,68,0.06); }
+        .matrix-cell-lightred { color: #fca5a5; background: rgba(239,68,68,0.03); }
+        .matrix-cell-current { outline: 2px solid var(--orange-primary); outline-offset: -2px; border-radius: 4px; }
+
+        /* ═══ CONTRAST SECTION ═══ */
+        .contrast-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+        .contrast-title {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+        .contrast-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+        .contrast-item {
+            text-align: center;
+            padding: 10px 8px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-subtle);
+        }
+        .contrast-company {
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        .contrast-value {
+            font-size: 18px;
+            font-weight: 700;
+            font-family: var(--mono);
+        }
+        .contrast-label {
+            font-size: 9px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* ═══ FOOTER ═══ */
+        .footer {
+            text-align: center;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-subtle);
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 24px;
+        }
+        .footer a { color: var(--orange-primary); text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+        .footer-formula {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: #333;
+            margin-top: 8px;
+        }
+
+        /* ═══ LOADING ═══ */
+        .loading-screen {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-primary);
+            z-index: 999;
+        }
+        .loading-spinner {
+            width: 32px; height: 32px;
+            border: 3px solid #222;
+            border-top-color: var(--yellow);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 12px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { font-size: 12px; color: var(--text-muted); letter-spacing: 2px; }
+
+        /* ═══ RESPONSIVE ═══ */
+        @media (max-width: 768px) {
+            .hero-price { font-size: 48px; }
+        }
+        @media (max-width: 480px) {
+            .hero-price { font-size: 36px; }
+            .control-value { font-size: 16px; }
+            .logo { font-size: 24px; letter-spacing: 10px; padding-left: 10px; }
+            .contrast-row { grid-template-columns: 1fr; }
+        }
+    </style>
+    <script defer src="/_vercel/insights/script.js"></script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">LOADING LIVE DATA</div>
+</div>
+
+<div class="container" id="app" style="display:none">
+
+    <!-- Header -->
+    <div class="header">
+        <a href="/modeler" class="nav-back">&larr; modelers</a>
+        <div class="logo-container">
+            <div class="logo-glow"></div>
+            <div class="logo"><span>CEBE</span></div>
+            <p class="logo-whisper">tracker</p>
+        </div>
+        <div class="logo-badge">&#127468;&#127463; SMARTER WEB MODELER</div>
+        <div class="header-sub" id="headerSub">UK&#8217;s Largest Bitcoin Holder &middot; LSE: SWC | OTC: TSWCF | FRA: 3M8</div>
+        <div class="live-strip" id="liveStrip">
+            <span><span class="live-dot"></span> Live Data</span>
+            <span class="live-price" id="liveBtcDisplay">BTC $&mdash;</span>
+            <span class="live-price" id="liveStockDisplay">SWC &pound;&mdash;</span>
+            <span class="live-price" id="liveDataDate">&mdash;</span>
+        </div>
+    </div>
+
+    <!-- Capital Structure Banner -->
+    <div class="zero-drag-banner" id="capitalBanner" style="background:var(--yellow-muted);border-color:rgba(234,179,8,0.25);">
+        <div class="zero-drag-title" id="dragDisplay" style="color:var(--yellow);">~7% DRAG</div>
+        <div class="zero-drag-sub" id="dragSub" style="color:#fde68a;">Smarter Convert CLN (~&pound;15.8M) is a senior claim. Common equity owns ~93% of the Bitcoin.</div>
+        <div style="font-size:11px;font-family:var(--mono);color:var(--text-muted);margin-top:8px;letter-spacing:0.5px;" id="cebeEquation"></div>
+    </div>
+
+    <!-- Scenario Cards — NOW -->
+    <div class="scenarios-section">
+        <div class="scenario-section-label"><span class="section-pill">&#9889; NOW</span> WHAT IF BTC WERE AT THIS PRICE TODAY</div>
+        <div class="scenarios-row" id="scenarioBarNow"></div>
+    </div>
+
+    <!-- Scenario Cards — FORWARD -->
+    <div class="scenarios-section">
+        <div class="scenario-section-label"><span class="section-pill">&#8594; FORWARD</span> 10-YEAR PROJECTIONS &middot; CLN MATURITY &middot; WRAPPER COSTS</div>
+        <div class="scenarios-row" id="scenarioBarForward"></div>
+    </div>
+
+    <!--
+    ══════════════════════════════════════════════════
+    FUTURE: Toggle tabs to switch between NOW/FORWARD
+    Replace the two sections above with this:
+
+    <div class="scenarios-section">
+        <div class="scenario-tabs" id="scenarioTabs">
+            <button class="scenario-tab active" data-tab="now">&#9889; NOW
+                <span class="tab-hint">WHAT IF BTC WERE AT THIS PRICE TODAY</span>
+            </button>
+            <button class="scenario-tab" data-tab="forward">&#8594; FORWARD
+                <span class="tab-hint">10-YEAR PROJECTIONS &middot; CLN MATURITY &middot; WRAPPER COSTS</span>
+            </button>
+        </div>
+        <div class="scenarios-row" id="scenarioBar"></div>
+    </div>
+
+    CSS for tabs:
+    .scenario-tabs { display:flex; gap:0; margin-bottom:12px; border-radius:10px; overflow:hidden; border:1px solid var(--border-subtle); }
+    .scenario-tab { flex:1; padding:10px 12px; background:var(--bg-card); border:none; color:var(--text-muted); font-size:11px; font-weight:700; letter-spacing:1.5px; font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.2s; text-align:center; }
+    .scenario-tab:not(:last-child) { border-right:1px solid var(--border-subtle); }
+    .scenario-tab:hover { color:var(--text-secondary); }
+    .scenario-tab.active { background:var(--orange-glow); color:var(--orange-primary); border-color:var(--orange-border); }
+    .tab-hint { display:block; font-size:8px; font-weight:500; letter-spacing:1px; margin-top:3px; opacity:0.6; }
+
+    JS: Add activeTab state, initTabs() that swaps SCENARIOS between NOW/FORWARD,
+    renders into single scenarioBar container. See git history for full implementation.
+    ══════════════════════════════════════════════════
+    -->
+
+    <!-- CLN Maturity Info (below cards) -->
+    <div style="background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.2);border-radius:10px;padding:12px 16px;margin-bottom:24px;text-align:center;">
+        <div style="font-size:11px;font-family:var(--mono);color:#7dd3fc;letter-spacing:1px;">&#9200; CLN MATURES AUG 2026</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">Noteholder can convert to shares at &pound;2.0475, take ~178 BTC, or take cash equivalent. Post-maturity, drag drops to 0%.</div>
+    </div>
+
+    <!-- Hero -->
+    <div class="hero">
+        <div class="hero-label" id="heroLabel">MODELED SHARE PRICE</div>
+        <div class="hero-price neutral" id="heroPrice">&mdash;</div>
+        <div class="hero-usd" id="heroUsd"></div>
+        <div class="hero-change" id="heroChange">&mdash;</div>
+        <div class="hero-vs" id="heroVs">vs current market price</div>
+        <div class="hero-implied" id="heroImplied" style="display:none">
+            Market implies <em id="impliedMnavVal">&mdash;</em> mNAV
+        </div>
+    </div>
+
+    <!-- Narrative Panel -->
+    <div class="narrative" id="narrativePanel">
+        <div class="narrative-title">&#128269; What happens here</div>
+        <div class="narrative-body" id="narrativeBody"></div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="metrics-grid" id="metricsGrid"></div>
+
+    <!-- Advanced Controls (collapsed) -->
+    <details class="collapse-section">
+        <summary>&#9881; Adjust Inputs</summary>
+        <div class="collapse-body">
+            <div class="controls-grid">
+                <div class="control-card">
+                    <div class="control-header">
+                        <span class="control-label">BTC PRICE</span>
+                        <span class="control-value" id="btcPriceDisplay">$&mdash;</span>
+                    </div>
+                    <input type="range" id="btcSlider" min="0" max="1000" value="500">
+                    <div class="slider-labels"><span>$10K</span><span>$1M</span></div>
+                </div>
+                <div class="control-card">
+                    <div class="control-header">
+                        <span class="control-label">mNAV MULTIPLE</span>
+                        <span class="control-value" id="mnavDisplay">1.00&times;</span>
+                    </div>
+                    <input type="range" id="mnavSlider" min="30" max="400" value="100">
+                    <div class="mnav-presets" id="mnavPresets"></div>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <!-- Value Waterfall (collapsed) -->
+    <details class="collapse-section">
+        <summary>&#128256; Value Waterfall</summary>
+        <div class="collapse-body" style="padding:0;">
+            <div class="waterfall" id="waterfall"></div>
+        </div>
+    </details>
+
+    <!-- Sensitivity Matrix (collapsed) -->
+    <details class="collapse-section">
+        <summary>&#127919; Price Sensitivity Matrix</summary>
+        <div class="collapse-body" style="padding:0;">
+            <div style="overflow-x:auto;">
+                <table class="matrix-table" id="matrixTable"></table>
+            </div>
+        </div>
+    </details>
+
+    <!-- Drag Contrast (collapsed) -->
+    <details class="collapse-section">
+        <summary>&#9878; Capital Structure Comparison</summary>
+        <div class="collapse-body" id="contrastBody"></div>
+    </details>
+
+    <!-- Wrapper Costs (collapsed) -->
+    <details class="collapse-section">
+        <summary>&#128176; Wrapper Cost Analysis</summary>
+        <div class="collapse-body" id="wrapperBody">
+            <div style="font-size:13px;color:var(--text-secondary);line-height:1.7;">
+                <div style="font-size:11px;letter-spacing:2px;color:var(--text-muted);margin-bottom:12px;font-weight:600;">ANNUAL PUBLIC COMPANY OVERHEAD</div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+                    <div style="background:var(--bg-secondary);border:1px solid var(--border-subtle);border-radius:10px;padding:14px;text-align:center;">
+                        <div style="font-size:9px;letter-spacing:1.5px;color:var(--text-muted);font-weight:600;margin-bottom:4px;">RECURRING WRAPPER</div>
+                        <div style="font-size:22px;font-weight:700;font-family:var(--mono);color:var(--orange-primary);">&pound;2.09M</div>
+                        <div style="font-size:10px;color:var(--text-muted);font-family:var(--mono);margin-top:2px;">per year</div>
+                    </div>
+                    <div style="background:var(--bg-secondary);border:1px solid var(--border-subtle);border-radius:10px;padding:14px;text-align:center;">
+                        <div style="font-size:9px;letter-spacing:1.5px;color:var(--text-muted);font-weight:600;margin-bottom:4px;">COST PER BTC</div>
+                        <div style="font-size:22px;font-weight:700;font-family:var(--mono);color:var(--orange-primary);" id="wrapperPerBtc">&pound;787</div>
+                        <div style="font-size:10px;color:var(--text-muted);font-family:var(--mono);margin-top:2px;">per BTC held</div>
+                    </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
+                    <div style="background:var(--bg-secondary);border:1px solid var(--border-subtle);border-radius:10px;padding:12px;text-align:center;">
+                        <div style="font-size:8px;letter-spacing:1px;color:var(--text-muted);font-weight:600;margin-bottom:3px;">% OF NET ASSETS</div>
+                        <div style="font-size:16px;font-weight:700;font-family:var(--mono);" id="wrapperPctNav">~1.0%</div>
+                    </div>
+                    <div style="background:var(--bg-secondary);border:1px solid var(--border-subtle);border-radius:10px;padding:12px;text-align:center;">
+                        <div style="font-size:8px;letter-spacing:1px;color:var(--text-muted);font-weight:600;margin-bottom:3px;">MONTHLY BURN</div>
+                        <div style="font-size:16px;font-weight:700;font-family:var(--mono);">&pound;136K</div>
+                    </div>
+                    <div style="background:var(--bg-secondary);border:1px solid var(--border-subtle);border-radius:10px;padding:12px;text-align:center;">
+                        <div style="font-size:8px;letter-spacing:1px;color:var(--text-muted);font-weight:600;margin-bottom:3px;">CASH RUNWAY</div>
+                        <div style="font-size:16px;font-weight:700;font-family:var(--mono);">~9 mo</div>
+                    </div>
+                </div>
+
+                <div style="font-size:11px;letter-spacing:2px;color:var(--text-muted);margin-bottom:10px;margin-top:20px;font-weight:600;">COST BREAKDOWN</div>
+                <div style="background:var(--bg-secondary);border:1px solid var(--border-subtle);border-radius:10px;overflow:hidden;">
+                    <table style="width:100%;border-collapse:collapse;font-size:12px;font-family:var(--mono);">
+                        <tbody>
+                            <tr style="border-bottom:1px solid var(--border-subtle);">
+                                <td style="padding:10px 14px;color:var(--text-secondary);">Board compensation</td>
+                                <td style="padding:10px 14px;text-align:right;color:var(--text-primary);font-weight:600;">&pound;1,110,000</td>
+                            </tr>
+                            <tr style="border-bottom:1px solid var(--border-subtle);">
+                                <td style="padding:10px 14px;color:var(--text-secondary);">Professional &amp; legal</td>
+                                <td style="padding:10px 14px;text-align:right;color:var(--text-primary);font-weight:600;">&pound;368,514</td>
+                            </tr>
+                            <tr style="border-bottom:1px solid var(--border-subtle);">
+                                <td style="padding:10px 14px;color:var(--text-secondary);">Listing &amp; compliance</td>
+                                <td style="padding:10px 14px;text-align:right;color:var(--text-primary);font-weight:600;">&pound;331,400</td>
+                            </tr>
+                            <tr style="border-bottom:1px solid var(--border-subtle);">
+                                <td style="padding:10px 14px;color:var(--text-secondary);">Non-director staff</td>
+                                <td style="padding:10px 14px;text-align:right;color:var(--text-primary);font-weight:600;">&pound;183,373</td>
+                            </tr>
+                            <tr style="border-bottom:1px solid var(--border-subtle);">
+                                <td style="padding:10px 14px;color:var(--text-secondary);">Social security &amp; pension</td>
+                                <td style="padding:10px 14px;text-align:right;color:var(--text-primary);font-weight:600;">&pound;98,602</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:10px 14px;color:var(--orange-primary);font-weight:700;">Total recurring</td>
+                                <td style="padding:10px 14px;text-align:right;color:var(--orange-primary);font-weight:700;">&pound;2,091,889</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="font-size:11px;letter-spacing:2px;color:var(--text-muted);margin-bottom:10px;margin-top:20px;font-weight:600;">BOARD DETAIL</div>
+                <div style="background:var(--bg-secondary);border:1px solid var(--border-subtle);border-radius:10px;overflow:hidden;">
+                    <table style="width:100%;border-collapse:collapse;font-size:12px;font-family:var(--mono);">
+                        <thead>
+                            <tr style="border-bottom:1px solid var(--border-subtle);">
+                                <th style="padding:8px 14px;text-align:left;font-size:9px;letter-spacing:1px;color:var(--text-muted);font-weight:600;">NAME</th>
+                                <th style="padding:8px 14px;text-align:left;font-size:9px;letter-spacing:1px;color:var(--text-muted);font-weight:600;">ROLE</th>
+                                <th style="padding:8px 14px;text-align:right;font-size:9px;letter-spacing:1px;color:var(--text-muted);font-weight:600;">BASE</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom:1px solid var(--border-subtle);">
+                                <td style="padding:8px 14px;color:var(--text-primary);">A. Webley</td>
+                                <td style="padding:8px 14px;color:var(--text-secondary);">CEO</td>
+                                <td style="padding:8px 14px;text-align:right;color:var(--text-primary);">&pound;450K</td>
+                            </tr>
+                            <tr style="border-bottom:1px solid var(--border-subtle);">
+                                <td style="padding:8px 14px;color:var(--text-primary);">A. Soleiman</td>
+                                <td style="padding:8px 14px;color:var(--text-secondary);">CFO</td>
+                                <td style="padding:8px 14px;text-align:right;color:var(--text-primary);">&pound;300K</td>
+                            </tr>
+                            <tr style="border-bottom:1px solid var(--border-subtle);">
+                                <td style="padding:8px 14px;color:var(--text-primary);">S. Wade</td>
+                                <td style="padding:8px 14px;color:var(--text-secondary);">Chairman</td>
+                                <td style="padding:8px 14px;text-align:right;color:var(--text-primary);">&pound;150K</td>
+                            </tr>
+                            <tr style="border-bottom:1px solid var(--border-subtle);">
+                                <td style="padding:8px 14px;color:var(--text-primary);">T. Evans</td>
+                                <td style="padding:8px 14px;color:var(--text-secondary);">NED</td>
+                                <td style="padding:8px 14px;text-align:right;color:var(--text-primary);">&pound;75K</td>
+                            </tr>
+                            <tr style="border-bottom:1px solid var(--border-subtle);">
+                                <td style="padding:8px 14px;color:var(--text-primary);">R. Casson</td>
+                                <td style="padding:8px 14px;color:var(--text-secondary);">SID/NED</td>
+                                <td style="padding:8px 14px;text-align:right;color:var(--text-primary);">&pound;75K</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:8px 14px;color:var(--text-primary);">M. Thomas</td>
+                                <td style="padding:8px 14px;color:var(--text-secondary);">NED</td>
+                                <td style="padding:8px 14px;text-align:right;color:var(--text-primary);">&pound;60K</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="margin-top:16px;padding:12px 16px;background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.2);border-radius:10px;font-size:12px;color:#7dd3fc;line-height:1.6;">
+                    <strong>Source:</strong> SWC Annual Report FY2025 (year ended 31 Oct 2025). Audited by PKF Littlejohn LLP. Wrapper decomposition is CEBE Tracker analysis using Notes 5, 6, 7 and the remuneration report. FY2025 one-off costs (~&pound;7.4M, mostly &pound;5.6M share issue costs from IPO/raises) excluded from recurring total.
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>CEBE Framework by <a href="https://x.com/chcbearsfan" target="_blank">&#64;chcbearsfan</a> &middot; <a href="/">cebetracker.io</a> &middot; <a href="https://x.com/chcbearsfan/status/2014767364819063207" target="_blank">Read the Framework</a></p>
+        <p style="margin-top:4px">Not financial advice &middot; Data updates after each filing</p>
+        <p class="footer-formula">CEBE = (BTC &minus; CLN in BTC) &divide; Shares &times; BTC Price &times; mNAV</p>
+    </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// CEBE MODELER — Smarter Web Co
+// cebetracker.io — CLN creates ~7% drag
+// ═══════════════════════════════════════════════
+
+// ─── COMPANY DATA ───
+const COMPANY = {
+    name: 'Smarter Web Co',
+    flag: '&#127468;&#127463;',
+    tickers: 'LSE: SWC | OTC: TSWCF | FRA: 3M8',
+    tagline: "UK's Largest Bitcoin Holder",
+    currency: 'GBP',
+    currencySymbol: '&#163;',
+    sheetTicker: 'TSWCF',
+    defaults: {
+        btc_holdings: 2689,
+        shares: 351651140,
+        stock_price_local: 0.33,
+        fx_rate: 1.26,
+        debt_usd: 19900000,  // Smarter Convert CLN ~£15.8M × 1.26
+    },
+    cln: {
+        faceGbp: 15803733,
+        btcCollateral: 177.89,
+        conversionPrice: 2.0475,
+        maxShares: 7718551,
+        maturity: '2026-08-05',
+    }
+};
+
+const SHEET_ID = '1BNsCWGVU08PDinDcfzJccqcuj9_KrK1VZGETErzBZvg';
+const SNAPSHOTS_GID = '771405586';
+
+const SCENARIOS_NOW = [
+    { id: 'wipeout', icon: '&#128128;', name: 'Wipeout',  btc: 25000,  mnav: 0.5, tag: 'NOW' },
+    { id: 'current', icon: '&#128205;', name: 'Current',  btc: null,   mnav: 1.0, tag: 'NOW' },
+    { id: 'bull',    icon: '&#128081;', name: 'Bull',     btc: 150000, mnav: 1.5, tag: 'NOW' },
+];
+
+const SCENARIOS_FORWARD = [
+    { id: 'siege',    icon: '&#127984;', name: 'Siege',              btc: 50000,   mnav: 0.7, tag: '10Y', desc: '0.7\u00d7 mNAV \u00b7 10Y', forward: true },
+    { id: 'powerlaw', icon: '&#128202;', name: 'Power Law Support',  btc: 760000,  mnav: 1.0, tag: '10Y', desc: 'Support floor \u00b7 10Y', forward: true },
+    { id: 'webley',   icon: '&#128640;', name: 'Webley Plan', btc: 1000000, mnav: 2.0, tag: '10Y', desc: '\u00a32.5B milestone \u00b7 10Y', forward: true },
+];
+
+const SCENARIOS = [...SCENARIOS_NOW, ...SCENARIOS_FORWARD];
+
+const MNAV_PRESETS = [0.5, 0.75, 1.0, 1.5, 2.0, 3.0];
+const MATRIX_BTC = [25000, 50000, 75000, 100000, 150000, 200000, 300000, 500000, 1000000];
+const MATRIX_MNAVS = [0.5, 0.75, 1.0, 1.5, 2.0, 3.0];
+
+// ─── STATE ───
+let btcPrice = 97000;
+let mnavMultiple = 1.0;
+let activeScenario = 'current';
+let liveBtcPrice = null;
+let liveFxRate = COMPANY.defaults.fx_rate;
+let loadedData = {};
+
+// ─── HELPERS ───
+const $ = id => document.getElementById(id);
+const fmt = n => Math.round(n).toLocaleString('en-US');
+const fmtB = n => n >= 1e9 ? '$' + (n/1e9).toFixed(1) + 'B' : n >= 1e6 ? '$' + (n/1e6).toFixed(0) + 'M' : '$' + fmt(n);
+const fmtPrice = p => {
+    if (p >= 1e6) return '$' + (p/1e6).toFixed(1) + 'M';
+    if (p >= 1000) return '$' + fmt(p);
+    if (p >= 0.01) return '$' + p.toFixed(2);
+    return '$0.00';
+};
+const fmtPct = (p, dec=1) => (p * 100).toFixed(dec) + '%';
+const fmtSats = s => fmt(Math.round(s));
+
+// Logarithmic BTC slider (matches MSTR modeler)
+function sliderToBtc(val) {
+    const minLog = Math.log10(10000);
+    const maxLog = Math.log10(1000000);
+    return Math.round(Math.pow(10, minLog + (val / 1000) * (maxLog - minLog)));
+}
+function btcToSlider(btc) {
+    const minLog = Math.log10(10000);
+    const maxLog = Math.log10(1000000);
+    return Math.round(((Math.log10(Math.max(10000, btc)) - minLog) / (maxLog - minLog)) * 1000);
+}
+
+function getData() {
+    return {
+        btcHoldings: loadedData.btc_holdings || COMPANY.defaults.btc_holdings,
+        shares: loadedData.shares || COMPANY.defaults.shares,
+        stockLocal: loadedData.stock_price_local || COMPANY.defaults.stock_price_local,
+        fxRate: liveFxRate || COMPANY.defaults.fx_rate,
+        debtUsd: loadedData.debt_usd !== undefined ? loadedData.debt_usd : COMPANY.defaults.debt_usd,
+        snapshotDate: loadedData.snapshot_date || null,
+    };
+}
+
+// ─── CSV PARSER ───
+function parseCSVLine(line) {
+    const r = []; let c = '', q = false;
+    for (const ch of line) { if (ch === '"') q = !q; else if (ch === ',' && !q) { r.push(c); c = ''; } else c += ch; }
+    r.push(c); return r;
+}
+function parseCSV(text) {
+    const lines = text.split('\n');
+    const headers = parseCSVLine(lines[0]);
+    return lines.slice(1).filter(l => l.trim()).map(l => {
+        const vals = parseCSVLine(l);
+        const row = {};
+        headers.forEach((h, i) => { row[h.replace(/"/g,'').trim()] = vals[i]?.replace(/"/g,'').trim() || ''; });
+        return row;
+    });
+}
+
+// ─── CORE MATH ───
+// CLN creates senior claim: CEBE ≠ BPS
+function compute(btcH, shares, btcP, mnav, debtUsd) {
+    const bpsBtc = shares > 0 ? btcH / shares : 0;
+    const bpsSats = Math.round(bpsBtc * 1e8);
+
+    // Senior claims: CLN converted to BTC terms
+    const netClaimsBtc = btcP > 0 ? Math.max(0, debtUsd / btcP) : 0;
+    const drag = btcH > 0 ? Math.max(0, netClaimsBtc / btcH) : 0;
+    const commonEquityBtc = Math.max(0, btcH - netClaimsBtc);
+    const cebeBtc = shares > 0 ? commonEquityBtc / shares : 0;
+    const cebeSats = Math.round(cebeBtc * 1e8);
+
+    const navUsd = commonEquityBtc * btcP;
+    const navPerShare = shares > 0 ? navUsd / shares : 0;
+    const modeledUsd = navPerShare * mnav;
+    const amplification = drag < 1 ? 1 / (1 - drag) : Infinity;
+    const breakEvenBtc = btcH > 0 ? debtUsd / btcH : 0;
+
+    return { bpsBtc, bpsSats, cebeBtc, cebeSats, netClaimsBtc, drag, commonEquityBtc, navUsd, navPerShare, modeledUsd, amplification, breakEvenBtc, debtUsd };
+}
+
+// ─── DATA LOADING ───
+async function loadData() {
+    try {
+        // BTC price + FX rates from CoinGecko
+        const btcRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,gbp')
+            .then(r => r.json()).catch(() => null);
+
+        if (btcRes && btcRes.bitcoin) {
+            liveBtcPrice = btcRes.bitcoin.usd;
+            if (btcRes.bitcoin.gbp && btcRes.bitcoin.usd) {
+                liveFxRate = btcRes.bitcoin.usd / btcRes.bitcoin.gbp;
+            }
+        }
+
+        // Google Sheet data
+        const sheetText = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${SNAPSHOTS_GID}`)
+            .then(r => r.text()).catch(() => null);
+
+        if (sheetText) {
+            const rows = parseCSV(sheetText);
+            let best = null;
+            rows.forEach(r => {
+                if (r.ticker === COMPANY.sheetTicker && (!r.status || r.status.toLowerCase() === 'live')) {
+                    if (!best || r.snapshot_date > best.snapshot_date) best = r;
+                }
+            });
+            if (best) {
+                loadedData = {
+                    btc_holdings: parseFloat(best.btc_holdings) || COMPANY.defaults.btc_holdings,
+                    shares: parseFloat(best.shares_outstanding) || COMPANY.defaults.shares,
+                    debt_usd: parseFloat(best.debt_usd) || 0,
+                    snapshot_date: best.snapshot_date || null,
+                };
+            }
+        }
+
+        btcPrice = liveBtcPrice || 97000;
+        SCENARIOS_NOW.find(s => s.id === 'current').btc = btcPrice;
+
+        $('loadingScreen').style.display = 'none';
+        $('app').style.display = 'block';
+
+        $('headerSub').innerHTML = COMPANY.tagline + ' &middot; ' + COMPANY.tickers;
+        buildScenarioBar();
+        buildMnavPresets();
+        syncSliders();
+        render();
+    } catch (err) {
+        console.error('Load failed:', err);
+        $('loadingScreen').innerHTML = '<div style="text-align:center;color:#a1a1aa;font-size:13px"><p style="margin-bottom:12px">Failed to load data</p><p style="font-size:11px;color:#52525b">' + err.message + '</p><p style="margin-top:12px"><a href="/modeler" style="color:#f97316">&larr; Back to modelers</a></p></div>';
+    }
+}
+
+// ═══════════════════════════════════════════════
+// RENDERING
+// ═══════════════════════════════════════════════
+
+function render() {
+    const co = COMPANY;
+    const d = getData();
+    const r = compute(d.btcHoldings, d.shares, btcPrice, mnavMultiple, d.debtUsd);
+
+    renderHero(r, co, d);
+    renderNarrative(r, co, d);
+    renderMetrics(r, co, d);
+    renderWaterfall(r, co, d);
+    renderMatrix(co, d);
+    renderContrast(r, d);
+    renderBanner(r);
+    renderWrapper(d);
+
+    // Live strip
+    $('liveBtcDisplay').textContent = 'BTC ' + fmtPrice(liveBtcPrice || btcPrice);
+    $('liveStockDisplay').textContent = 'SWC \u00a3' + d.stockLocal.toFixed(2);
+    $('liveDataDate').textContent = d.snapshotDate ? 'Data: ' + d.snapshotDate : '';
+
+    updateSliderFills();
+}
+
+function renderBanner(r) {
+    const banner = $('capitalBanner');
+    const display = $('dragDisplay');
+    const sub = $('dragSub');
+    const eq = $('cebeEquation');
+    const dragPct = (r.drag * 100).toFixed(1);
+    const ownPct = ((1 - r.drag) * 100).toFixed(1);
+    const d = getData();
+    const sharesLabel = d.shares >= 1e9 ? (d.shares/1e9).toFixed(2) + 'B' : (d.shares/1e6).toFixed(1) + 'M';
+
+    // CEBE equation
+    eq.innerHTML = 'CEBE = (' + fmt(d.btcHoldings) + ' &minus; ' + fmt(Math.round(r.netClaimsBtc)) + ') &divide; ' + sharesLabel + ' = ' + fmtSats(r.cebeSats) + ' sats/share';
+
+    // Banner subtitle with break-even
+    const subText = 'Common equity owns ' + ownPct + '% of ' + fmt(d.btcHoldings) + ' BTC &middot; Break-even: ' + fmtPrice(r.breakEvenBtc);
+
+    if (r.drag < 0.01) {
+        banner.style.background = 'var(--green-muted)';
+        banner.style.borderColor = 'rgba(34,197,94,0.25)';
+        display.style.color = 'var(--green)';
+        display.textContent = '0% DRAG';
+        sub.style.color = '#86efac';
+        sub.innerHTML = subText;
+    } else if (r.drag < 0.15) {
+        banner.style.background = 'var(--yellow-muted)';
+        banner.style.borderColor = 'rgba(234,179,8,0.25)';
+        display.style.color = 'var(--yellow)';
+        display.innerHTML = 'DRAG: &nbsp;' + dragPct + '%';
+        sub.style.color = '#fde68a';
+        sub.innerHTML = subText;
+    } else {
+        banner.style.background = 'var(--red-muted)';
+        banner.style.borderColor = 'rgba(239,68,68,0.25)';
+        display.style.color = 'var(--red)';
+        display.innerHTML = 'DRAG: &nbsp;' + dragPct + '%';
+        sub.style.color = '#fca5a5';
+        sub.innerHTML = subText;
+    }
+}
+
+function renderWrapper(d) {
+    const wrapperAnnual = 2091889; // £2.09M recurring
+    const perBtc = d.btcHoldings > 0 ? Math.round(wrapperAnnual / d.btcHoldings) : 0;
+    const navGbp = d.btcHoldings * (liveBtcPrice || btcPrice) / (liveFxRate || 1.26);
+    const pctNav = navGbp > 0 ? ((wrapperAnnual / navGbp) * 100).toFixed(2) : '?';
+
+    const perBtcEl = $('wrapperPerBtc');
+    if (perBtcEl) perBtcEl.textContent = '\u00a3' + fmt(perBtc);
+    const pctEl = $('wrapperPctNav');
+    if (pctEl) pctEl.textContent = pctNav + '%';
+}
+
+function renderHero(r, co, d) {
+    const priceUsd = r.modeledUsd;
+    const priceLocal = priceUsd / d.fxRate;
+    const sym = co.currencySymbol;
+    const el = $('heroPrice');
+
+    $('heroLabel').innerHTML = 'MODELED ' + co.name.toUpperCase() + ' SHARE PRICE';
+
+    if (priceUsd <= 0) {
+        el.textContent = sym + '0.00';
+        el.className = 'hero-price negative';
+        $('heroUsd').textContent = '';
+        $('heroChange').textContent = '';
+        $('heroVs').textContent = '';
+        $('heroImplied').style.display = 'none';
+        return;
+    }
+
+    // Show local currency as primary
+    if (priceLocal >= 1) {
+        el.innerHTML = sym + priceLocal.toFixed(2);
+    } else {
+        el.innerHTML = sym + priceLocal.toFixed(4);
+    }
+    $('heroUsd').innerHTML = '&#8776; ' + fmtPrice(priceUsd) + ' USD';
+
+    // Change vs market
+    const marketLocal = d.stockLocal;
+    if (marketLocal > 0) {
+        const chg = priceLocal - marketLocal;
+        const chgPct = (chg / marketLocal) * 100;
+        const sign = chg >= 0 ? '+' : '';
+        $('heroChange').textContent = sign + chgPct.toFixed(1) + '%';
+        $('heroChange').className = 'hero-change ' + (chg >= 0 ? 'up' : 'down');
+        el.className = 'hero-price ' + (chgPct > 5 ? 'positive' : chgPct < -5 ? 'negative' : 'neutral');
+        $('heroVs').innerHTML = 'vs market ' + sym + marketLocal.toFixed(2);
+    } else {
+        $('heroChange').textContent = '';
+        el.className = 'hero-price neutral';
+        $('heroVs').textContent = '';
+    }
+
+    // Implied mNAV
+    if (marketLocal > 0 && r.navPerShare > 0) {
+        const marketUsd = marketLocal * d.fxRate;
+        const impliedMnav = marketUsd / r.navPerShare;
+        $('impliedMnavVal').textContent = impliedMnav.toFixed(2) + '\u00d7';
+        $('heroImplied').style.display = 'inline-block';
+    } else {
+        $('heroImplied').style.display = 'none';
+    }
+}
+
+function renderNarrative(r, co, d) {
+    const items = [];
+    const scenarioObj = SCENARIOS.find(s => s.id === activeScenario);
+    const scenarioName = scenarioObj ? scenarioObj.name : 'Custom';
+    const dragPct = (r.drag * 100).toFixed(1);
+    const ownPct = ((1 - r.drag) * 100).toFixed(1);
+
+    document.querySelector('.narrative-title').innerHTML = '&#128269; ' + scenarioName + ' &mdash; ' + fmtPrice(btcPrice) + ' BTC';
+
+    // CLN drag status
+    if (r.drag < 0.01) {
+        items.push({
+            cls: 'green',
+            icon: '&#9989;',
+            text: '<strong>Near-zero drag at this price.</strong> The Smarter Convert CLN (~\u00a315.8M) is negligible relative to ' + fmt(d.btcHoldings) + ' BTC at ' + fmtPrice(btcPrice) + '. Common equity owns effectively 100% of the stack.'
+        });
+    } else if (r.drag < 0.15) {
+        items.push({
+            cls: 'amber',
+            icon: '&#9888;',
+            text: '<strong>' + dragPct + '% drag from Smarter Convert CLN.</strong> The \u00a315.8M CLN represents ~' + fmt(Math.round(r.netClaimsBtc)) + ' BTC in senior claims at ' + fmtPrice(btcPrice) + '. Common equity owns ' + ownPct + '% of the ' + fmt(d.btcHoldings) + ' BTC (' + fmt(Math.round(r.commonEquityBtc)) + ' BTC).'
+        });
+    } else {
+        items.push({
+            cls: 'red',
+            icon: '&#128680;',
+            text: '<strong>' + dragPct + '% drag &mdash; CLN claims expanding.</strong> At ' + fmtPrice(btcPrice) + ', the \u00a315.8M CLN consumes ~' + fmt(Math.round(r.netClaimsBtc)) + ' BTC of the ' + fmt(d.btcHoldings) + ' BTC stack. Common equity owns only ' + ownPct + '%.'
+        });
+    }
+
+    // CLN maturity info
+    items.push({
+        cls: 'info',
+        icon: '&#9200;',
+        text: '<strong>CLN matures August 2026.</strong> Noteholder chooses: convert to shares at \u00a32.0475 (~7.7M new shares), take ~178 BTC from segregated wallet, or cash equivalent. Post-settlement, drag drops to 0% regardless of outcome (shares dilute if converted, but no more senior claim).'
+    });
+
+    // Sats per dollar efficiency
+    const marketUsd = d.stockLocal * d.fxRate;
+    if (marketUsd > 0) {
+        const satsPerDollar = r.cebeSats / marketUsd;
+        items.push({
+            cls: 'info',
+            icon: '&#128176;',
+            text: '<strong>' + fmt(Math.round(satsPerDollar)) + ' CEBE sats per $1 invested</strong> at current market price. This accounts for the CLN claim &mdash; only counting Bitcoin that actually belongs to common shareholders.'
+        });
+    }
+
+    // Amplification
+    if (r.drag >= 0.01) {
+        items.push({
+            cls: 'neutral',
+            icon: '&#9878;',
+            text: '<strong>Amplification: ' + r.amplification.toFixed(2) + '&times;</strong>. The CLN creates mild leverage &mdash; common equity gets ' + r.amplification.toFixed(2) + '&times; BTC price movement. This works both ways: amplified gains on the way up, amplified losses on the way down.'
+        });
+    } else {
+        items.push({
+            cls: 'neutral',
+            icon: '&#9878;',
+            text: '<strong>Amplification: ~1.00&times;</strong>. At this BTC price, CLN drag is negligible. Moves roughly 1:1 with Bitcoin.'
+        });
+    }
+
+    // mNAV interpretation
+    if (mnavMultiple > 1.1) {
+        items.push({
+            cls: 'amber',
+            icon: '&#9888;',
+            text: '<strong>Premium territory at ' + mnavMultiple.toFixed(2) + '&times; mNAV.</strong> Paying above net Bitcoin value. Premium must be justified by growth execution, not leverage.'
+        });
+    } else if (mnavMultiple < 0.9) {
+        items.push({
+            cls: 'green',
+            icon: '&#128176;',
+            text: '<strong>Discount at ' + mnavMultiple.toFixed(2) + '&times; mNAV.</strong> Market is pricing ' + co.name + ' below its net BTC value. You&#8217;re buying CEBE-adjusted BTC cheaper than spot.'
+        });
+    }
+
+    // Scenario-specific
+    if (activeScenario === 'crash' || activeScenario === 'bear') {
+        items.push({
+            cls: 'info',
+            icon: '&#128161;',
+            text: '<strong>Break-even BTC price: ' + fmtPrice(r.breakEvenBtc) + '.</strong> Below this, the CLN would theoretically consume all BTC. However, this is extremely low because the CLN is only \u00a315.8M against ' + fmt(d.btcHoldings) + ' BTC. The real risk is mNAV compression, not CLN claims.'
+        });
+    }
+
+    $('narrativeBody').innerHTML = items.map(i =>
+        '<div class="narr-item ' + i.cls + '"><span class="narr-icon">' + i.icon + '</span><span>' + i.text + '</span></div>'
+    ).join('');
+}
+
+function renderMetrics(r, co, d) {
+    const sym = co.currencySymbol;
+    const navLocal = r.navPerShare / d.fxRate;
+    const dragPct = (r.drag * 100).toFixed(1);
+    const ownPct = ((1 - r.drag) * 100).toFixed(1);
+    const dragCls = r.drag < 0.01 ? 'good' : r.drag < 0.15 ? 'warn' : 'danger';
+    const ownCls = r.drag < 0.01 ? 'good' : r.drag < 0.15 ? '' : 'danger';
+
+    const metrics = [
+        { label: 'CEBE', value: fmtSats(r.cebeSats) + ' sats', cls: '' },
+        { label: 'BPS', value: fmtSats(r.bpsSats) + ' sats', cls: '', sub: 'before claims' },
+        { label: 'DRAG', value: dragPct + '%', cls: dragCls },
+        { label: 'COMMON OWNS', value: ownPct + '%', cls: ownCls },
+        { label: 'BTC HOLDINGS', value: fmt(d.btcHoldings), cls: '' },
+        { label: 'NAV/SHARE', value: sym + navLocal.toFixed(navLocal >= 1 ? 2 : 4), cls: '' },
+        { label: 'AMPLIFICATION', value: r.amplification.toFixed(2) + '&times;', cls: '' },
+        { label: 'BREAK-EVEN', value: fmtPrice(r.breakEvenBtc), cls: '', sub: 'BTC price' },
+    ];
+
+    $('metricsGrid').innerHTML = metrics.map(m =>
+        '<div class="metric-card"><div class="metric-label">' + m.label + '</div><div class="metric-value ' + (m.cls || '') + '">' + m.value + '</div>' + (m.sub ? '<div class="metric-sub">' + m.sub + '</div>' : '') + '</div>'
+    ).join('');
+}
+
+function renderWaterfall(r, co, d) {
+    const sym = co.currencySymbol;
+    const navLocal = r.navPerShare / d.fxRate;
+    const priceLocal = r.modeledUsd / d.fxRate;
+    const grossBtcUsd = d.btcHoldings * btcPrice;
+    const clnUsd = r.debtUsd;
+
+    $('waterfall').innerHTML =
+        '<div class="wf-step btc-val"><div class="wf-label">BTC RESERVE</div><div class="wf-value">' + fmtB(grossBtcUsd) + '</div></div>' +
+        '<span class="wf-arrow">&#8594;</span>' +
+        '<div class="wf-step nav" style="border-color:rgba(239,68,68,0.3)"><div class="wf-label">CLN CLAIM</div><div class="wf-value" style="color:var(--red)">&#8722; ' + fmtB(clnUsd) + '</div></div>' +
+        '<span class="wf-arrow">=</span>' +
+        '<div class="wf-step nav"><div class="wf-label">NAV</div><div class="wf-value">' + fmtB(r.navUsd) + '</div></div>' +
+        '<span class="wf-arrow">&#247;</span>' +
+        '<div class="wf-step shares"><div class="wf-label">SHARES</div><div class="wf-value">' + (d.shares / 1e6).toFixed(0) + 'M</div></div>' +
+        '<span class="wf-arrow">=</span>' +
+        '<div class="wf-step shares"><div class="wf-label">NAV/SHARE</div><div class="wf-value">' + sym + (navLocal >= 1 ? navLocal.toFixed(2) : navLocal.toFixed(4)) + '</div></div>' +
+        '<span class="wf-arrow">&times;</span>' +
+        '<div class="wf-step shares"><div class="wf-label">mNAV</div><div class="wf-value">' + mnavMultiple.toFixed(2) + '&times;</div></div>' +
+        '<span class="wf-arrow">=</span>' +
+        '<div class="wf-step result"><div class="wf-label">PRICE</div><div class="wf-value">' + sym + (priceLocal >= 1 ? priceLocal.toFixed(2) : priceLocal.toFixed(4)) + '</div></div>';
+}
+
+function renderMatrix(co, d) {
+    const sym = co.currencySymbol;
+    let html = '<thead><tr><th>BTC &#8595; \\ mNAV &#8594;</th>';
+    MATRIX_MNAVS.forEach(m => { html += '<th>' + m.toFixed(m % 1 === 0 ? 0 : 2) + '&times;</th>'; });
+    html += '</tr></thead><tbody>';
+
+    MATRIX_BTC.forEach(btcP => {
+        const r = compute(d.btcHoldings, d.shares, btcP, 1.0, d.debtUsd);
+        const label = btcP >= 1e6 ? '$' + (btcP/1e6) + 'M' : '$' + (btcP/1e3) + 'K';
+        html += '<tr><td class="row-label">' + label + '</td>';
+        MATRIX_MNAVS.forEach(m => {
+            const priceUsd = r.navPerShare * m;
+            const priceLocal = priceUsd / d.fxRate;
+            const display = priceLocal >= 100 ? sym + Math.round(priceLocal).toLocaleString() : priceLocal >= 1 ? sym + priceLocal.toFixed(2) : sym + priceLocal.toFixed(4);
+
+            // Color relative to current market
+            const marketUsd = d.stockLocal * d.fxRate;
+            let cls = '';
+            if (marketUsd > 0) {
+                const ratio = priceUsd / marketUsd;
+                if (ratio > 1.5) cls = 'matrix-cell-green';
+                else if (ratio > 1.1) cls = 'matrix-cell-lightgreen';
+                else if (ratio < 0.5) cls = 'matrix-cell-red';
+                else if (ratio < 0.9) cls = 'matrix-cell-lightred';
+            }
+
+            // Highlight nearest to current inputs
+            const btcClose = Math.abs(btcP - btcPrice) < btcPrice * 0.25;
+            const mnavClose = Math.abs(m - mnavMultiple) < 0.15;
+            if (btcClose && mnavClose) cls += ' matrix-cell-current';
+
+            html += '<td class="' + cls + '">' + display + '</td>';
+        });
+        html += '</tr>';
+    });
+    html += '</tbody>';
+    $('matrixTable').innerHTML = html;
+}
+
+function renderContrast(r, d) {
+    const dragPct = (r.drag * 100).toFixed(1);
+    const ownPct = ((1 - r.drag) * 100).toFixed(1);
+    const mstrDrag = 26.6;
+    const mtplDrag = 14.0;
+
+    $('contrastBody').innerHTML =
+        '<div class="contrast-title">DRAG COMPARISON AT ' + fmtPrice(btcPrice) + ' BTC</div>' +
+        '<div class="contrast-row">' +
+            '<div class="contrast-item"><div class="contrast-company">' + COMPANY.name.toUpperCase() + '</div><div class="contrast-value" style="color:' + (r.drag < 0.01 ? 'var(--green)' : 'var(--yellow)') + '">' + dragPct + '%</div><div class="contrast-label">owns ' + ownPct + '%</div></div>' +
+            '<div class="contrast-item"><div class="contrast-company">METAPLANET</div><div class="contrast-value" style="color:var(--yellow)">~' + mtplDrag + '%</div><div class="contrast-label">owns ~86%</div></div>' +
+            '<div class="contrast-item"><div class="contrast-company">STRATEGY</div><div class="contrast-value" style="color:var(--orange-light)">~' + mstrDrag + '%</div><div class="contrast-label">owns ~73%</div></div>' +
+        '</div>' +
+        '<div style="margin-top:14px;font-size:12px;color:var(--text-muted);line-height:1.6">' +
+            '<strong style="color:var(--text-secondary)">What this means:</strong> ' + COMPANY.name + '\'s CLN creates ' + dragPct + '% drag at this BTC price, compared to Strategy\'s ~27% and Metaplanet\'s ~14%. The CLN matures August 2026 &mdash; after settlement, drag drops to 0% regardless of how the noteholder exercises.' +
+            '<br><br>' +
+            '<strong style="color:var(--text-secondary)">Key difference:</strong> Strategy and Metaplanet carry permanent leverage through converts and bonds. ' + COMPANY.name + '\'s drag is temporary &mdash; the CLN has a fixed 1-year term with a known resolution date.' +
+        '</div>';
+}
+
+
+// ═══════════════════════════════════════════════
+// UI BUILDERS & EVENT HANDLERS
+// ═══════════════════════════════════════════════
+
+function buildScenarioBar() {
+    renderScenarioRow($('scenarioBarNow'), SCENARIOS_NOW, false);
+    renderScenarioRow($('scenarioBarForward'), SCENARIOS_FORWARD, true);
+}
+
+function renderScenarioRow(container, scenarios, isForward) {
+    container.innerHTML = scenarios.map(s => {
+        const priceDisplay = s.btc ? (s.btc >= 1e6 ? '$' + (s.btc/1e6) + 'M' : '$' + (s.btc/1e3) + 'K') : fmtPrice(btcPrice);
+        const priceWithArrow = isForward && s.btc ? '&rarr; ' + priceDisplay : priceDisplay;
+        const tagHtml = s.tag ? '<span style="position:absolute;top:6px;right:8px;font-size:8px;font-weight:700;letter-spacing:1px;color:var(--text-muted);font-family:var(--mono);">' + s.tag + '</span>' : '';
+        const descHtml = s.desc ? '<div class="scenario-mnav">' + s.desc + '</div>' : '<div class="scenario-mnav">' + s.mnav.toFixed(1) + '&times; mNAV</div>';
+        const fwdClass = isForward ? ' forward-card' : '';
+        return '<div class="scenario-card' + fwdClass + ' ' + (s.id === activeScenario ? 'active' : '') + '" data-scenario="' + s.id + '">' +
+            tagHtml +
+            '<div class="scenario-icon">' + s.icon + '</div>' +
+            '<div class="scenario-name">' + s.name + '</div>' +
+            '<div class="scenario-price">' + priceWithArrow + '</div>' +
+            descHtml +
+        '</div>';
+    }).join('');
+
+    container.querySelectorAll('.scenario-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const id = card.dataset.scenario;
+            const scenario = SCENARIOS.find(s => s.id === id);
+            if (!scenario) return;
+            activeScenario = id;
+            btcPrice = scenario.btc || (liveBtcPrice || 97000);
+            mnavMultiple = scenario.mnav;
+            syncSliders();
+            buildScenarioBar();
+            updateMnavPresets();
+            render();
+        });
+    });
+}
+
+function buildMnavPresets() {
+    $('mnavPresets').innerHTML = MNAV_PRESETS.map(m =>
+        '<button class="mnav-btn ' + (Math.abs(m - mnavMultiple) < 0.01 ? 'active' : '') + '" data-mnav="' + m + '">' + m.toFixed(m % 1 === 0 ? 0 : 2) + '&times;</button>'
+    ).join('');
+
+    document.querySelectorAll('.mnav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            mnavMultiple = parseFloat(btn.dataset.mnav);
+            $('mnavSlider').value = mnavMultiple * 100;
+            $('mnavDisplay').textContent = mnavMultiple.toFixed(2) + '\u00d7';
+            activeScenario = '';
+            updateMnavPresets();
+            buildScenarioBar();
+            render();
+        });
+    });
+}
+
+function updateMnavPresets() {
+    document.querySelectorAll('.mnav-btn').forEach(btn => {
+        btn.classList.toggle('active', Math.abs(parseFloat(btn.dataset.mnav) - mnavMultiple) < 0.01);
+    });
+}
+
+function syncSliders() {
+    $('btcSlider').value = btcToSlider(btcPrice);
+    $('btcPriceDisplay').textContent = fmtPrice(btcPrice);
+    $('mnavSlider').value = mnavMultiple * 100;
+    $('mnavDisplay').textContent = mnavMultiple.toFixed(2) + '\u00d7';
+    updateMnavPresets();
+}
+
+function updateSliderFills() {
+    const btcSlider = $('btcSlider');
+    const btcPct = (btcSlider.value / 1000) * 100;
+    btcSlider.style.background = 'linear-gradient(90deg, var(--orange-primary) ' + btcPct + '%, #333 ' + btcPct + '%)';
+
+    const mnavSlider = $('mnavSlider');
+    const mnavPct = ((mnavSlider.value - 30) / (400 - 30)) * 100;
+    mnavSlider.style.background = 'linear-gradient(90deg, var(--orange-primary) ' + mnavPct + '%, #333 ' + mnavPct + '%)';
+}
+
+// ─── SLIDER EVENTS ───
+$('btcSlider').addEventListener('input', (e) => {
+    btcPrice = sliderToBtc(parseInt(e.target.value));
+    $('btcPriceDisplay').textContent = fmtPrice(btcPrice);
+    activeScenario = '';
+    buildScenarioBar();
+    render();
+});
+
+$('mnavSlider').addEventListener('input', (e) => {
+    mnavMultiple = parseInt(e.target.value) / 100;
+    $('mnavDisplay').textContent = mnavMultiple.toFixed(2) + '\u00d7';
+    activeScenario = '';
+    updateMnavPresets();
+    buildScenarioBar();
+    render();
+});
+
+// ─── KEYBOARD SHORTCUTS ───
+document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.key >= '1' && e.key <= '6') {
+        const idx = parseInt(e.key) - 1;
+        if (SCENARIOS[idx]) {
+            const scenario = SCENARIOS[idx];
+            activeScenario = scenario.id;
+            btcPrice = scenario.btc || (liveBtcPrice || 97000);
+            mnavMultiple = scenario.mnav;
+            syncSliders();
+            buildScenarioBar();
+            updateMnavPresets();
+            render();
+        }
+    }
+
+});
+
+/*
+ * ═══ FUTURE: NOW/FORWARD TOGGLE ═══
+ * Replace section labels with toggle tabs. Cards switch between NOW (3) and FORWARD (3).
+ * 
+ * HTML (replace scenario section labels + rows):
+ * <div class="scenario-tabs" id="scenarioTabs">
+ *   <button class="scenario-tab active" data-tab="now">⚡ NOW</button>
+ *   <button class="scenario-tab" data-tab="forward">→ FORWARD</button>
+ * </div>
+ * <div class="scenarios-row" id="scenarioBar"></div>
+ *
+ * JS:
+ * let activeTab = 'now';
+ * function initTabs() {
+ *     document.querySelectorAll('.scenario-tab').forEach(tab => {
+ *         tab.addEventListener('click', () => {
+ *             activeTab = tab.dataset.tab;
+ *             const scenarios = activeTab === 'now' ? SCENARIOS_NOW : SCENARIOS_FORWARD;
+ *             document.querySelectorAll('.scenario-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === activeTab));
+ *             const first = scenarios[activeTab === 'now' ? 1 : 0];
+ *             activeScenario = first.id;
+ *             btcPrice = first.btc || (liveBtcPrice || 97000);
+ *             mnavMultiple = first.mnav;
+ *             syncSliders();
+ *             buildScenarioBar();  // would render into single #scenarioBar using active tab's array
+ *             updateMnavPresets();
+ *             render();
+ *         });
+ *     });
+ * }
+ * // Call initTabs() in loadData init section.
+ * // Apply across all modelers simultaneously when ready.
+ */
+
+// ─── INIT ───
+loadData();
+</script>
+</body>
+</html>
