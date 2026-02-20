@@ -1295,7 +1295,8 @@
             </div>
             <p class="tagline">Common Equity Bitcoin Exposure</p>
             <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-top:10px;">
-                <a href="/cebe" style="display:inline-block; padding:5px 14px; border-radius:20px; border:1px solid rgba(249,115,22,0.3); background:rgba(249,115,22,0.06); color:#f97316; font-size:11px; font-weight:600; letter-spacing:1.5px; font-family:'JetBrains Mono',monospace; text-decoration:none; transition:all 0.2s;" onmouseover="this.style.background='rgba(249,115,22,0.15)';this.style.borderColor='rgba(249,115,22,0.6)'" onmouseout="this.style.background='rgba(249,115,22,0.06)';this.style.borderColor='rgba(249,115,22,0.3)'">FRAMEWORK</a>
+                <a href="/cebe" style="display:inline-block; padding:5px 14px; border-radius:20px; border:1px solid rgba(249,115,22,0.3); background:rgba(249,115,22,0.06); color:#f97316; font-size:11px; font-weight:600; letter-spacing:1.5px; font-family:'JetBrains Mono',monospace; text-decoration:none; transition:all 0.2s;" onmouseover="this.style.background='rgba(249,115,22,0.15)';this.style.borderColor='rgba(249,115,22,0.6)'" onmouseout="this.style.background='rgba(249,115,22,0.06)';this.style.borderColor='rgba(249,115,22,0.3)'">CEBE vs BPS</a>
+                <a href="/framework" style="display:inline-block; padding:5px 14px; border-radius:20px; border:1px solid rgba(249,115,22,0.3); background:rgba(249,115,22,0.06); color:#f97316; font-size:11px; font-weight:600; letter-spacing:1.5px; font-family:'JetBrains Mono',monospace; text-decoration:none; transition:all 0.2s;" onmouseover="this.style.background='rgba(249,115,22,0.15)';this.style.borderColor='rgba(249,115,22,0.6)'" onmouseout="this.style.background='rgba(249,115,22,0.06)';this.style.borderColor='rgba(249,115,22,0.3)'">FRAMEWORK</a>
                 <a href="/endgame" style="display:inline-block; padding:5px 14px; border-radius:20px; border:1px solid rgba(249,115,22,0.3); background:rgba(249,115,22,0.06); color:#f97316; font-size:11px; font-weight:600; letter-spacing:1.5px; font-family:'JetBrains Mono',monospace; text-decoration:none; transition:all 0.2s;" onmouseover="this.style.background='rgba(249,115,22,0.15)';this.style.borderColor='rgba(249,115,22,0.6)'" onmouseout="this.style.background='rgba(249,115,22,0.06)';this.style.borderColor='rgba(249,115,22,0.3)'">ENDGAME</a>
                 <a href="/modeler" style="display:inline-block; padding:5px 14px; border-radius:20px; border:1px solid rgba(249,115,22,0.3); background:rgba(249,115,22,0.06); color:#f97316; font-size:11px; font-weight:600; letter-spacing:1.5px; font-family:'JetBrains Mono',monospace; text-decoration:none; transition:all 0.2s;" onmouseover="this.style.background='rgba(249,115,22,0.15)';this.style.borderColor='rgba(249,115,22,0.6)'" onmouseout="this.style.background='rgba(249,115,22,0.06)';this.style.borderColor='rgba(249,115,22,0.3)'">MODELER</a>
             </div>
@@ -1345,7 +1346,7 @@
         <footer class="footer">
             <p class="footer-text">
                 CEBE Framework by <a href="https://x.com/chcbearsfan" class="footer-link" target="_blank">@chcbearsfan</a> &middot; 
-                <a href="https://x.com/chcbearsfan/status/2014767364819063207" class="footer-link" target="_blank">Read the Framework</a>
+                <a href="/framework" class="footer-link">Read the Framework</a>
             </p>
             <p class="footer-text" style="margin-top:4px">Not financial advice &middot; Data updates after each filing</p>
             <p class="footer-formula">CEBE = (Total BTC - Senior Claims in BTC) / Shares</p>
@@ -2543,13 +2544,12 @@
                 // Stock price projection using CEBE mNAV (matches table formula)
                 if (stockPrice > 0) {
                     document.getElementById('simStockSection').style.display = 'block';
-                    const currencySymbols = { USD: '$', EUR: '\u20AC', BRL: 'R$', GBP: '\u00A3', JPY: '\u00A5' };
-                    const currSym = currencySymbols[currency] || '$';
-                    document.getElementById('simCurrentStock').textContent = currSym + stockPrice.toFixed(2);
-                    
                     // Convert stock price to USD (Finnhub returns local currency for foreign tickers)
                     const currency = stockCurrency[simData.ticker] || 'USD';
                     const fxRate = fxRates[currency] || 1;
+                    const currencySymbols = { USD: '$', EUR: '\u20AC', BRL: 'R$', GBP: '\u00A3', JPY: '\u00A5' };
+                    const currSym = currencySymbols[currency] || '$';
+                    document.getElementById('simCurrentStock').textContent = currSym + stockPrice.toFixed(2);
                     const priceUsd = stockPrice * fxRate;
                     
                     // CEBE mNAV = priceUsd / (cebe_btc x liveBtcPrice)
