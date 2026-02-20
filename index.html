@@ -1603,20 +1603,51 @@
                 ]
             },
             TSWCF: {
-                lastUpdated: null,
-                btcReserveForCalc: null,
-                items: [],
-                offsets: [],
-                sources: [],
-                pendingBackfill: ['Smarter Web Co reports via UK Companies House / RNS. Encumbrance data collection in progress.']
+                lastUpdated: '2026-02-20',
+                btcReserveForCalc: 260800000, // 2,689 BTC x ~$97K
+                items: [
+                    { category: 'exec', label: 'Board Compensation', sublabel: 'CEO £450K · CFO £300K · Chairman £150K · 3 NEDs £210K', amount: 1399000, pctOfReserve: null, verified: true, note: 'FY2025 Annual Report remuneration report. Webley (CEO) £450K, Soleiman (CFO) £300K, Wade (Chairman) £150K, Evans (NED) £75K, Casson (SID/NED) £75K, Thomas (NED) £60K. Total £1,110,000 (converted at £1=$1.26). Audited by PKF Littlejohn LLP.' },
+                    { category: 'operations', label: 'Professional & Legal', sublabel: 'Advisors, solicitors, audit fees', amount: 464000, pctOfReserve: null, verified: true, note: 'FY2025: £368,514. Recurring advisory and compliance costs. Converted at £1=$1.26. Source: Annual Report Note 5.' },
+                    { category: 'operations', label: 'Listing & Compliance', sublabel: 'LSE Main Market + Aquis fees, registrar, IR', amount: 418000, pctOfReserve: null, verified: true, note: 'FY2025: £331,400. Ongoing stock exchange and regulatory costs. Converted at £1=$1.26. Source: Annual Report Note 5.' },
+                    { category: 'operations', label: 'Staff & Social Security', sublabel: 'Non-director employees + NI + pension', amount: 355000, pctOfReserve: null, verified: true, note: 'FY2025: Non-director staff £183,373 + social security & pension £98,602 = £281,975. Converted at £1=$1.26. Source: Annual Report Notes 6-7.' },
+                    { category: 'interest', label: 'CLN Interest', sublabel: 'Smarter Convert — zero-coupon', amount: 0, pctOfReserve: null, verified: true, note: 'The £15.8M Smarter Convert CLN is zero-coupon. No cash interest payments. Matures August 2026 — noteholder can convert to shares at £2.0475, take ~178 BTC from segregated wallet, or cash equivalent. Source: Prospectus Jan 16, 2026.' },
+                ],
+                offsets: [
+                    { label: 'Web Design Revenue (SWC Ltd)', sublabel: 'Acquired April 2025 — recurring web services', amount: 88000, verified: true, note: 'FY2025: £70,029 revenue (partial year from April 2025 acquisition). Net profit £8,005. Annualized run-rate likely higher. Acquisitions pipeline planned per 10-Year Plan. Source: Annual Report Note 28.' },
+                ],
+                sources: [
+                    'FY2025 Annual Report (year ended 31 Oct 2025) — audited by PKF Littlejohn LLP',
+                    'Jan 16, 2026 LSE Prospectus — CLN terms, warrant details, share count',
+                    'RNS filings via LSE — BTC holdings updates',
+                ],
+                pendingBackfill: [
+                    'FY2025 one-off costs (~£7.4M, mostly £5.6M share issue costs from IPO/raises) excluded from recurring total.',
+                    '96M pre-IPO warrants at 2.5p exercisable Apr 2026-Apr 2028 — will add ~£2.4M cash but significant dilution when exercised.',
+                    'CLN settlement (Aug 2026) will change cost structure — drag drops to 0% but may add ~7.7M shares if converted.',
+                ]
             },
             ALCPB: {
-                lastUpdated: null,
-                btcReserveForCalc: null,
-                items: [],
-                offsets: [],
-                sources: [],
-                pendingBackfill: ['Capital B reports via Euronext / AMF (France). 0% drag — minimal encumbrances expected.']
+                lastUpdated: '2026-02-17',
+                btcReserveForCalc: 275000000, // 2,834 BTC x ~$97K
+                items: [
+                    { category: 'operations', label: 'Personnel Expenses', sublabel: 'Salaries, AGA (free share grants), employer charges', amount: 11400000, pctOfReserve: null, verified: true, note: 'H1 2025: EUR5,483K annualized = EUR10.97M ($11.4M at 1.04). Includes AGA (French free share grants) — SBC component embedded, not separable without annual report. Source: H1 2025 semi-annual report, approved by Board Oct 30, 2025.' },
+                    { category: 'operations', label: 'General & Administrative', sublabel: 'Includes ~EUR2.4M/yr BTC strategy costs (legal, advisory)', amount: 6200000, pctOfReserve: null, verified: true, note: 'H1 2025: EUR2,959K annualized = EUR5.9M ($6.2M). Up 14.5% YoY — includes ~EUR1.2M in BTC strategy launch costs. Source: H1 2025 semi-annual report.' },
+                    { category: 'sbc', label: 'Stock-Based Compensation (AGA)', sublabel: 'French free share grants — embedded in personnel line', amount: 0, pctOfReserve: null, verified: false, note: 'AGA mentioned in adjusted EBITDA calc but amount not disclosed separately. Embedded within personnel expenses above. Will extract from FY2025 annual report (expected Mar 25, 2026).' },
+                    { category: 'interest', label: 'Debt Service', sublabel: 'All OCAs (convertible bonds) fully converted', amount: 0, pctOfReserve: null, verified: true, note: 'Capital B had OCA convertible bonds that have all been converted to equity. 0% drag — no senior claims of any kind. Pure equity structure.' },
+                ],
+                offsets: [
+                    { label: 'Consulting Revenue (iOrga + Trimane)', sublabel: 'Data intelligence, AI, decentralized tech consulting', amount: 11800000, verified: true, note: 'H1 2025: EUR5,649K annualized = EUR11.3M ($11.8M). Down 23% YoY from staff turnover post-judicial recovery exit. Operating entities EBITDA positive: EUR583K H1 (up 66% YoY). FY2024 TTM: ~$15M. Source: H1 2025 semi-annual report.' },
+                ],
+                sources: [
+                    'H1 2025 semi-annual report (approved by Board Oct 30, 2025)',
+                    'FY2024 annual results (Apr 30, 2025) — net income EUR1,361K (profitable)',
+                    'Weekly BTC acquisition press releases (cptlb.com/investors)',
+                ],
+                pendingBackfill: [
+                    'FY2025 annual results expected ~Mar 25, 2026 — will provide: full-year opex, AGA/SBC detail, aggregate director comp',
+                    'Key exec: Alexandre Laizet (Deputy CEO, Director of Bitcoin Strategy). Individual comp not yet disclosed — French Euronext Growth companies report aggregate director comp in rapport de gestion.',
+                    'H1 2025 figures annualized — H2 may differ due to BTC strategy ramp-up costs and consulting revenue recovery.',
+                ]
             },
             OBTC3: {
                 lastUpdated: '2026-02-20',
