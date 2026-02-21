@@ -1808,7 +1808,7 @@
                 ]
             },
             NAKA: {
-                lastUpdated: '2026-02-19',
+                lastUpdated: '2026-02-20',
                 btcReserveForCalc: 518000000, // 5,398 BTC x ~$96K
                 items: [
                     { category: 'interest', label: 'Kraken Loan Interest', sublabel: '$210M USDT at 8.0% p.a.', amount: 16800000, pctOfReserve: null, verified: true, note: 'Master Loan Agreement Dec 3, 2025. $210M USDT, 8% fixed, maturity Dec 4, 2026. BTC-collateralized (154% Required Margin Ratio). Default rate 13%. Source: 8-K Dec 9, 2025 + Exhibit 10.1.' },
@@ -1816,21 +1816,23 @@
                     { category: 'exec', label: 'Executive Cash Compensation', sublabel: 'Bailey (CEO) + Evans (CIO) + Creighton (CCO)', amount: 3500000, pctOfReserve: null, verified: true, note: 'Bailey: $700K base + $250K signing. Evans: $500K + $250K signing. Creighton: $600K + $250K signing. Excludes performance bonuses (up to $2.1M Bailey, $1.5M Evans, $200K Creighton). Source: 8-K Aug 14, 2025.' },
                     { category: 'sbc', label: 'Stock-Based Compensation', sublabel: 'Options + RSUs + performance awards', amount: 10000000, pctOfReserve: null, verified: false, note: 'Estimated. Bailey: 5M options + $1M RSU + $1M perf RSU/yr. Evans: 10M options + $800K perf RSU/yr. Creighton: 4M options + $600K perf RSU/yr. 37.6M shares reserved under 2025 plan. Source: 8-K Aug 14, 2025.' },
                     { category: 'board', label: 'Board Compensation', sublabel: '6 directors x $300K (cash + equity)', amount: 1800000, pctOfReserve: null, verified: true, note: 'Each non-employee director: $75K cash retainer + 500K stock options + $50K-100K committee fees. Source: 8-K Aug 14, 2025 Director Compensation policy.' },
-                    { category: 'operations', label: 'BTC Inc Services Agreement', sublabel: 'Marketing, branding, conference services', amount: 960000, pctOfReserve: null, verified: true, note: 'Related-party agreement with BTC Inc (Bailey entity). $80K/month. Source: 8-K/S-4 disclosures.' },
+                    // BTC Inc Services Agreement ($960K/yr) REMOVED -- BTC Inc acquired Feb 20, 2026. Now internal subsidiary.
                 ],
                 offsets: [
                     { label: 'Healthcare Revenue', sublabel: 'KindlyMD legacy clinics (declining)', amount: 1600000, verified: false, note: 'Q3 2025: $0.4M revenue (down from $0.6M YoY). Annualized ~$1.6M. Negligible relative to costs. Source: Q3 2025 10-Q.' },
+                    { label: 'BTC Inc + UTXO EBITDA', sublabel: 'Bitcoin Magazine, conferences, 210k Capital advisory', amount: 34180486, verified: true, note: 'Combined EBITDA for 12-month period ending Sep 30, 2025 (unaudited). BTC Inc: $20.6M, UTXO: $13.6M. Revenue: $80.5M ($65.3M BTC Inc + $18.2M UTXO - $3.0M intercompany). Deal closed Feb 20, 2026. Source: 8-K filed Feb 18, 2026.' },
                 ],
                 sources: [
                     'Q3 2025 10-Q (filed late Nov 2025)',
                     '8-K Aug 14, 2025 (exec comp, board comp)',
                     '8-K Dec 9, 2025 (Kraken loan terms)',
                     'Exhibit 10.1 Master Loan Agreement',
+                    '8-K Feb 18, 2026 (BTC Inc + UTXO EBITDA, deal definitive agreements)',
                 ],
                 pendingBackfill: [
                     'FY2025 10-K (expected spring 2026) for full-year expenses',
                     'Cash position update (Q3 $24.2M is 5 months stale)',
-                    'BTC Inc deal close would add ~$62M revenue but 363.6M dilutive shares',
+                    'Q1 2026 10-Q (expected May 2026) for first consolidated BTC Inc + UTXO financials',
                     'WARNING: BTC-secured debt. Kraken can force-liquidate collateral with zero notice at Liquidation Ratio breach.',
                 ]
             }
