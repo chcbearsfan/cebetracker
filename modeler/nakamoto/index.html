@@ -79,6 +79,9 @@
         .scenario-card { flex:1; min-width:100px; padding:10px 14px; border-radius:10px; border:1.5px solid var(--border-subtle); background:var(--bg-card); cursor:pointer; text-align:center; transition:all .2s; position:relative; }
         .scenario-card:hover { border-color:rgba(255,255,255,0.12); background:var(--bg-elevated); }
         .scenario-card.active { border-color:var(--orange-primary); background:var(--orange-glow); }
+        .scenario-card.projection { border:1.5px solid var(--border-subtle); border-left:3px solid var(--orange-primary); box-shadow:inset 3px 0 8px rgba(249,115,22,0.15), 0 2px 8px rgba(0,0,0,0.3); background:rgba(249,115,22,0.04); }
+        .scenario-card.projection:hover { border-color:var(--border-subtle); border-left:3px solid var(--orange-primary); box-shadow:inset 3px 0 12px rgba(249,115,22,0.25), 0 4px 12px rgba(0,0,0,0.4); background:rgba(249,115,22,0.08); }
+        .scenario-card.projection.active { border-color:var(--orange-primary); border-left:3px solid var(--orange-primary); background:var(--orange-glow); box-shadow:inset 3px 0 12px rgba(249,115,22,0.25), 0 4px 12px rgba(0,0,0,0.4); }
         .scenario-icon { font-size:20px; margin-bottom:2px; }
         .scenario-name { font-size:10px; font-weight:600; letter-spacing:.5px; color:var(--text-secondary); }
         .scenario-price { font-size:12px; font-weight:700; font-family:var(--mono); color:var(--text-primary); margin-top:2px; }
@@ -420,7 +423,7 @@ const COMPANY = {
         debt_usd: 210000000,          // Kraken loan
         preferred_usd: 0,             // No preferred
         cash_usd: 24200000,           // Q3 2025 -- STALE
-        deal_ebitda: 34180486,        // BTC Inc + UTXO (8-K Feb 19, 2026; fallback if sheet has no ebitda column)
+        deal_ebitda: 34180486,        // BTC Inc + UTXO (8-K filed Feb 18, 2026; deal closed Feb 20, 2026)
     },
     // Kraken loan specifics
     kraken_loan_usd: 210000000,
@@ -435,7 +438,7 @@ const COMPANY = {
     sbc_annual_usd: 7500000,          // Estimated from filings
     cash_comp_annual_usd: 3000000,    // Estimated exec comp
     board_comp_annual_usd: 1800000,   // Board compensation
-    btc_inc_services_usd: 960000,     // BTC Inc service agreement
+    // BTC Inc Services Agreement REMOVED -- BTC Inc acquired Feb 20, 2026. Now internal subsidiary.
     // BTC Inc deal
     // deal_ebitda now sourced from sheet 'ebitda' column. Fallback in defaults.
 };
@@ -489,7 +492,7 @@ let activeScenario = 'current';
 let liveBtcPrice = null;
 let liveFxRate = 1.0;
 let loadedData = {};
-// BTC Inc deal closed Feb 19, 2026. Shares + EBITDA baked into base case.
+// BTC Inc deal closed Feb 20, 2026. Shares + EBITDA baked into base case.
 
 // --- HELPERS ---
 const $ = id => document.getElementById(id);
@@ -1005,8 +1008,8 @@ function renderNarrative(r, co, d, projResults) {
         items.push({cls:'amber',icon:'&#128176;',text:'<strong>' + fmtB(cashToShow) + ' cash reserve.</strong> ~' + runwayQ + ' quarters of runway at current burn. Cash position is from Q3 2025 and likely lower. No BTC accumulation since Nov 19, 2025.'});
     }
 
-    // BTC Inc + UTXO context (deal closed Feb 19, 2026)
-    items.push({cls:'info',icon:'&#128230;',text:'<strong>BTC Inc + UTXO acquired.</strong> Deal closed Feb 19, 2026. +364.8M shares issued. Adds $34.2M/yr EBITDA ($80.5M revenue) from Bitcoin Magazine, The Bitcoin Conference, and UTXO advisory. Partially offsets wrapper costs.'});
+    // BTC Inc + UTXO context (deal closed Feb 20, 2026)
+    items.push({cls:'info',icon:'&#128230;',text:'<strong>BTC Inc + UTXO acquired.</strong> Deal closed Feb 20, 2026. +364.8M shares issued. Adds $34.2M/yr EBITDA ($80.5M revenue) from Bitcoin Magazine, The Bitcoin Conference, and UTXO advisory. Partially offsets wrapper costs.'});
 
     // Stale accumulation warning
     if (!r._proj) {
@@ -1195,7 +1198,7 @@ function renderAssumptions() {
     } else {
         t = '<strong>Custom projection:</strong> BTC ' + fmtPrice(btcPrice) + ', mNAV ' + mnavMultiple.toFixed(2) + 'x. Kraken loan refinanced at maturity Y1 (assumed). Static BTC holdings.';
     }
-    t += '<br><br><strong>Wrapper costs:</strong> Kraken interest $16.8M/yr (8% on $210M), operating expenses ~$43.2M/yr (Q3 annualized), SBC ~$7.5M/yr. Total: ~$67.5M/yr gross. BTC Inc + UTXO EBITDA offsets $34.2M/yr (8-K Feb 19, 2026). Net wrapper: ~$33.3M/yr.';
+    t += '<br><br><strong>Wrapper costs:</strong> Kraken interest $16.8M/yr (8% on $210M), operating expenses ~$43.2M/yr (Q3 annualized), SBC ~$7.5M/yr. Total: ~$67.5M/yr gross. BTC Inc + UTXO EBITDA offsets $34.2M/yr (8-K filed Feb 18, 2026). Net wrapper: ~$33.3M/yr.';
     t += '<br><br><strong>Collateral thresholds:</strong> Required Margin Ratio 154% (confirmed from 8-K). Margin call ~130% and liquidation ~110% are ESTIMATES based on industry norms. Actual thresholds from non-public Loan Term Sheet.';
     t += '<br><br><strong>Cash position:</strong> $24.2M is from Q3 2025 10-Q (Sep 30, 2025). Likely lower. Flagged as stale in all calculations.';
     t += '<br><br><strong>Data:</strong> BTC holdings from nakamoto.com/dashboard. Kraken loan from 8-K Dec 9, 2025. Shares from Q3 earnings. Live BTC from CoinGecko.';
@@ -1210,7 +1213,7 @@ function buildScenarioBar() {
     var snapshots = SCENARIOS.filter(function(s){ return s.group === 'snapshot'; });
     var projections = SCENARIOS.filter(function(s){ return s.group === 'projection'; });
 
-    function renderCards(arr) {
+    function renderCards(arr, isProjection) {
         return arr.map(function(s) {
             var priceDisplay = s.btc ? (s.btc >= 1e6 ? '$'+(s.btc/1e6)+'M' : '$'+(s.btc/1e3)+'K') : fmtPrice(liveBtcPrice || btcPrice);
             var badge = s.horizon > 0 ? '<span class="horizon-badge future-badge">' + s.horizon + 'Y</span>' : '<span class="horizon-badge now-badge">NOW</span>';
@@ -1226,7 +1229,8 @@ function buildScenarioBar() {
                 mnavText = mnavVal.toFixed(1) + '&times; mNAV';
                 if (s.horizon > 0) mnavText += ' &middot; ' + s.horizon + 'Y';
             }
-            return '<div class="scenario-card ' + (s.id === activeScenario ? 'active' : '') + '" data-scenario="' + s.id + '">' +
+            var cardClasses = 'scenario-card' + (isProjection ? ' projection' : '') + (s.id === activeScenario ? ' active' : '');
+            return '<div class="' + cardClasses + '" data-scenario="' + s.id + '">' +
                 badge +
                 '<div class="scenario-icon">' + s.icon + '</div>' +
                 '<div class="scenario-name">' + s.name + '</div>' +
@@ -1236,8 +1240,8 @@ function buildScenarioBar() {
         }).join('');
     }
 
-    $('snapshotBar').innerHTML = renderCards(snapshots);
-    $('projectionBar').innerHTML = renderCards(projections);
+    $('snapshotBar').innerHTML = renderCards(snapshots, false);
+    $('projectionBar').innerHTML = renderCards(projections, true);
 
     document.querySelectorAll('.scenario-card').forEach(function(card) {
         card.addEventListener('click', function() {
