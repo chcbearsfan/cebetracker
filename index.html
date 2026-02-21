@@ -1641,7 +1641,7 @@
         function calcCycleMnav(cebeMnav, ticker) {
             const wrapper = getWrapperFee(ticker);
             if (wrapper === null || cebeMnav <= 0) return null;
-            return cebeMnav * Math.pow(1 - wrapper, cycleYears);
+            return cebeMnav / Math.pow(1 - wrapper, cycleYears);
         }
         
         // Encumbrance data — Annual Cost to Common Equity
